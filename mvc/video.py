@@ -125,6 +125,10 @@ def extract_info(ast):
 
     metadata = input0.get_by_key("Metadata")
     if metadata:
+        for key in ('title', 'artist', 'album', 'track', 'genre'):
+            node = metadata.get_by_key(key)
+            if node:
+                info[key] = node.line.split(':', 1)[1].strip()
         major_brand_node = metadata.get_by_key("major_brand")
         extra_container_types = []
         if major_brand_node:
