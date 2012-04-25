@@ -52,7 +52,7 @@ class Conversion(object):
         self.listeners.remove(f)
 
     def notify_listeners(self):
-        self.manager.notify_queue.append(self)
+        self.manager.notify_queue.add(self)
 
     def run(self):
         self.temp_fd, self.temp_output = tempfile.mkstemp()
@@ -130,8 +130,7 @@ class Conversion(object):
 
 class ConversionManager(object):
     def __init__(self):
-        self.notify_queue = collections.deque()
-        self.in_progress = set()
+        self.notify_queue = set()
         self.running = False
 
     def start_conversion(self, video, converter):
@@ -143,12 +142,8 @@ class ConversionManager(object):
 
     def check_notifications(self):
         # get the changed items, but only notify once
-        changed = set()
-        while True:
-            try:
-                changed.add(self.notify_queue.popleft())
-            except IndexError:
-                break
+        self.notify_queue, changed = set(), self.notify_queue
+
         for converter in changed:
             for listener in converter.listeners:
                 listener(converter)
