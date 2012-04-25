@@ -141,7 +141,10 @@ class ConversionManager(object):
         return c
 
     def check_notifications(self):
-        # get the changed items, but only notify once
+        if not self.running:
+            # don't bother checking if we're not running
+            return
+
         self.notify_queue, changed = set(), self.notify_queue
 
         for converter in changed:
