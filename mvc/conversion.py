@@ -131,6 +131,7 @@ class Conversion(object):
 class ConversionManager(object):
     def __init__(self):
         self.notify_queue = set()
+        self.in_progress = set()
         self.running = False
 
     def start_conversion(self, video, converter):
