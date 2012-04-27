@@ -36,7 +36,7 @@ class ConverterInfo(object):
     def process_status_line(self, line):
         raise NotImplementedError
 
-class FFmpegConverterInfo(ConverterInfo):
+class FFmpegConverterInfoBase(ConverterInfo):
     DURATION_RE = re.compile(r'\W*Duration: (\d\d):(\d\d):(\d\d)\.(\d\d)'
                              '(, start:.*)?(, bitrate:.*)?')
     PROGRESS_RE = re.compile(r'(?:frame=.* fps=.* q=.* )?size=.* time=(.*) '
@@ -45,11 +45,6 @@ class FFmpegConverterInfo(ConverterInfo):
                                   'bitrate=(.*)')
 
     extension = None
-    parameters = None
-
-    def __init__(self, name, (width, height)):
-        self.width, self.height = width, height
-        ConverterInfo.__init__(self, name)
 
     def get_executable(self):
         return settings.get_ffmpeg_executable_path()
@@ -59,13 +54,7 @@ class FFmpegConverterInfo(ConverterInfo):
                 self.get_extra_arguments(video, output) + [output])
 
     def get_extra_arguments(self, video, output):
-        if self.parameters is None:
-            raise NotImplementedError
-        ssize = '%ix%i' % (self.width, self.height)
-        return self.parameters.format(
-            ssize=ssize,
-            input=video.filename,
-            output=output).split()
+        raise NotImplementedError
 
     @staticmethod
     def _check_for_errors(line):
@@ -98,6 +87,23 @@ class FFmpegConverterInfo(ConverterInfo):
         match = klass.LAST_PROGRESS_RE.match(line)
         if match is not None:
             return {'finished': True}
+
+class FFmpegConverterInfo(FFmpegConverterInfoBase):
+
+    parameters = None
+
+    def __init__(self, name, (width, height)):
+        self.width, self.height = width, height
+        ConverterInfo.__init__(self, name)
+
+    def get_extra_arguments(self, video, output):
+        if self.parameters is None:
+            raise NotImplementedError
+        ssize = '%ix%i' % (self.width, self.height)
+        return self.parameters.format(
+            ssize=ssize,
+            input=video.filename,
+            output=output).split()
 
 
 class ConverterManager(object):
