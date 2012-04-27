@@ -21,7 +21,8 @@ class TestGetMediaInfo(unittest.TestCase):
                                 'artist': 'Revolution Void',
                                 'album': 'Increase The Dosage',
                                 'track': '1',
-                                'genre': 'Blues'})
+                                'genre': 'Blues',
+                                'duration': 1.07})
 
     def test_mp3_1(self):
         self.assertEqualOutput('mp3-1.mp3',
@@ -30,7 +31,8 @@ class TestGetMediaInfo(unittest.TestCase):
                                 'title': 'Race Lieu',
                                 'artist': 'Ckz',
                                 'album': 'The Heart EP',
-                                'track': '2/5'})
+                                'track': '2/5',
+                                'duration': 1.07})
 
     def test_mp3_2(self):
         self.assertEqualOutput('mp3-2.mp3',
@@ -38,21 +40,24 @@ class TestGetMediaInfo(unittest.TestCase):
                                 'audio_codec': 'mp3',
                                 'artist': 'This American Life',
                                 'genre': 'Podcast',
-                                'title': '#426: Tough Room 2011'})
+                                'title': '#426: Tough Room 2011',
+                                'duration': 1.09})
 
     def test_theora_with_ogg_extension(self):
         self.assertEqualOutput('theora_with_ogg_extension.ogg',
                                {'container': 'ogg',
                                 'video_codec': 'theora',
                                 'width': 320,
-                                'height': 240})
+                                'height': 240,
+                                'duration': 0.1})
 
     def test_webm_0(self):
         self.assertEqualOutput('webm-0.webm',
                                {'container': ['matroska', 'webm'],
                                 'video_codec': 'vp8',
                                 'width': 1920,
-                                'height': 912})
+                                'height': 912,
+                                'duration': 0.43})
 
     def test_mp4_0(self):
         self.assertEqualOutput('mp4-0.mp4',
@@ -68,7 +73,8 @@ class TestGetMediaInfo(unittest.TestCase):
                                 'audio_codec': 'aac',
                                 'width': 640,
                                 'height': 480,
-                                'title': 'Africa: Cash for Climate Change?'})
+                                'title': 'Africa: Cash for Climate Change?',
+                                'duration': 312.37})
 
     def test_nuls(self):
         self.assertEqualOutput('nuls.mp3',
@@ -97,6 +103,7 @@ class TestGetMediaInfo(unittest.TestCase):
                                 'artist': 'The Most Extreme',
                                 'album': 'The Most Extreme',
                                 'track': '10',
-                                'genre': 'Nonfiction'})
+                                'genre': 'Nonfiction',
+                                'duration': 2668.8})
 
 

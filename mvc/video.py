@@ -3,7 +3,7 @@ import re
 import subprocess
 
 from mvc.settings import get_ffmpeg_executable_path
-
+from mvc.utils import hms_to_seconds
 
 class VideoFile(object):
     def __init__(self, filename):
@@ -13,6 +13,7 @@ class VideoFile(object):
         self.audio_codec = None
         self.width = None
         self.height = None
+        self.duration = None
         self.parse()
 
     def parse(self):
@@ -150,6 +151,11 @@ def extract_info(ast):
 
     duration = input0.get_by_key("Duration:")
     if duration:
+        _, rest = duration.line.split(':', 1)
+        duration_string, _ = rest.split(', ', 1)
+        hours, minutes, seconds = [
+            float(i) for i in duration_string.split(':')]
+        info['duration'] = hms_to_seconds(hours, minutes, seconds)
         for stream_node in duration.children:
             stream = stream_node.line
             if "Video:" in stream:

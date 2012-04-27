@@ -3,13 +3,9 @@ import re
 import os.path
 
 from mvc import settings
+from mvc.utils import hms_to_seconds
 
 NON_WORD_CHARS = re.compile(r"[^a-zA-Z0-9]+")
-
-def hms_to_seconds(hours, minutes, seconds):
-    return (hours * 3600 +
-            minutes * 60 +
-            seconds)
 
 class ConverterInfo(object):
     media_type = None
