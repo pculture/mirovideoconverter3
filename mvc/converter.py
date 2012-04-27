@@ -45,6 +45,11 @@ class FFmpegConverterInfo(ConverterInfo):
                                   'bitrate=(.*)')
 
     extension = None
+    parameters = None
+
+    def __init__(self, name, (width, height)):
+        self.width, self.height = width, height
+        ConverterInfo.__init__(self, name)
 
     def get_executable(self):
         return settings.get_ffmpeg_executable_path()
@@ -53,8 +58,14 @@ class FFmpegConverterInfo(ConverterInfo):
         return (['-i', video.filename, '-strict', 'experimental'] +
                 self.get_extra_arguments(video, output) + [output])
 
-    def get_extra_arguments(self, video_output):
-        raise NotImplementedError
+    def get_extra_arguments(self, video, output):
+        if self.parameters is None:
+            raise NotImplementedError
+        ssize = '%ix%i' % (self.width, self.height)
+        return self.parameters.format(
+            ssize=ssize,
+            input=video.filename,
+            output=output).split()
 
     @staticmethod
     def _check_for_errors(line):

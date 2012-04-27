@@ -4,20 +4,9 @@ class AndroidConversion(FFmpegConverterInfo):
     media_type = 'video'
     bitrate = 300000
     extension = 'mp4'
-    parameters = ('-y -acodec aac -ab 160k -s {ssize} '
+    parameters = ('-y -acodec aac -strict experimental -ab 160k -s {ssize} '
                   '-vcodec libx264 -preset slow -profile:v baseline -level 30 '
                   '-maxrate 10000000 -bufsize 10000000 -f mp4 -threads 0 ')
-
-    def __init__(self, name, (width, height)):
-        self.width, self.height = width, height
-        FFmpegConverterInfo.__init__(self, name)
-
-    def get_extra_arguments(self, video, output):
-        ssize = '%ix%i' % (self.width, self.height)
-        return self.parameters.format(
-            ssize=ssize,
-            input=video.filename,
-            output=output).split()
 
 g2 = AndroidConversion('G2', (800, 480))
 nexus_one = AndroidConversion('Nexus One', (800, 400))
