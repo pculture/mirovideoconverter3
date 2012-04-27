@@ -61,7 +61,7 @@ class FFmpegConverterInfoBase(ConverterInfo):
         if line.startswith('Unknown'):
             return line
         if line.startswith("Error"):
-            if not line.startswith("Error which decoding stream"):
+            if not line.startswith("Error while decoding stream"):
                 return line
 
     @classmethod
@@ -72,8 +72,10 @@ class FFmpegConverterInfoBase(ConverterInfo):
 
         match = klass.DURATION_RE.match(line)
         if match is not None:
-            hours, minutes, seconds = [int(m) for m in match.groups()[:3]]
-            return {'duration': hms_to_seconds(hours, minutes, seconds)}
+            hours, minutes, seconds, centi = [
+                int(m) for m in match.groups()[:4]]
+            return {'duration': hms_to_seconds(hours, minutes,
+                                               seconds + 0.01 * centi)}
 
         match = klass.PROGRESS_RE.match(line)
         if match is not None:
