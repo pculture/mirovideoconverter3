@@ -3,10 +3,9 @@ import unittest
 
 from mvc import video
 
-class TestGetMediaInfo(unittest.TestCase):
+import base
 
-    def setUp(self):
-        self.testdata_dir = os.path.join(os.path.dirname(__file__), 'testdata')
+class GetMediaInfoTest(base.Test):
 
     def assertEqualOutput(self, filename, expected):
         full_path = os.path.join(self.testdata_dir, filename)
