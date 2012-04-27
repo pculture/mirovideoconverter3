@@ -7,6 +7,14 @@ class SimpleFFmpegConverterInfo(FFmpegConverterInfoBase):
         return self.parameters
 
 
+class WebM(SimpleFFmpegConverterInfo):
+    media_type = 'video'
+    bitrate = 1200000
+    extension = 'webm'
+    parameters = ('-f webm -vcodec libvpx '
+                  '-acodec libvorbis -ab 160000 -sameq').split()
+
+
 class MP4(SimpleFFmpegConverterInfo):
     media_type = 'video'
     bitrate = 700000
@@ -32,6 +40,7 @@ class OggVorbis(SimpleFFmpegConverterInfo):
     parameters = '-f ogg -vn -acodec libvorbis -aq 60'.split()
 
 
+webm = WebM('WebM (VP8)')
 mp4 = MP4('MP4')
 mp3 = MP3('MP3')
 ogg_vorbis = OggVorbis('Ogg Vorbis')
