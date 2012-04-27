@@ -25,7 +25,7 @@ class ConverterInfo(object):
     def get_output_filename(self, video):
         basename = os.path.basename(video.filename)
         name, ext = os.path.splitext(basename)
-        return '%s.%s%s' % (name, self.identifier, ext)
+        return '%s.%s.%s' % (name, self.identifier, self.extension)
 
     def get_output_size_guess(self, video):
         if not self.bitrate:

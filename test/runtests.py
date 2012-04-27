@@ -6,6 +6,7 @@ except ImportError:
     sys.path.append(mvc_path)
 
 from test_video import *
+from test_converter import *
 
 if __name__ == "__main__":
     import unittest
