@@ -180,16 +180,7 @@ def extract_info(ast):
                 info['audio_codec'] = audio_codec
     return info
 
-
-def get_media_info(filepath):
-    """Takes a file path and returns a dict of information about
-    this media file that it extracted from ffmpeg -i.
-
-    :param filepath: absolute path to the media file in question
-
-    :returns: dict of media info possibly containing: height, width,
-    container, audio_codec, video_codec
-    """
+def get_ffmpeg_output(filepath):
 
     commandline = [get_ffmpeg_executable_path(),
                    "-i", filepath]
@@ -205,6 +196,18 @@ def get_media_info(filepath):
             # just get the output.
             output = e.output
 
+    return output
+
+def get_media_info(filepath):
+    """Takes a file path and returns a dict of information about
+    this media file that it extracted from ffmpeg -i.
+
+    :param filepath: absolute path to the media file in question
+
+    :returns: dict of media info possibly containing: height, width,
+    container, audio_codec, video_codec
+    """
+    output = get_ffmpeg_output(filepath)
     ast = parse_ffmpeg_output(output.splitlines())
 
     return extract_info(ast)

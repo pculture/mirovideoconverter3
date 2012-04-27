@@ -1,7 +1,9 @@
+import sys
 import os, os.path
 import unittest
+import subprocess
 
-from mvc import video
+from mvc import video, settings
 
 class TestGetMediaInfo(unittest.TestCase):
 
@@ -10,7 +12,12 @@ class TestGetMediaInfo(unittest.TestCase):
 
     def assertEqualOutput(self, filename, expected):
         full_path = os.path.join(self.testdata_dir, filename)
-        output = video.get_media_info(full_path)
+        try:
+            output = video.get_media_info(full_path)
+        except Exception, e:
+            raise AssertionError(
+                'Error parsing %r\nException: %r\nOutput: %s' % (
+                    filename, e, video.get_ffmpeg_output(full_path)))
         self.assertEqual(output, expected)
 
     def test_mp3_0(self):
