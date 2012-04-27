@@ -173,6 +173,12 @@ class FFmpeg2TheoraConversionInfoTest(ConverterInfoTestMixin, base.Test):
             '{"result": "ok"}',
             finished=True)
 
+    def test_process_status_line_error_result(self):
+        self.assertStatusLineOutput(
+            '{"result": "not ok"}',
+            finished=True,
+            error='not ok')
+
     def test_process_status_line_error(self):
         lines = """{
   "code": "badfile",
