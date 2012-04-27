@@ -5,4 +5,4 @@ install:
   - virtualenv /home/vagrant/virtualenv/python$TRAVIS_PYTHON_VERSION --system-site-packages
   - sudo ./helperscripts/debian_ubuntu.sh
 script:
-  - python ./test/runtests.py
+  - python ./test/runtests.py -v
