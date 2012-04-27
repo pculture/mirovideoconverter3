@@ -1,9 +1,7 @@
-import sys
 import os, os.path
 import unittest
-import subprocess
 
-from mvc import video, settings
+from mvc import video
 
 class TestGetMediaInfo(unittest.TestCase):
 
@@ -88,7 +86,7 @@ class TestGetMediaInfo(unittest.TestCase):
                                {'container': 'mp3',
                                 'title': 'Invisible'})
 
-
+    @unittest.skip('inconsistent parsing of DRMed files')
     def test_drm(self):
         self.assertEqualOutput('drm.m4v',
                                {'container': ['mov',
