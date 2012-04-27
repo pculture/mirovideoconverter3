@@ -1,3 +1,4 @@
+import errno
 import os
 import time
 import tempfile
@@ -44,6 +45,13 @@ class Conversion(object):
         self.eta = None
         self.listeners = set()
 
+    def __str__(self):
+        return unicode(self).encode('utf8')
+
+    def __unicode__(self):
+        return u'<Conversion (%s) %r -> %r>' % (
+            self.converter.name, self.video.filename, self.output)
+
     def listen(self, f):
         self.listeners.add(f)
 
@@ -56,8 +64,7 @@ class Conversion(object):
     def run(self):
         self.temp_fd, self.temp_output = tempfile.mkstemp()
         self.thread = threading.Thread(target=self._thread,
-                                       name="Conversion: %s => %s (%s)" % (
-                self.video.filename, self.temp_output, self.converter.name))
+                                       name="Thread:%s" % (self,))
         self.thread.setDaemon(True)
         self.thread.start()
 
@@ -70,6 +77,12 @@ class Conversion(object):
                                      stderr=subprocess.STDOUT)
             self.process_output(popen)
             popen.wait()
+        except OSError, e:
+            if e.errno == errno.ENOENT:
+                self.error = '%r does not exist' % (
+                    self.converter.get_executable(),)
+            else:
+                raise
         except Exception, e:
             logging.exception('in %s' % (self.thread.name,))
             self.error = str(e)
@@ -124,12 +137,22 @@ class Conversion(object):
         if self.error is None:
             self.status = 'staging'
             self.notify_listeners()
-            shutil.move(self.temp_output, self.output)
-            os.close(self.temp_fd)
-            self.status = 'finished'
+            try:
+                shutil.move(self.temp_output, self.output)
+                os.close(self.temp_fd)
+            except EnvironmentError:
+                logging.exception('while trying to move %r to %r after %s',
+                                  self.temp_output, self.output, self)
+                self.status = 'failed'
+            else:
+                self.status = 'finished'
         else:
-            os.unlink(self.temp_output)
-            os.close(self.temp_fd)
+            try:
+                os.unlink(self.temp_output)
+                os.close(self.temp_fd)
+            except EnvironmentError:
+                logging.exception('while trying to remove %r after %s',
+                                  self.temp_output, self)
             self.status = 'failed'
         self.notify_listeners()
 
