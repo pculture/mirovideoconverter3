@@ -71,36 +71,41 @@ class Conversion(object):
             self.started_at = time.time()
             self.status = 'converting'
             for line in line_reader(popen.stdout):
-                status = self.converter.process_status_line(line)
+                status = self.converter.process_status_line(self.video, line)
                 if status is None:
                     continue
-                updated = False
+                updated = set()
                 if 'finished' in status:
                     self.error = status.get('error', None)
                     break
                 if 'duration' in status:
-                    updated = True
+                    updated.add('duration', 'progress')
                     self.duration = float(status['duration'])
                     if self.progress is None:
                         self.progress = 0.0
                 if 'progress' in status:
-                    updated = True
+                    updated.add('progress')
                     self.progress = min(float(status['progress']),
                                         self.duration)
+                if 'eta' in status:
+                    updated.add('eta')
+                    self.eta = float(status['eta'])
 
                 if updated:
                     if self.duration:
                         self.progress_percent = self.progress / self.duration
-                        if 0 < self.progress_percent < 1.0:
+                    else:
+                        self.progress_percent = 0.0
+                    if 'eta' not in updated:
+                        if self.duration and 0 < self.progress_percent < 1.0:
                             progress = self.progress_percent * 100
                             elapsed = time.time() - self.started_at
                             time_per_percent = elapsed / progress
-                            self.eta = int(time_per_percent * (100 - progress))
+                            self.eta = float(
+                                time_per_percent * (100 - progress))
                         else:
-                            self.eta = 0
-                    else:
-                        self.progress_percent = 0.0
-                        self.eta = 0
+                            self.eta = 0.0
+
                     self.notify_listeners()
 
             self.progress_percent = 1.0

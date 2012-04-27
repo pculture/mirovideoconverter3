@@ -69,18 +69,39 @@ class ConverterInfoTest(base.Test):
         self.assertEqual(self.converter_info.get_output_size_guess(self.video),
                          self.video.duration * self.converter_info.bitrate / 8)
 
-class FFmpegConverterInfoTest(base.Test):
+
+class ConverterInfoTestMixin(object):
 
     def setUp(self):
-        base.Test.setUp(self)
-        self.converter_info = converter.FFmpegConverterInfo('FFmpeg Test',
-                                                            (1024, 768))
+        self.video = VideoFile(os.path.join(self.testdata_dir, 'mp4-0.mp4'))
 
     def assertStatusLineOutput(self, line, **output):
         if not output:
             output = None
-        self.assertEqual(self.converter_info.process_status_line(line),
+        self.assertEqual(self.converter_info.process_status_line(self.video,
+                                                                 line),
                          output)
+
+    def test_get_excecutable(self):
+        self.assertTrue(self.converter_info.get_executable())
+
+    def test_get_arguments(self):
+        output = str(id(self))
+        arguments = self.converter_info.get_arguments(self.video, output)
+
+        self.assertTrue(arguments)
+        self.assertTrue(self.video.filename in arguments)
+        self.assertTrue(output in arguments)
+
+
+class FFmpegConverterInfoTest(ConverterInfoTestMixin, base.Test):
+
+    def setUp(self):
+        base.Test.setUp(self)
+        ConverterInfoTestMixin.setUp(self)
+        self.converter_info = converter.FFmpegConverterInfo('FFmpeg Test',
+                                                            (1024, 768))
+        self.converter_info.parameters = ''
 
     def test_process_status_line_nothing(self):
         self.assertStatusLineOutput(
@@ -128,3 +149,48 @@ class FFmpegConverterInfoTest(base.Test):
         # XXX haven't actually seen this line
         line = 'Error while decoding stream: something'
         self.assertStatusLineOutput(line)
+
+
+class FFmpeg2TheoraConversionInfoTest(ConverterInfoTestMixin, base.Test):
+
+    def setUp(self):
+        base.Test.setUp(self)
+        ConverterInfoTestMixin.setUp(self)
+        self.converter_info = converter.FFmpeg2TheoraConverterInfo(
+            'FFmpeg2theora Test')
+
+
+    def test_process_status_line_regular(self):
+        self.assertStatusLineOutput(
+            '{"duration": 676.590000, "position": 668.04, "audio_kbps":  174, '
+            '"video_kbps": 2243, "remaining": 19.33}',
+            duration=676.59,
+            progress=668.04,
+            eta=19.33)
+
+    def test_process_status_line_finished(self):
+        self.assertStatusLineOutput(
+            '{"result": "ok"}',
+            finished=True)
+
+    def test_process_status_line_error(self):
+        lines = """{
+  "code": "badfile",
+  "error": "file does not exist or has unknown format.",
+  "path": "/dev/null",
+  "size": 0
+}""".split('\n')
+        results = [
+            None,
+            None,
+            None,
+            None,
+            None,
+            {'finished': True,
+             'error': "file does not exist or has unknown format."}]
+        for line, result in zip(lines, results):
+            if result is None:
+                self.assertStatusLineOutput(line)
+            else:
+                self.assertStatusLineOutput(line, **result)
+        self.assertFalse(self.converter_info.line_progress)

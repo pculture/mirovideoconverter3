@@ -1,4 +1,5 @@
 from glob import glob
+import json
 import re
 import os.path
 
@@ -65,7 +66,7 @@ class FFmpegConverterInfoBase(ConverterInfo):
                 return line
 
     @classmethod
-    def process_status_line(klass, line):
+    def process_status_line(klass, video, line):
         error = klass._check_for_errors(line)
         if error:
             return {'finished': True, 'error': error}
@@ -90,6 +91,7 @@ class FFmpegConverterInfoBase(ConverterInfo):
         if match is not None:
             return {'finished': True}
 
+
 class FFmpegConverterInfo(FFmpegConverterInfoBase):
 
     parameters = None
@@ -107,6 +109,63 @@ class FFmpegConverterInfo(FFmpegConverterInfoBase):
             input=video.filename,
             output=output).split()
 
+
+class FFmpeg2TheoraConverterInfo(ConverterInfo):
+    media_type = 'video'
+    bitrate = 1200000
+    extension = 'ogv'
+
+    video_quality = 8
+    audio_quality = 6
+
+    def __init__(self, name):
+        ConverterInfo.__init__(self, name)
+        self.line_progress = {}
+
+    def get_executable(self):
+        return settings.get_ffmpeg2theora_executable_path()
+
+    def get_arguments(self, video, output):
+        return ('--videoquality', str(self.video_quality),
+                '--audioquality', str(self.audio_quality),
+                '--frontend',
+                '-o', output, video.filename)
+
+    def process_status_line(self, video, line):
+        # line_progress is a hack because sometimes FFmpeg2theora sends us a
+        # JSON object over multiple lines.  If we can't parse the object, we
+        # start throwing caching the previous lines and wait until we get a
+        # whole object.
+        if video in self.line_progress:
+            self.line_progress[video].append(line)
+            try:
+                parsed = json.loads("".join(self.line_progress[video]))
+            except ValueError:
+                return
+            else:
+                del self.line_progress[video]
+        else:
+            try:
+                parsed = json.loads(line)
+            except ValueError:
+                self.line_progress[video] = [line]
+                return
+
+        if 'result' in parsed:
+            if parsed['result'] == 'ok':
+                return {'finished': True}
+            else:
+                return {'finished': True,
+                        'error': parsed['result']}
+        elif 'error' in parsed:
+            return {'finished': True,
+                    'error': parsed['error']}
+        else:
+            return {
+                'duration': parsed['duration'],
+                'progress': parsed['position'],
+                'eta': parsed['remaining']
+                }
 
 class ConverterManager(object):
     def __init__(self):

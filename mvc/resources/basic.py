@@ -1,4 +1,4 @@
-from mvc.converter import FFmpegConverterInfoBase
+from mvc.converter import FFmpegConverterInfoBase, FFmpeg2TheoraConverterInfo
 
 
 class SimpleFFmpegConverterInfo(FFmpegConverterInfoBase):
@@ -35,5 +35,6 @@ class OggVorbis(SimpleFFmpegConverterInfo):
 mp4 = MP4('MP4')
 mp3 = MP3('MP3')
 ogg_vorbis = OggVorbis('Ogg Vorbis')
+theora = FFmpeg2TheoraConverterInfo('Ogg Theora')
 
-converters = [mp4, mp3, ogg_vorbis]
+converters = [mp4, mp3, ogg_vorbis, theora]
