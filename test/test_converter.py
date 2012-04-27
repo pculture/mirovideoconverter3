@@ -101,7 +101,21 @@ class FFmpegConverterInfoTest(ConverterInfoTestMixin, base.Test):
         ConverterInfoTestMixin.setUp(self)
         self.converter_info = converter.FFmpegConverterInfo('FFmpeg Test',
                                                             (1024, 768))
-        self.converter_info.parameters = ''
+        self.converter_info.parameters = '{ssize}'
+
+    def test_get_extra_arguments(self):
+        output = str(id(self))
+        self.assertEqual(
+            self.converter_info.get_extra_arguments(self.video, output),
+            ['640x480'])
+
+    def test_get_extra_arguments_rescales_size(self):
+        self.video.width = 1400
+        self.video.height = 768
+        output = str(id(self))
+        self.assertEqual(
+            self.converter_info.get_extra_arguments(self.video, output),
+            ['1024x560'])
 
     def test_process_status_line_nothing(self):
         self.assertStatusLineOutput(

@@ -3,7 +3,7 @@ import json
 import re
 import os.path
 
-from mvc import settings
+from mvc import settings, utils
 from mvc.utils import hms_to_seconds
 
 NON_WORD_CHARS = re.compile(r"[^a-zA-Z0-9]+")
@@ -103,7 +103,9 @@ class FFmpegConverterInfo(FFmpegConverterInfoBase):
     def get_extra_arguments(self, video, output):
         if self.parameters is None:
             raise NotImplementedError
-        ssize = '%ix%i' % (self.width, self.height)
+        width, height = utils.rescale_video((video.width, video.height),
+                                            (self.width, self.height))
+        ssize = '%ix%i' % (width, height)
         return self.parameters.format(
             ssize=ssize,
             input=video.filename,
