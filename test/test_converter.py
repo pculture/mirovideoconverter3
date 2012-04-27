@@ -82,7 +82,7 @@ class ConverterInfoTestMixin(object):
                                                                  line),
                          output)
 
-    def test_get_excecutable(self):
+    def test_get_executable(self):
         self.assertTrue(self.converter_info.get_executable())
 
     def test_get_arguments(self):
