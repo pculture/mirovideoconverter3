@@ -27,20 +27,28 @@ class Application(mvc.Application):
         if options.list_converters:
             for c in sorted(self.converter_manager.list_converters(),
                             key=operator.attrgetter('name')):
-                print '%s (-c %s)' % (
-                    c.name,
-                    c.identifier)
+                if options.json:
+                    print json.dumps({'name': c.name,
+                                      'identifier': c.identifier})
+                else:
+                    print '%s (-c %s)' % (
+                        c.name,
+                        c.identifier)
             return
 
         try:
             self.converter_manager.get_by_id(options.converter)
         except KeyError:
-            print 'ERROR: %r is not a valid converter type.' % (
+            message = '%r is not a valid converter type.' % (
                 options.converter,)
-            print 'Use "%s -l" to get a list of valid converters.' % (
-                parser.prog,)
-            print
-            parser.print_help()
+            if options.json:
+                print json.dumps({'error': message})
+            else:
+                print 'ERROR:', message
+                print 'Use "%s -l" to get a list of valid converters.' % (
+                    parser.prog,)
+                print
+                parser.print_help()
             sys.exit(1)
 
         if options.json:
