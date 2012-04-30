@@ -1,3 +1,4 @@
+import json
 import operator
 import optparse
 import time
@@ -9,6 +10,9 @@ parser = optparse.OptionParser(
     usage='%prog [-l] [--list-converters] [-c <converter> <filenames..>]',
     version='%prog ' + mvc.VERSION,
     prog='python -m mvc.ui.console')
+parser.add_option('-j', '--json', action='store_true',
+                  dest='json',
+                  help='Output JSON documents, rather than text.')
 parser.add_option('-l', '--list-converters', action='store_true',
                   dest='list_converters',
                   help="Print a list of supported converter types.")
@@ -39,7 +43,21 @@ class Application(mvc.Application):
             parser.print_help()
             sys.exit(1)
 
-        for filename in args:
+        if options.json:
+            def changed(c):
+                output = {
+                    'filename': c.video.filename,
+                    'output': c.output,
+                    'status': c.status,
+                    'duration': c.duration,
+                    'progress': c.progress,
+                    'percent': (c.progress_percent * 100 if c.progress_percent
+                                else 0),
+                    }
+                if c.error is not None:
+                    output['error'] = c.error
+                print json.dumps(output)
+        else:
             def changed(c):
                 if c.status == 'initialized':
                     line = 'starting (output: %s)' % (c.output,)
@@ -58,6 +76,8 @@ class Application(mvc.Application):
                 else:
                     line = c.status
                 print '%s: %s' % (c.video.filename, line)
+
+        for filename in args:
             c = app.start_conversion(filename, options.converter)
             changed(c)
             c.listen(changed)

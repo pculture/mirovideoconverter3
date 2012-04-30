@@ -135,6 +135,7 @@ class Conversion(object):
                 self.notify_listeners()
 
     def finalize(self):
+        self.progress = self.duration
         self.progress_percent = 1.0
         self.eta = 0
 
@@ -189,7 +190,7 @@ class ConversionManager(object):
             for listener in converter.listeners:
                 listener(converter)
             if converter.status in ('finished', 'failed'):
-                self.in_progress.remove(converter)
+                self.in_progress.discard(converter)
                 if not self.in_progress:
                     self.running = False
 
