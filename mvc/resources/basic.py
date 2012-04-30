@@ -4,7 +4,7 @@ from mvc.converter import FFmpegConverterInfoBase, FFmpeg2TheoraConverterInfo
 class SimpleFFmpegConverterInfo(FFmpegConverterInfoBase):
 
     def get_extra_arguments(self, video, output):
-        return self.parameters
+        return list(self.parameters)
 
 
 class WebM(SimpleFFmpegConverterInfo):
@@ -46,4 +46,4 @@ mp3 = MP3('MP3')
 ogg_vorbis = OggVorbis('Ogg Vorbis')
 theora = FFmpeg2TheoraConverterInfo('Ogg Theora')
 
-converters = [mp4, mp3, ogg_vorbis, theora]
+converters = [mp4, mp3, ogg_vorbis, theora, webm]
