@@ -29,7 +29,7 @@ class ConverterInfo(object):
         return '%s.%s.%s' % (name, self.identifier, self.extension)
 
     def get_output_size_guess(self, video):
-        if not self.bitrate:
+        if not self.bitrate or not video.duration:
             return None
         if video.duration:
             return self.bitrate * video.duration / 8
