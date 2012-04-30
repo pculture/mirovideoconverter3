@@ -86,7 +86,16 @@ class Application(mvc.Application):
                 print '%s: %s' % (c.video.filename, line)
 
         for filename in args:
-            c = app.start_conversion(filename, options.converter)
+            try:
+                c = app.start_conversion(filename, options.converter)
+            except ValueError:
+                message = 'could not parse %r' % filename
+                if options.json:
+                    print json.dumps({'status': 'failed', 'error': message,
+                                      'filename': filename})
+                else:
+                    print 'ERROR:', message
+                continue
             changed(c)
             c.listen(changed)
 
