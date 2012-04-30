@@ -156,3 +156,15 @@ class ConversionManagerTest(base.Test):
         c2 = self.start_conversion(filename)
         self.assertEqual(c2.status, 'finished')
         self.assertEqual(c2.output, c.output)
+
+    def test_stop(self):
+        filename = os.path.join(self.temp_dir, 'webm-0.webm')
+        shutil.copyfile(os.path.join(self.testdata_dir, 'webm-0.webm'),
+                        filename)
+        vf = video.VideoFile(filename)
+        c = self.manager.start_conversion(vf, self.converter)
+        time.sleep(0.5)
+        c.stop()
+        self.spin(1)
+        self.assertEqual(c.status, 'failed')
+        self.assertEqual(c.error, 'manually stopped')

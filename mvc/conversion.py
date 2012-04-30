@@ -22,6 +22,7 @@ class Conversion(object):
                                    converter.get_output_filename(video))
         self.lines = []
         self.thread = None
+        self.popen = None
         self.status = 'initialized'
         self.error = None
         self.started_at = None
@@ -54,17 +55,28 @@ class Conversion(object):
         self.thread.setDaemon(True)
         self.thread.start()
 
+    def stop(self):
+        if not self.popen:
+            return
+        self.error = 'manually stopped'
+        try:
+            self.popen.kill()
+            self.popen.wait()
+        except EnvironmentError, e:
+            logging.exception('while stopping %s' % (self,))
+            self.error = str(e)
+
     def _thread(self):
         os.unlink(self.temp_output) # unlink temp file before FFmpeg gets it
         try:
-            popen = subprocess.Popen(self.get_subprocess_arguments(
+            self.popen = subprocess.Popen(self.get_subprocess_arguments(
                     self.temp_output),
-                                     bufsize=1,
-                                     stdin=open(os.devnull, 'rb'),
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT)
-            self.process_output(popen)
-            popen.wait()
+                                          bufsize=1,
+                                          stdin=open(os.devnull, 'rb'),
+                                          stdout=subprocess.PIPE,
+                                          stderr=subprocess.STDOUT)
+            self.process_output()
+            self.popen.wait()
         except OSError, e:
             if e.errno == errno.ENOENT:
                 self.error = '%r does not exist' % (
@@ -78,10 +90,10 @@ class Conversion(object):
 
         self.finalize()
 
-    def process_output(self, popen):
+    def process_output(self):
         self.started_at = time.time()
         self.status = 'converting'
-        for line in line_reader(popen.stdout):
+        for line in line_reader(self.popen.stdout):
             self.lines.append(line) # for debugging, if needed
             status = self.converter.process_status_line(self.video, line)
             if status is None:
