@@ -30,7 +30,7 @@ class MP3(SimpleFFmpegConverterInfo):
     media_type = 'audio'
     bitrate = 160000
     extension = 'mp3'
-    parameters = '-f mp3 -y'.split()
+    parameters = '-f mp3 -ac 2'.split()
 
 
 class OggVorbis(SimpleFFmpegConverterInfo):
