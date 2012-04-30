@@ -49,7 +49,8 @@ class Conversion(object):
         self.manager.notify_queue.add(self)
 
     def run(self):
-        self.temp_fd, self.temp_output = tempfile.mkstemp()
+        self.temp_fd, self.temp_output = tempfile.mkstemp(
+            dir=os.path.dirname(self.output))
         self.thread = threading.Thread(target=self._thread,
                                        name="Thread:%s" % (self,))
         self.thread.setDaemon(True)
