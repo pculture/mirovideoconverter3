@@ -6,7 +6,7 @@ class AppleConversion(FFmpegConverterInfo):
     extension = 'mp4'
     parameters = ('-acodec aac -ac 2 -ab 160k -s {ssize} '
                   '-vcodec libx264 -preset slow -profile:v baseline -level 30 '
-                  '-maxrate 10000000 -bufsize 10000000 -b 1200k -f mp4 '
+                  '-maxrate 10000000 -bufsize 10000000 -vb 1200k -f mp4 '
                   '-threads 0')
 
 
