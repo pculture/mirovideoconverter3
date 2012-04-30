@@ -1,8 +1,9 @@
 language: python
 python:
   - 2.7
-install:
+before_install:
   - virtualenv /home/vagrant/virtualenv/python$TRAVIS_PYTHON_VERSION --system-site-packages
+install:
   - sudo ./helperscripts/debian_ubuntu.sh
 script:
   - python ./test/runtests.py -v
