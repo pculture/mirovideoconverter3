@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import os.path
 import shutil
@@ -132,3 +133,26 @@ class ConversionManagerTest(base.Test):
         self.spin(5)
         self.assertEqual(c.status, 'finished')
         self.assertEqual(c2.status, 'finished')
+
+    def test_funny_characters(self):
+        for filename in (
+            u'"TAKE2\'s" REHEARSAL човен поўны вуграмі',
+            u'ところで早け',
+            u'Lputefartøavål'):
+            full_filename = os.path.join(self.temp_dir, filename)
+            shutil.copyfile(os.path.join(self.testdata_dir, 'webm-0.webm'),
+                            full_filename)
+            c = self.start_conversion(full_filename)
+            self.assertEqual(c.status, 'finished')
+            self.assertTrue(filename in c.output, '%r not in %r' % (
+                    filename, c.output))
+
+    def test_overwrite(self):
+        filename = os.path.join(self.temp_dir, 'webm-0.webm')
+        shutil.copyfile(os.path.join(self.testdata_dir, 'webm-0.webm'),
+                        filename)
+        c = self.start_conversion(filename)
+        self.assertEqual(c.status, 'finished')
+        c2 = self.start_conversion(filename)
+        self.assertEqual(c2.status, 'finished')
+        self.assertEqual(c2.output, c.output)
