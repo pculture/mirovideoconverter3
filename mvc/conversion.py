@@ -70,7 +70,8 @@ class Conversion(object):
                 self.error = '%r does not exist' % (
                     self.converter.get_executable(),)
             else:
-                raise
+                logging.exception('OSError in %s' % (self.thread.name,))
+                self.error = str(e)
         except Exception, e:
             logging.exception('in %s' % (self.thread.name,))
             self.error = str(e)
