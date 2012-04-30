@@ -1,3 +1,4 @@
+import collections
 import errno
 import os
 import time
@@ -11,13 +12,14 @@ from mvc.utils import line_reader
 
 class Conversion(object):
 
-    def __init__(self, video, converter, manager):
+    def __init__(self, video, converter, manager, output_dir=None):
         self.video = video
         self.converter = converter
         self.manager = manager
-        self.output = os.path.join(
-            os.path.dirname(video.filename),
-            converter.get_output_filename(video))
+        if output_dir is None:
+            output_dir = os.path.dirname(video.filename)
+        self.output = os.path.join(output_dir,
+                                   converter.get_output_filename(video))
         self.thread = None
         self.status = 'initialized'
         self.error = None
@@ -145,20 +147,26 @@ class Conversion(object):
 
     def get_subprocess_arguments(self, output):
         return ([self.converter.get_executable()] +
-                self.converter.get_arguments(self.video, output))
+                list(self.converter.get_arguments(self.video, output)))
 
 
 class ConversionManager(object):
-    def __init__(self):
+    def __init__(self, simultaneous=None):
         self.notify_queue = set()
         self.in_progress = set()
+        self.waiting = collections.deque()
+        self.simultaneous = simultaneous
         self.running = False
 
     def start_conversion(self, video, converter):
         c = Conversion(video, converter, self)
-        self.in_progress.add(c)
-        c.run()
-        self.running = True
+        if (self.simultaneous is not None and
+            len(self.in_progress) >= self.simultaneous):
+            self.waiting.append(c)
+        else:
+            self.in_progress.add(c)
+            c.run()
+            self.running = True
         return c
 
     def check_notifications(self):
@@ -172,7 +180,14 @@ class ConversionManager(object):
             for listener in conversion.listeners:
                 listener(conversion)
             if conversion.status in ('finished', 'failed'):
-                self.in_progress.discard(conversion)
-                if not self.in_progress:
-                    self.running = False
+                self.conversion_finished(conversion)
 
+    def conversion_finished(self, conversion):
+        self.in_progress.discard(conversion)
+        while (self.waiting and self.simultaneous is not None and
+               len(self.in_progress) < self.simultaneous):
+            c = self.waiting.popleft()
+            self.in_progress.add(c)
+            c.run()
+        if not self.in_progress:
+            self.running = False

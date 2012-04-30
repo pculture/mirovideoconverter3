@@ -115,3 +115,20 @@ class ConversionManagerTest(base.Test):
         self.assertEqual(c.status, 'failed')
         self.assertEqual(c.error, '%r does not exist' % missing)
         self.assertFalse(os.path.exists(c.output))
+
+    def test_limit_simultaneous_conversions(self):
+        self.manager.simultaneous = 1
+        filename = os.path.join(self.temp_dir, 'webm-0.webm')
+        shutil.copyfile(os.path.join(self.testdata_dir, 'webm-0.webm'),
+                        filename)
+        shutil.copyfile(os.path.join(self.testdata_dir, 'webm-0.webm'),
+                        filename + '2')
+        vf = video.VideoFile(filename)
+        vf2 = video.VideoFile(filename + '2')
+        c = self.manager.start_conversion(vf, self.converter)
+        c2 = self.manager.start_conversion(vf2, self.converter)
+        self.assertEqual(len(self.manager.in_progress), 1)
+        self.assertEqual(len(self.manager.waiting), 1)
+        self.spin(5)
+        self.assertEqual(c.status, 'finished')
+        self.assertEqual(c2.status, 'finished')
