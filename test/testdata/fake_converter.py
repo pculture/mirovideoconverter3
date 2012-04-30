@@ -3,6 +3,10 @@ import sys
 import json
 
 filename, output = sys.argv[1:3]
+if 'error' in filename:
+    print json.dumps({'finished': True, 'error': 'test error'})
+    sys.exit(1)
+
 time.sleep(0.5)
 RANGE = 5
 for i in range(RANGE):
@@ -14,6 +18,7 @@ for i in range(RANGE):
             'eta': RANGE - i
             })
     time.sleep(0.1)
+
 with file(output, 'w') as f:
     f.write('blank')
 print json.dumps({'finished': True})

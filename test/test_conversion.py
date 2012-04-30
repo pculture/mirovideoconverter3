@@ -32,12 +32,38 @@ class ConversionManagerTest(base.Test):
 
     def setUp(self):
         base.Test.setUp(self)
+        self.converter = FakeConverterInfo('Fake')
         self.manager = conversion.ConversionManager()
         self.temp_dir = tempfile.mkdtemp()
+        self.changes = []
 
     def tearDown(self):
         base.Test.tearDown(self)
         shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def changed(self, conversion):
+        self.changes.append(
+            {'status': conversion.status,
+             'duration': conversion.duration,
+             'progress': conversion.progress,
+             'eta': conversion.eta
+             })
+
+    def spin(self, timeout):
+        finish_by = time.time() + timeout
+        while time.time() < finish_by and self.manager.running:
+            self.manager.check_notifications()
+            time.sleep(0)
+
+    def start_conversion(self, filename, timeout=5):
+        vf = video.VideoFile(filename)
+        c = self.manager.start_conversion(vf, self.converter)
+        c.listen(self.changed)
+        self.assertTrue(self.manager.running)
+        self.assertTrue(c in self.manager.in_progress)
+        self.spin(timeout)
+        self.assertFalse(self.manager.running)
+        return c
 
     def test_initial(self):
         self.assertEqual(self.manager.notify_queue, set())
@@ -45,31 +71,13 @@ class ConversionManagerTest(base.Test):
         self.assertFalse(self.manager.running)
 
     def test_conversion(self):
-        converter = FakeConverterInfo('Fake')
-        output = os.path.join(self.temp_dir, 'webm-0.webm')
+        filename = os.path.join(self.temp_dir, 'webm-0.webm')
         shutil.copyfile(os.path.join(self.testdata_dir, 'webm-0.webm'),
-                        output)
-        vf = video.VideoFile(output)
-        changes = []
-        def changed(c):
-            changes.append(
-                {'status': c.status,
-                 'duration': c.duration,
-                 'progress': c.progress,
-                 'eta': c.eta
-                 })
-        c = self.manager.start_conversion(vf, converter)
-        c.listen(changed)
-        self.assertTrue(self.manager.running)
-        self.assertTrue(c in self.manager.in_progress)
-        finish_by = time.time() + 5
-        while time.time() < finish_by and self.manager.running:
-            self.manager.check_notifications()
-            time.sleep(0) # spin a lot to get all the updates
-        self.assertFalse(self.manager.running)
+                        filename)
+        c = self.start_conversion(filename)
         self.assertTrue(c.status, 'finished')
         self.assertTrue(os.path.exists(c.output))
-        self.assertEqual(changes, [
+        self.assertEqual(self.changes, [
                 {'status': 'converting', 'duration': 5.0, 'eta': 5.0,
                  'progress': 0.0},
                 {'status': 'converting', 'duration': 5.0, 'eta': 4.0,
@@ -85,3 +93,12 @@ class ConversionManagerTest(base.Test):
                 {'status': 'finished', 'duration': 5.0, 'eta': 0.0,
                  'progress': 5.0}
                 ])
+
+    def test_conversion_with_error(self):
+        filename = os.path.join(self.temp_dir, 'error.webm')
+        shutil.copyfile(os.path.join(self.testdata_dir, 'webm-0.webm'),
+                        filename)
+        c = self.start_conversion(filename)
+        self.assertFalse(os.path.exists(c.output))
+        self.assertEqual(c.status, 'failed')
+        self.assertEqual(c.error, 'test error')

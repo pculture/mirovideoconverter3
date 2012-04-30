@@ -135,11 +135,11 @@ class Conversion(object):
                 self.status = 'finished'
         else:
             try:
-                os.unlink(self.temp_output)
                 os.close(self.temp_fd)
+                os.unlink(self.temp_output)
             except EnvironmentError:
-                logging.exception('while trying to remove %r after %s',
-                                  self.temp_output, self)
+                pass # ignore errors removing temp files; they may not have
+                     # been created
             self.status = 'failed'
         self.notify_listeners()
 
