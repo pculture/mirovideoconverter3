@@ -51,8 +51,12 @@ class Application(mvc.Application):
                 parser.print_help()
             sys.exit(1)
 
-        if options.json:
-            def changed(c):
+        any_failed = False
+
+        def changed(c):
+            if c.status == 'failed':
+                any_failed = True
+            if options.json:
                 output = {
                     'filename': c.video.filename,
                     'output': c.output,
@@ -65,8 +69,7 @@ class Application(mvc.Application):
                 if c.error is not None:
                     output['error'] = c.error
                 print json.dumps(output)
-        else:
-            def changed(c):
+            else:
                 if c.status == 'initialized':
                     line = 'starting (output: %s)' % (c.output,)
                 elif c.status == 'converting':
@@ -91,6 +94,7 @@ class Application(mvc.Application):
             except ValueError:
                 message = 'could not parse %r' % filename
                 if options.json:
+                    any_failed = True
                     print json.dumps({'status': 'failed', 'error': message,
                                       'filename': filename})
                 else:
@@ -104,6 +108,8 @@ class Application(mvc.Application):
             self.conversion_manager.check_notifications()
             time.sleep(1)
         self.conversion_manager.check_notifications() # one last time
+
+        sys.exit(0 if not any_failed else 1)
 
 if __name__ == "__main__":
     app = Application()
