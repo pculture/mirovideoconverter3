@@ -93,6 +93,9 @@ class Conversion(object):
     def process_output(self):
         self.started_at = time.time()
         self.status = 'converting'
+        # We use line_reader, rather than just iterating over the file object,
+        # because iterating over the file object gives us all the lines when
+        # the process ends, and we're looking for real-time updates.
         for line in line_reader(self.popen.stdout):
             self.lines.append(line) # for debugging, if needed
             status = self.converter.process_status_line(self.video, line)
