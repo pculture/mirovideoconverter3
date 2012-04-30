@@ -53,7 +53,7 @@ class ConversionManagerTest(base.Test):
         finish_by = time.time() + timeout
         while time.time() < finish_by and self.manager.running:
             self.manager.check_notifications()
-            time.sleep(0)
+            time.sleep(0.1)
 
     def start_conversion(self, filename, timeout=5):
         vf = video.VideoFile(filename)
@@ -88,8 +88,6 @@ class ConversionManagerTest(base.Test):
                  'progress': 3.0},
                 {'status': 'converting', 'duration': 5.0, 'eta': 1.0,
                  'progress': 4.0},
-                {'status': 'staging', 'duration': 5.0, 'eta': 0.0,
-                 'progress': 5.0},
                 {'status': 'finished', 'duration': 5.0, 'eta': 0.0,
                  'progress': 5.0}
                 ])
