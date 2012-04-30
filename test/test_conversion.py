@@ -63,6 +63,7 @@ class ConversionManagerTest(base.Test):
         self.assertTrue(c in self.manager.in_progress)
         self.spin(timeout)
         self.assertFalse(self.manager.running)
+        self.assertFalse(os.path.exists(c.temp_output))
         return c
 
     def test_initial(self):
