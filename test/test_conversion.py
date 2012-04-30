@@ -75,7 +75,7 @@ class ConversionManagerTest(base.Test):
         shutil.copyfile(os.path.join(self.testdata_dir, 'webm-0.webm'),
                         filename)
         c = self.start_conversion(filename)
-        self.assertTrue(c.status, 'finished')
+        self.assertEqual(c.status, 'finished')
         self.assertTrue(os.path.exists(c.output))
         self.assertEqual(self.changes, [
                 {'status': 'converting', 'duration': 5.0, 'eta': 5.0,
@@ -102,3 +102,14 @@ class ConversionManagerTest(base.Test):
         self.assertFalse(os.path.exists(c.output))
         self.assertEqual(c.status, 'failed')
         self.assertEqual(c.error, 'test error')
+
+    def test_conversion_with_missing_executable(self):
+        missing = sys.executable + '.does-not-exist'
+        self.converter.get_executable = lambda: missing
+        filename = os.path.join(self.temp_dir, 'webm-0.webm')
+        shutil.copyfile(os.path.join(self.testdata_dir, 'webm-0.webm'),
+                        filename)
+        c = self.start_conversion(filename)
+        self.assertEqual(c.status, 'failed')
+        self.assertEqual(c.error, '%r does not exist' % missing)
+        self.assertFalse(os.path.exists(c.output))
