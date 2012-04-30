@@ -65,7 +65,7 @@ class ConversionManagerTest(base.Test):
         finish_by = time.time() + 5
         while time.time() < finish_by and self.manager.running:
             self.manager.check_notifications()
-            time.sleep(0.01) # spin a lot to get all the updates
+            time.sleep(0) # spin a lot to get all the updates
         self.assertFalse(self.manager.running)
         self.assertTrue(c.status, 'finished')
         self.assertTrue(os.path.exists(c.output))
@@ -80,6 +80,8 @@ class ConversionManagerTest(base.Test):
                  'progress': 3.0},
                 {'status': 'converting', 'duration': 5.0, 'eta': 1.0,
                  'progress': 4.0},
+                {'status': 'staging', 'duration': 5.0, 'eta': 0.0,
+                 'progress': 5.0},
                 {'status': 'finished', 'duration': 5.0, 'eta': 0.0,
                  'progress': 5.0}
                 ])
