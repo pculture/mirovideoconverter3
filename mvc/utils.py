@@ -36,3 +36,27 @@ def rescale_video((source_width, source_height),
     height_ratio = float(source_height) / float(target_height)
     ratio = max(width_ratio, height_ratio)
     return round_even(source_width / ratio), round_even(source_height / ratio)
+
+def line_reader(handle):
+    """Builds a line reading generator for the given handle.  This
+    generator breaks on empty strings, \\r and \\n.
+
+    This a little weird, but it makes it really easy to test error
+    checking and progress monitoring.
+    """
+    def _readlines():
+        chars = []
+        c = handle.read(1)
+        while True:
+            if c in ["", "\r", "\n"]:
+                if chars:
+                    yield "".join(chars)
+                if not c:
+                    break
+                chars = []
+            else:
+                chars.append(c)
+            c = handle.read(1)
+    return _readlines()
+
+

@@ -7,25 +7,7 @@ import shutil
 import subprocess
 import logging
 
-def line_reader(handle, block_size=1):
-    """Builds a line reading generator for the given handle.  This
-    generator breaks on empty strings, \\r and \\n.
-
-    This a little weird, but it makes it really easy to test error
-    checking and progress monitoring.
-    """
-    def _readlines():
-        chars = []
-        c = handle.read(block_size)
-        while c:
-            if c in ["", "\r", "\n"]:
-                yield "".join(chars)
-                chars = []
-            else:
-                chars.append(c)
-            c = handle.read(block_size)
-    return _readlines()
-
+from mvc.utils import line_reader
 
 class Conversion(object):
 

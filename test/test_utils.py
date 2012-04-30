@@ -1,3 +1,5 @@
+from StringIO import StringIO
+
 from mvc import utils
 
 import base
@@ -34,3 +36,12 @@ class UtilsTest(base.Test):
                          target)
         self.assertEqual(utils.rescale_video((1400, 768), target), # widescreen
                          (1024, 560))
+
+    def test_line_reader(self):
+        lines = """line1
+line2
+line3\rline4\r
+line5"""
+        expected = ['line1', 'line2', 'line3', 'line4', 'line5']
+        self.assertEqual(list(utils.line_reader(StringIO(lines))), expected)
+
