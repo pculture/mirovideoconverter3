@@ -7,6 +7,11 @@ import base
 
 class GetMediaInfoTest(base.Test):
 
+    def assertClose(self, output, expected):
+        diff = output - expected
+        self.assertTrue(diff ** 2 < 0.04, # abs(diff) < 0.2
+                        "%s != %s" % (output, expected))
+
     def assertEqualOutput(self, filename, expected):
         full_path = os.path.join(self.testdata_dir, filename)
         try:
@@ -15,6 +20,14 @@ class GetMediaInfoTest(base.Test):
             raise AssertionError(
                 'Error parsing %r\nException: %r\nOutput: %s' % (
                     filename, e, video.get_ffmpeg_output(full_path)))
+        duration_output = output.pop('duration', None)
+        duration_expected = expected.pop('duration', None)
+        if duration_output is not None and duration_expected is not None:
+            self.assertClose(duration_output, duration_expected)
+        else:
+            # put them back in, let assertEqual handle the difference
+            output['duration'] = duration_output
+            expected['duration'] = duration_expected
         self.assertEqual(output, expected)
 
     def test_mp3_0(self):
