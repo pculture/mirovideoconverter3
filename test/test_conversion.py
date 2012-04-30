@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8mar-
 import json
 import os.path
 import shutil
@@ -134,7 +134,7 @@ class ConversionManagerTest(base.Test):
         self.assertEqual(c.status, 'finished')
         self.assertEqual(c2.status, 'finished')
 
-    def test_funny_characters(self):
+    def test_unicode_characters(self):
         for filename in (
             u'"TAKE2\'s" REHEARSAL човен поўны вуграмі',
             u'ところで早け',
