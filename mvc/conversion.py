@@ -20,6 +20,7 @@ class Conversion(object):
             output_dir = os.path.dirname(video.filename)
         self.output = os.path.join(output_dir,
                                    converter.get_output_filename(video))
+        self.lines = []
         self.thread = None
         self.status = 'initialized'
         self.error = None
@@ -80,6 +81,7 @@ class Conversion(object):
         self.started_at = time.time()
         self.status = 'converting'
         for line in line_reader(popen.stdout):
+            self.lines.append(line) # for debugging, if needed
             status = self.converter.process_status_line(self.video, line)
             if status is None:
                 continue
