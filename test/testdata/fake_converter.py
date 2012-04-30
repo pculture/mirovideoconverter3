@@ -1,10 +1,17 @@
 import time
 import sys
+import os
 import json
 
 filename, output = sys.argv[1:3]
 if 'error' in filename:
     print json.dumps({'finished': True, 'error': 'test error'})
+    sys.exit(1)
+
+if os.path.exists(output):
+    print json.dumps({'finished': True,
+                      'error': '%r existed when we started' % (
+                output,)})
     sys.exit(1)
 
 time.sleep(0.5)
