@@ -51,7 +51,7 @@ class FFmpegConverterInfoBase(ConverterInfo):
         return settings.get_ffmpeg_executable_path()
 
     def get_arguments(self, video, output):
-        return (['-i', video.filename, '-strict', 'experimental'] +
+        return (['-i', video.filename, '-strict', 'experimental', '-n'] +
                 self.get_extra_arguments(video, output) + [output])
 
     def get_extra_arguments(self, video, output):

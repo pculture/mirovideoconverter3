@@ -42,6 +42,7 @@ class Conversion(object):
         self.started_at = None
         self.duration = None
         self.progress = None
+        self.progress_percent = None
         self.eta = None
         self.listeners = set()
 
@@ -69,12 +70,15 @@ class Conversion(object):
         self.thread.start()
 
     def _thread(self):
+        os.unlink(self.temp_output) # unlink temp file before FFmpeg gets it
         try:
             popen = subprocess.Popen(self.get_subprocess_arguments(
                     self.temp_output),
                                      bufsize=1,
+                                     stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT)
+            popen.stdin.close()
             self.process_output(popen)
             popen.wait()
         except OSError, e:
@@ -101,7 +105,7 @@ class Conversion(object):
                 self.error = status.get('error', None)
                 break
             if 'duration' in status:
-                updated.add('duration', 'progress')
+                updated.update(('duration', 'progress'))
                 self.duration = float(status['duration'])
                 if self.progress is None:
                     self.progress = 0.0

@@ -1,5 +1,7 @@
 from mvc import converter, conversion, video
 
+VERSION = '3.0a'
+
 class Application(object):
 
     def __init__(self):
