@@ -57,10 +57,9 @@ class Conversion(object):
             popen = subprocess.Popen(self.get_subprocess_arguments(
                     self.temp_output),
                                      bufsize=1,
-                                     stdin=subprocess.PIPE,
+                                     stdin=open(os.devnull, 'rb'),
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT)
-            popen.stdin.close()
             self.process_output(popen)
             popen.wait()
         except OSError, e:
@@ -127,9 +126,10 @@ class Conversion(object):
             try:
                 shutil.move(self.temp_output, self.output)
                 os.close(self.temp_fd)
-            except EnvironmentError:
+            except EnvironmentError, e:
                 logging.exception('while trying to move %r to %r after %s',
                                   self.temp_output, self.output, self)
+                self.error = str(e)
                 self.status = 'failed'
             else:
                 self.status = 'finished'
@@ -168,11 +168,11 @@ class ConversionManager(object):
 
         self.notify_queue, changed = set(), self.notify_queue
 
-        for converter in changed:
-            for listener in converter.listeners:
-                listener(converter)
-            if converter.status in ('finished', 'failed'):
-                self.in_progress.discard(converter)
+        for conversion in changed:
+            for listener in conversion.listeners:
+                listener(conversion)
+            if conversion.status in ('finished', 'failed'):
+                self.in_progress.discard(conversion)
                 if not self.in_progress:
                     self.running = False
 

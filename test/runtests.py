@@ -7,6 +7,7 @@ except ImportError:
 
 from test_video import *
 from test_converter import *
+from test_conversion import *
 from test_utils import *
 
 if __name__ == "__main__":
