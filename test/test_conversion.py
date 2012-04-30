@@ -77,6 +77,8 @@ class ConversionManagerTest(base.Test):
                         filename)
         c = self.start_conversion(filename)
         self.assertEqual(c.status, 'finished')
+        self.assertEqual(c.progress, c.duration)
+        self.assertEqual(c.progress_percent, 1.0)
         self.assertTrue(os.path.exists(c.output))
         self.assertEqual(self.changes, [
                 {'status': 'converting', 'duration': 5.0, 'eta': 5.0,
