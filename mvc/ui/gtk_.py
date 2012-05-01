@@ -99,3 +99,8 @@ class Application(mvc.Application):
     def run(self):
         gtk.main()
 
+
+if __name__ == "__main__":
+    app = Application()
+    app.startup()
+    app.run()
