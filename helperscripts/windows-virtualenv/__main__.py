@@ -8,6 +8,9 @@ import time
 import zipfile
 from optparse import OptionParser
 
+env_dir = build_dir = site_packages_dir = scripts_dir = python_dir = None
+options = args = None
+
 def setup_global_dirs(parser_args):
     global env_dir, build_dir, site_packages_dir, scripts_dir, python_dir
 
