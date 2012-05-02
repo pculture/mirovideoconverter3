@@ -1,6 +1,9 @@
 import os
+import sys
 
 def which(name):
+    if sys.platform == 'win32':
+        name = name + '.exe' # we're looking for ffmpeg.exe in this case
     for dirname in os.environ['PATH'].split(os.pathsep):
         fullpath = os.path.join(dirname, name)
         # XXX check for +x bit
