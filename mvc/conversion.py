@@ -68,6 +68,7 @@ class Conversion(object):
             self.error = str(e)
 
     def _thread(self):
+        os.close(self.temp_fd)
         os.unlink(self.temp_output) # unlink temp file before FFmpeg gets it
         try:
             self.popen = subprocess.Popen(self.get_subprocess_arguments(
@@ -146,7 +147,6 @@ class Conversion(object):
             self.notify_listeners()
             try:
                 shutil.move(self.temp_output, self.output)
-                os.close(self.temp_fd)
             except EnvironmentError, e:
                 logging.exception('while trying to move %r to %r after %s',
                                   self.temp_output, self.output, self)
@@ -156,7 +156,6 @@ class Conversion(object):
                 self.status = 'finished'
         else:
             try:
-                os.close(self.temp_fd)
                 os.unlink(self.temp_output)
             except EnvironmentError:
                 pass # ignore errors removing temp files; they may not have
