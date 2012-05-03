@@ -2,6 +2,8 @@ import gtk
 import gobject
 
 import mvc
+from miro import app
+from miro.plat.frontends.widgets import widgetset
 
 class Application(mvc.Application):
 
@@ -13,6 +15,20 @@ class Application(mvc.Application):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title('Miro Video Converter')
 
+        self.menubar = None
+
+        rect = widgetset.Rect(100, 300, 800, 600)
+        self.mainwindow = widgetset.MainWindow('Miro Video Converter', rect)
+        self.hbox = widgetset.HBox()
+        def on_clicked(widget):
+            print 'clicked %s' % widget.label.get_text()
+        for i in xrange(0, 6):
+            b = widgetset.Button('Test Button %d' % i)
+            b.connect('clicked', on_clicked)
+            self.hbox.pack_start(b)
+        self.mainwindow.set_content_widget(self.hbox)
+        self.mainwindow.show()
+        
         self.chooser = gtk.FileChooserButton('Add a file to convert')
         self.chooser.show()
 
@@ -101,6 +117,7 @@ class Application(mvc.Application):
 
 
 if __name__ == "__main__":
-    app = Application()
-    app.startup()
-    app.run()
+    a = Application()
+    app.widgetapp = a
+    a.startup()
+    a.run()

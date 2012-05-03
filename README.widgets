@@ -1,0 +1,18 @@
+For now the widgets are to be grown automatically.  It is mirrored after
+the installed structure of the miro library so follow it please, so you can
+do diff on it.
+
+General rule is that anything in gtk/cocoa is pretty much fair game,
+there's usually some good reason for stuff in miro.frontends.widgets.
+
+For stuff in miro namespace, think carefully before adding it, with
+the exception if it is utilty functions (which we will further abstract
+away) or a base class of a platform impementation (such as player.Player).
+
+Python is dynamically interpreted so it is generally safe to remove
+the top-level imports and still have the thing run.
+
+As a convention, please prepend the line with ### when you are removing
+something, and when you are adding something add ###XXXMVC on the line
+before your first addition.
+
