@@ -1,6 +1,42 @@
-import mvc
+try:
+    import mvc
+except ImportError:
+    import os.path, sys
+    mvc_path = os.path.join(os.path.dirname(__file__), '..', '..')
+    sys.path.append(mvc_path)
+    import mvc
+
 
 from mvc.widgets import *
+
+TABLE_COLUMNS = (
+    ("Name", unicode),
+    ("Output", unicode),
+    ("Converter", unicode),
+    ("Status", unicode),
+    ("Duration", int),
+    ("Progress", int),
+    ("ETA", int))
+
+class ConversionModel(TableModel):
+    def __init__(self):
+        super(ConversionModel, self).__init__(zip(*TABLE_COLUMNS)[1])
+        self.conversion_to_iter = {}
+
+    def update_conversion(self, conversion):
+        values = (conversion.video.filename,
+                  conversion.output,
+                  conversion.converter.name,
+                  conversion.status,
+                  conversion.duration or 0,
+                  conversion.progress or 0,
+                  conversion.eta or 0)
+        iter_ = self.conversion_to_iter.get(conversion)
+        if iter_ is None:
+            self.conversion_to_iter[conversion] = self.append(values)
+        else:
+            self.update_iter(iter_, values)
+
 
 class Application(mvc.Application):
 
@@ -14,7 +50,10 @@ class Application(mvc.Application):
         self.window.connect('destroy', self.destroy)
 
         # # table on top
-        self.table = ConversionTable()
+        self.model = ConversionModel()
+        self.table = TableView(self.model)
+        for name in zip(*TABLE_COLUMNS)[0]:
+            self.table.add_column(name)
 
         # # bottom buttons
         self.chooser = FileChooserButton('Add a File to Convert')
@@ -59,7 +98,7 @@ class Application(mvc.Application):
         self.update_conversion(c)
 
     def update_conversion(self, conversion):
-        self.table.update_conversion(conversion)
+        self.model.update_conversion(conversion)
 
 if __name__ == "__main__":
     app = Application()

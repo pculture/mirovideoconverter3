@@ -10,38 +10,30 @@ TABLE_COLUMNS = (
     ("Progress", gobject.TYPE_INT),
     ("ETA", gobject.TYPE_INT))
 
+TYPE_MAPPING = {
+    str: gobject.TYPE_STRING,
+    unicode: gobject.TYPE_STRING,
+    int: gobject.TYPE_INT
+    }
 
-class ConversionModel(gtk.ListStore):
+class TableModel(gtk.ListStore):
 
-    def __init__(self):
-        super(ConversionModel, self).__init__(*[c[1] for c in TABLE_COLUMNS])
+    def __init__(self, column_types):
+        super(TableModel, self).__init__(*[TYPE_MAPPING[t] for t in column_types])
+
+    def update_iter(self, iter_, values):
+        [self.set_value(iter_, i, v)
+         for i, v in enumerate(values)]
 
 
-class ConversionTable(gtk.TreeView):
+class TableView(gtk.TreeView):
 
-    def __init__(self):
-        model = ConversionModel()
-        super(ConversionTable, self).__init__(model)
+    def __init__(self, model):
+        super(TableView, self).__init__(model)
         self.set_size_request(-1, 200)
-        for i, (name, type_) in enumerate(TABLE_COLUMNS):
-            self.insert_column_with_attributes(
-                i, name, gtk.CellRendererText(), text=i)
-        self._conversion_to_iter = {}
 
-    def update_conversion(self, conversion):
-        values = (conversion.video.filename,
-                  conversion.output,
-                  conversion.converter.name,
-                  conversion.status,
-                  conversion.duration or 0,
-                  conversion.progress or 0,
-                  conversion.eta or 0)
-        model = self.get_model()
-        if conversion not in self._conversion_to_iter:
-            iter_ = model.append(values)
-            self._conversion_to_iter[conversion] = iter_
-        else:
-            iter_ = self._conversion_to_iter[conversion]
-            [model.set_value(iter_, i, v)
-             for i, v in enumerate(values)]
+    def add_column(self, name):
+        i = len(self.get_columns())
+        self.insert_column_with_attributes(i, name, gtk.CellRendererText(),
+                                           text=i)
 
