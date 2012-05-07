@@ -6,7 +6,6 @@ except ImportError:
     sys.path.append(mvc_path)
     import mvc
 
-
 from mvc.widgets import *
 
 TABLE_COLUMNS = (
@@ -52,10 +51,11 @@ class Application(mvc.Application):
         # # table on top
         self.model = ConversionModel()
         self.table = TableView(self.model)
+
         for name in zip(*TABLE_COLUMNS)[0]:
             self.table.add_column(name)
 
-        # # bottom buttons
+        # bottom buttons
         self.chooser = FileChooserButton('Add a File to Convert')
 
         options = [(c.name, c.identifier) for c in
@@ -72,7 +72,7 @@ class Application(mvc.Application):
 
         # # finish up
         vbox = VBox()
-        vbox.pack_start(self.table)
+        vbox.pack_start(self.table, expand=True)
         vbox.pack_end(bottom)
         self.window.add(vbox)
 
@@ -81,6 +81,8 @@ class Application(mvc.Application):
         self.window.show()
 
     def destroy(self, widget):
+        for conversion in self.conversion_manager.in_progress.copy():
+            conversion.stop()
         mainloop_stop()
 
     def run(self):
@@ -101,6 +103,7 @@ class Application(mvc.Application):
         self.model.update_conversion(conversion)
 
 if __name__ == "__main__":
+    initialize()
     app = Application()
     app.startup()
     app.run()
