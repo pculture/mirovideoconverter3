@@ -42,8 +42,8 @@ class VideoFile(object):
                                  skip=skip)
             if name is None:
                 temp = None # no result
-            else:
-                self.thumbnails[key] = temp
+
+            self.thumbnails[key] = temp
 
         temp = self.thumbnails[key]
         if temp is None:
@@ -250,8 +250,8 @@ def get_thumbnail(filename, width, height, output, skip=0):
                    '-frames:v', '1', output]
 
     try:
-        subprocess.check_call(commandline, stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT)
+        subprocess.check_output(commandline,
+                                stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, e:
         logging.exception('error calling %r\noutput:%s', commandline, e.output)
         return None
