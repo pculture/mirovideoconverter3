@@ -247,7 +247,7 @@ def get_thumbnail(filename, width, height, output, skip=0):
     commandline = [get_ffmpeg_executable_path(),
                    '-ss', str(skip), '-i', filename, '-vf',
                    'thumbnail,scale=%i:%i' % (width, height),
-                   '-frames:v', '1', output]
+                   '-frames', '1', output]
 
     try:
         subprocess.check_output(commandline,
