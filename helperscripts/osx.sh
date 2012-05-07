@@ -11,7 +11,7 @@
 # Last updated:    2012-04-30
 # Last updated by: Paul Swartz
 
-port install python27 py27-pyobjc py27-pyobj-cocoa py27-py2app ffmpeg
+port install python27 py27-pyobjc py27-pyobj-cocoa py27-py2app ffmpeg-devel
 curl -o ffmpeg2theora-0.28.pkg http://v2v.cc/~j/ffmpeg2theora/ffmpeg2theora-0.28.pkg
 installer -pkg ffmpeg2theora-0.28.pkg -target /
 rm ffmpeg2theora-0.28.pkg
