@@ -1,4 +1,5 @@
 import os, os.path
+import tempfile
 import unittest
 
 from mvc import video
@@ -59,6 +60,15 @@ class GetMediaInfoTest(base.Test):
                                 'genre': 'Podcast',
                                 'title': '#426: Tough Room 2011',
                                 'duration': 1.09})
+
+    def test_theora(self):
+        self.assertEqualOutput('theora.ogv',
+                               {'container': 'ogg',
+                                'video_codec': 'theora',
+                                'audio_codec': 'vorbis',
+                                'width': 400,
+                                'height': 304,
+                                'duration': 5.0})
 
     def test_theora_with_ogg_extension(self):
         self.assertEqualOutput('theora_with_ogg_extension.ogg',
@@ -124,3 +134,80 @@ class GetMediaInfoTest(base.Test):
                                 'duration': 2668.8})
 
 
+
+class GetThumbnailTest(base.Test):
+
+    def setUp(self):
+        base.Test.setUp(self)
+        self.video_path = os.path.join(self.testdata_dir,
+                                       'theora.ogv')
+        self.temp_path = tempfile.NamedTemporaryFile(
+            suffix='.png')
+
+    def generate_thumbnail(self, width, height):
+        path = video.get_thumbnail(self.video_path, width, height,
+                                   self.temp_path.name,
+                                   skip=0)
+        self.assertEqual(path, self.temp_path.name)
+        thumbnail = video.VideoFile(path)
+        return thumbnail
+
+    def test_original_size(self):
+        thumbnail = self.generate_thumbnail(-1, -1)
+        self.assertEqual(thumbnail.width, 400)
+        self.assertEqual(thumbnail.height, 304)
+
+    def test_height_resize(self):
+        thumbnail = self.generate_thumbnail(200, -1)
+        self.assertEqual(thumbnail.width, 200)
+        self.assertEqual(thumbnail.height, 152)
+
+    def test_width_resize(self):
+        thumbnail = self.generate_thumbnail(-1, 152)
+        self.assertEqual(thumbnail.width, 200)
+        self.assertEqual(thumbnail.height, 152)
+
+    def test_both_resize(self):
+        thumbnail = self.generate_thumbnail(100, 100)
+        self.assertEqual(thumbnail.width, 100)
+        self.assertEqual(thumbnail.height, 100)
+
+
+class VideoFileTest(base.Test):
+
+    def setUp(self):
+        base.Test.setUp(self)
+        self.video_path = os.path.join(self.testdata_dir,
+                                       'theora.ogv')
+        self.video = video.VideoFile(self.video_path)
+        self.video.thumbnails = {}
+
+    def get_thumbnail_from_video(self, **kwargs):
+        path = self.video.get_thumbnail(**kwargs)
+        return video.VideoFile(path)
+
+    def test_get_thumbnail_original_size(self):
+        thumbnail = self.get_thumbnail_from_video()
+        self.assertEqual(thumbnail.width, 400)
+        self.assertEqual(thumbnail.height, 304)
+
+    def test_get_thumbnail_scaled_width(self):
+        thumbnail = self.get_thumbnail_from_video(width=200)
+        self.assertEqual(thumbnail.width, 200)
+        self.assertEqual(thumbnail.height, 152)
+
+    def test_get_thumbnail_scaled_height(self):
+        thumbnail = self.get_thumbnail_from_video(height=152)
+        self.assertEqual(thumbnail.width, 200)
+        self.assertEqual(thumbnail.height, 152)
+
+    def test_get_thumbnail_scaled_both(self):
+        thumbnail = self.get_thumbnail_from_video(width=100, height=100)
+        self.assertEqual(thumbnail.width, 100)
+        self.assertEqual(thumbnail.height, 100)
+
+    def test_get_thumbnail_cache(self):
+        thumbnail = self.get_thumbnail_from_video()
+        thumbnail2 = self.get_thumbnail_from_video()
+        self.assertEqual(thumbnail.filename,
+                         thumbnail2.filename)

@@ -1,6 +1,7 @@
 import logging
 import re
 import subprocess
+import tempfile
 
 from mvc.settings import get_ffmpeg_executable_path
 from mvc.utils import hms_to_seconds
@@ -14,11 +15,41 @@ class VideoFile(object):
         self.width = None
         self.height = None
         self.duration = None
+        self.thumbnails = {}
         self.parse()
 
     def parse(self):
         self.__dict__.update(
             get_media_info(self.filename))
+
+    def get_thumbnail(self, width=None, height=None, type_='.png'):
+        if width is None:
+            width = -1
+        if height is None:
+            height = -1
+
+        if self.duration is None:
+            skip = 0
+        else:
+            skip = min(int(self.duration / 3), 120)
+
+        key = (width, height, type_)
+
+        if key not in self.thumbnails:
+            temp = tempfile.NamedTemporaryFile(
+                suffix=type_)
+            name = get_thumbnail(self.filename, width, height, temp.name,
+                                 skip=skip)
+            if name is None:
+                temp = None # no result
+            else:
+                self.thumbnails[key] = temp
+
+        temp = self.thumbnails[key]
+        if temp is None:
+            return None
+        else:
+            return temp.name
 
 
 class Node(object):
@@ -211,3 +242,18 @@ def get_media_info(filepath):
     ast = parse_ffmpeg_output(output.splitlines())
 
     return extract_info(ast)
+
+def get_thumbnail(filename, width, height, output, skip=0):
+    commandline = [get_ffmpeg_executable_path(),
+                   '-ss', str(skip), '-i', filename, '-vf',
+                   'thumbnail,scale=%i:%i' % (width, height),
+                   '-frames:v', '1', output]
+
+    try:
+        subprocess.check_call(commandline, stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError, e:
+        logging.exception('error calling %r\noutput:%s', commandline, e.output)
+        return None
+
+    return output
