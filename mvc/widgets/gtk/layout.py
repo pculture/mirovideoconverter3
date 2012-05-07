@@ -32,13 +32,13 @@
 import gtk
 
 class BoxMixin(object):
-    def pack_start(self, widget):
+    def pack_start(self, widget, expand=False):
         widget.show()
-        super(BoxMixin, self).pack_start(widget)
+        super(BoxMixin, self).pack_start(widget, expand=expand)
 
-    def pack_end(self, widget):
+    def pack_end(self, widget, expand=False):
         widget.show()
-        super(BoxMixin, self).pack_end(widget)
+        super(BoxMixin, self).pack_end(widget, expand=expand)
 
 
 class HBox(BoxMixin, gtk.HBox):

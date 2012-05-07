@@ -6,6 +6,9 @@ from .layout import *
 from .controls import *
 from .table import *
 
+def initialize():
+    pass
+
 def mainloop_start():
     gtk.main()
 
