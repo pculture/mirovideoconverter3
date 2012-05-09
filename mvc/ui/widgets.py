@@ -120,15 +120,31 @@ class Application(mvc.Application):
             self.table.add_column(name)
 
         # bottom buttons
-        options = [(c.name, c.identifier) for c in
-                   self.converter_manager.list_converters()]
-        self.conversions = OptionMenu(options)
+        converter_types = ('apple', 'android', 'other', 'format')
+        converters = {}
+        for c in self.converter_manager.list_converters():
+            media_type = c.media_type
+            if media_type not in converter_types:
+                media_type = 'others'
+            converters.setdefault(media_type, []).append(c)
+
+        self.menus = []
+        bottom = HBox()
+
+        for type_ in converter_types:
+            options = [(c.name, c.identifier) for c in
+                       converters[type_]]
+            options.sort()
+            options.insert(0, (type_.title(), None))
+            menu = OptionMenu(options)
+            menu.connect('changed', self.change_conversion)
+            self.menus.append(menu)
+            bottom.pack_start(menu)
+
 
         self.convert_button = Button("Start Conversions!")
+        self.convert_button.disable()
         self.convert_button.connect('clicked', self.convert)
-
-        bottom = HBox()
-        bottom.pack_start(self.conversions)
         bottom.pack_start(self.convert_button)
 
         drop_target = FileDropTarget()
@@ -154,14 +170,29 @@ class Application(mvc.Application):
         mainloop_start()
 
     def file_activated(self, widget, filename):
-        identifier = self.conversions.get_selected()
-        if identifier is None:
+        if self.current_conversion is None:
             return
         vf = VideoFile(filename)
         converter = self.converter_manager.get_by_id(identifier)
         c = self.conversion_manager.get_conversion(vf, converter)
         c.listen(self.update_conversion)
         self.update_conversion(c)
+
+    def change_conversion(self, widget):
+        if hasattr(self, '_doing_conversion_change'):
+            return
+        self._doing_conversion_change = True
+
+        self.current_conversion = widget.get_selected()
+        if self.current_conversion is None:
+            self.convert_button.disable()
+        else:
+            self.convert_button.enable()
+        for menu in self.menus:
+            if menu is not widget:
+                menu.set_selected(0)
+
+        del self._doing_conversion_change
 
     def convert(self, widget):
         if not self.conversion_manager.running:

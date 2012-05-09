@@ -52,9 +52,16 @@ class OptionMenu(gtk.ComboBox):
             return
         return self.get_model()[iter_][1]
 
+    def set_selected(self, index):
+        self.set_active(index)
+
 
 class Button(gtk.Button):
-    pass
+    def enable(self):
+        self.set_sensitive(True)
+
+    def disable(self):
+        self.set_sensitive(False)
 
 
 class Label(gtk.Label):
