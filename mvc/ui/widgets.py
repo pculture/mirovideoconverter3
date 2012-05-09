@@ -24,7 +24,7 @@ TABLE_COLUMNS = (
 class FileDropTarget(Alignment):
     def __init__(self):
         super(FileDropTarget, self).__init__(
-            xscale=0.5, yscale=0.5,
+            xalign=0.5, yalign=0.5,
             top_pad=50, right_pad=40,
             bottom_pad=50, left_pad=40)
         self.connect('drag-motion', self.drag_motion)
@@ -107,6 +107,8 @@ class Application(mvc.Application):
         if self.started:
             return
 
+        self.current_converter = None
+
         mvc.Application.startup(self)
 
         self.window = Window("Miro Video Converter")
@@ -142,11 +144,6 @@ class Application(mvc.Application):
             bottom.pack_start(menu)
 
 
-        self.convert_button = Button("Start Conversions!")
-        self.convert_button.disable()
-        self.convert_button.connect('clicked', self.convert)
-        bottom.pack_start(self.convert_button)
-
         drop_target = FileDropTarget()
         drop_target.connect('file-activated', self.file_activated)
 
@@ -154,7 +151,17 @@ class Application(mvc.Application):
         vbox = VBox()
         vbox.pack_start(self.table, expand=True)
         vbox.pack_start(drop_target)
-        vbox.pack_end(bottom)
+        vbox.pack_start(bottom)
+
+        self.convert_button = Button("Start Conversions!")
+        self.convert_button.disable()
+        self.convert_button.connect('clicked', self.convert)
+        alignment = Alignment(xalign=0.5, yalign=0.5,
+                              top_pad=50, bottom_pad=50,
+                              left_pad=50, right_pad=50)
+        alignment.add(self.convert_button)
+        vbox.pack_start(alignment, expand=True)
+
         self.window.add(vbox)
 
         idle_add(self.conversion_manager.check_notifications)
@@ -169,12 +176,31 @@ class Application(mvc.Application):
     def run(self):
         mainloop_start()
 
+    def update_convert_button(self):
+        can_cancel = False
+        can_start = False
+        for c in self.model.conversions():
+            if c.status == 'converting':
+                can_cancel = True
+            if c.status == 'initialized':
+                can_start = True
+        if (self.current_converter is None or not
+            (can_cancel or can_start)):
+            self.convert_button.disable()
+        else:
+            self.convert_button.enable()
+        if can_cancel:
+            self.convert_button.set_label('Cancel Conversions')
+        else:
+            self.convert_button.set_label('Start Conversions!')
+
     def file_activated(self, widget, filename):
-        if self.current_conversion is None:
+        print 'activated?', filename, self.current_converter
+        if self.current_converter is None:
             return
         vf = VideoFile(filename)
-        converter = self.converter_manager.get_by_id(identifier)
-        c = self.conversion_manager.get_conversion(vf, converter)
+        c = self.conversion_manager.get_conversion(vf,
+                                                   self.current_converter)
         c.listen(self.update_conversion)
         self.update_conversion(c)
 
@@ -183,11 +209,15 @@ class Application(mvc.Application):
             return
         self._doing_conversion_change = True
 
-        self.current_conversion = widget.get_selected()
-        if self.current_conversion is None:
-            self.convert_button.disable()
+        identifier = widget.get_selected()
+        if identifier is not None:
+            self.current_converter = self.converter_manager.get_by_id(
+                identifier)
         else:
-            self.convert_button.enable()
+            self.current_converter = None
+
+        self.update_convert_button()
+
         for menu in self.menus:
             if menu is not widget:
                 menu.set_selected(0)
@@ -196,13 +226,10 @@ class Application(mvc.Application):
 
     def convert(self, widget):
         if not self.conversion_manager.running:
-            started = False
             for conversion in self.model.conversions():
                 if conversion.status == 'initialized':
-                    started = True
                     self.conversion_manager.run_conversion(conversion)
-            if started:
-                widget.set_label('Cancel Conversions')
+            self.update_convert_button()
         else:
             for conversion in self.model.conversions():
                 conversion.stop()
@@ -210,7 +237,7 @@ class Application(mvc.Application):
     def update_conversion(self, conversion):
         self.model.update_conversion(conversion)
         if not self.conversion_manager.running:
-            self.convert_button.set_label('Start Conversions!')
+            self.update_convert_button()
 
 
 if __name__ == "__main__":
