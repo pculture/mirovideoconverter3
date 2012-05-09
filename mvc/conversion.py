@@ -176,16 +176,21 @@ class ConversionManager(object):
         self.simultaneous = simultaneous
         self.running = False
 
+    def get_conversion(self, video, converter):
+        return Conversion(video, converter, self)
+
     def start_conversion(self, video, converter):
-        c = Conversion(video, converter, self)
+        self.run_conversion(self.get_conversion(video, converter))
+
+    def run_conversion(self, conversion):
         if (self.simultaneous is not None and
             len(self.in_progress) >= self.simultaneous):
-            self.waiting.append(c)
+            self.waiting.append(conversion)
         else:
-            self.in_progress.add(c)
-            c.run()
+            self.in_progress.add(conversion)
+            conversion.run()
             self.running = True
-        return c
+        return conversion
 
     def check_notifications(self):
         if not self.running:
@@ -195,10 +200,10 @@ class ConversionManager(object):
         self.notify_queue, changed = set(), self.notify_queue
 
         for conversion in changed:
-            for listener in conversion.listeners:
-                listener(conversion)
             if conversion.status in ('finished', 'failed'):
                 self.conversion_finished(conversion)
+            for listener in conversion.listeners:
+                listener(conversion)
 
     def conversion_finished(self, conversion):
         self.in_progress.discard(conversion)

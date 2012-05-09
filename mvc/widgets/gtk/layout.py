@@ -31,7 +31,10 @@
 
 import gtk
 
-class BoxMixin(object):
+from .base import WidgetMixin
+
+
+class BoxMixin(WidgetMixin):
     def pack_start(self, widget, expand=False):
         widget.show()
         super(BoxMixin, self).pack_start(widget, expand=expand)
@@ -47,3 +50,15 @@ class HBox(BoxMixin, gtk.HBox):
 
 class VBox(BoxMixin, gtk.VBox):
     pass
+
+
+class Alignment(WidgetMixin, gtk.Alignment):
+    def __init__(self, xalign=0, yalign=0, xscale=0, yscale=0,
+                 top_pad=0, bottom_pad=0, left_pad=0, right_pad=0):
+        WidgetMixin.__init__(self)
+        gtk.Alignment.__init__(self, xalign, yscale, xscale, yscale)
+        self.set_padding(top_pad, bottom_pad, left_pad, right_pad)
+
+    def add(self, widget):
+        widget.show()
+        super(Alignment, self).add(widget)

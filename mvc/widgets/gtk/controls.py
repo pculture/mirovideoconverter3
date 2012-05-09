@@ -29,9 +29,10 @@
 
 """mvc.widgets.gtk.controls -- Control Widgets."""
 
+import logging
+
 import gtk
 import gobject
-
 
 class OptionMenu(gtk.ComboBox):
     def __init__(self, options):
@@ -56,5 +57,25 @@ class Button(gtk.Button):
     pass
 
 
-class FileChooserButton(gtk.FileChooserButton):
-    pass
+class Label(gtk.Label):
+    def __init__(self, text=None, markup=False):
+        super(Label, self).__init__()
+        if text:
+            if markup:
+                self.set_markup(text)
+                self.set_track_visited_links(False)
+            else:
+                self.set_text(text)
+
+    def connect(self, signal, method, *args):
+        if signal == 'clicked':
+            signal = 'activate-link'
+            old_method = method
+            def wrapper(widget, link, *a):
+                try:
+                    old_method(widget, *a)
+                except:
+                    logging.exception('during activate-link')
+                return True
+            method = wrapper
+        super(Label, self).connect(signal, method, *args)

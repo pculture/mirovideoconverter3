@@ -5,6 +5,10 @@ from .window import *
 from .layout import *
 from .controls import *
 from .table import *
+from .dialogs import *
+
+from gtk import DEST_DEFAULT_ALL
+from gtk.gdk import ACTION_COPY
 
 def initialize():
     pass
