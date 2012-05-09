@@ -180,7 +180,7 @@ class ConversionManager(object):
         return Conversion(video, converter, self)
 
     def start_conversion(self, video, converter):
-        self.run_conversion(self.get_conversion(video, converter))
+        return self.run_conversion(self.get_conversion(video, converter))
 
     def run_conversion(self, conversion):
         if (self.simultaneous is not None and
