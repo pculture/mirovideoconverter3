@@ -1,8 +1,7 @@
 from mvc.converter import FFmpegConverterInfo
 
 class AndroidConversion(FFmpegConverterInfo):
-    media_type = 'video'
-    bitrate = 300000
+    media_type = 'android'
     extension = 'mp4'
     parameters = ('-acodec aac -ac 2 -ab 160k -s {ssize} '
                   '-vcodec libx264 -preset slow -profile:v baseline -level 30 '

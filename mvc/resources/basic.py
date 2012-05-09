@@ -8,16 +8,14 @@ class SimpleFFmpegConverterInfo(FFmpegConverterInfoBase):
 
 
 class WebM(SimpleFFmpegConverterInfo):
-    media_type = 'video'
-    bitrate = 1200000
+    media_type = 'format'
     extension = 'webm'
     parameters = ('-f webm -vcodec libvpx '
                   '-acodec libvorbis -ab 160000 -sameq').split()
 
 
 class MP4(SimpleFFmpegConverterInfo):
-    media_type = 'video'
-    bitrate = 700000
+    media_type = 'format'
     extension = 'mp4'
     parameters = ('-acodec aac -ab 96k -vcodec libx264 -preset slow '
                   '-f mp4 -crf 22').split()
@@ -27,15 +25,13 @@ class MP4(SimpleFFmpegConverterInfo):
 
 
 class MP3(SimpleFFmpegConverterInfo):
-    media_type = 'audio'
-    bitrate = 160000
+    media_type = 'format'
     extension = 'mp3'
     parameters = '-f mp3 -ac 2'.split()
 
 
 class OggVorbis(SimpleFFmpegConverterInfo):
-    media_type = 'audio'
-    bitrate = 300000
+    media_type = 'format'
     extension = 'ogg'
     parameters = '-f ogg -vn -acodec libvorbis -aq 60'.split()
 
