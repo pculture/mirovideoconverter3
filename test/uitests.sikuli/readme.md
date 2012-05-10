@@ -9,13 +9,13 @@ users with batch processing options and give users greater control over their co
 
 This directory holds the UI tests for mvc that can be run like this:
 
-# install Sikuli from http://sikuli.org
-# install nose (pip install nose)
-# set 2 environment variables:
+1. install Sikuli from http://sikuli.org
+2. install nose (pip install nose)
+3. set 2 environment variables:
     export SIKULI_HOME = <path to sikuli-script.jar>
     export PYTHON_PKGS = <path to where nose packages live (because jython is annoying and it's the only way I can get it to import)
-# cd ../ (on dir level above the tests.sikuli directory
-# java -jar $SIKULI_HOME/sikuli-script.jar uitests.sikuli
+4. cd ../ (on dir level above the tests.sikuli directory
+5. java -jar $SIKULI_HOME/sikuli-script.jar uitests.sikuli
 
 
 
