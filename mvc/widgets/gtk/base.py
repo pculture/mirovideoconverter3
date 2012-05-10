@@ -26,3 +26,9 @@ class WidgetMixin(object):
                                       signal_name, args, self)
         else:
             super(WidgetMixin, self).emit(signal_name, *args)
+
+
+class BinMixin(WidgetMixin):
+    def add(self, widget):
+        widget.show()
+        super(BinMixin, self).add(widget)

@@ -31,7 +31,7 @@
 
 import gtk
 
-from .base import WidgetMixin
+from .base import WidgetMixin, BinMixin
 
 
 class BoxMixin(WidgetMixin):
@@ -52,13 +52,17 @@ class VBox(BoxMixin, gtk.VBox):
     pass
 
 
-class Alignment(WidgetMixin, gtk.Alignment):
+class Alignment(BinMixin, gtk.Alignment):
     def __init__(self, xalign=0, yalign=0, xscale=0, yscale=0,
                  top_pad=0, bottom_pad=0, left_pad=0, right_pad=0):
-        WidgetMixin.__init__(self)
+        BinMixin.__init__(self)
         gtk.Alignment.__init__(self, xalign, yscale, xscale, yscale)
         self.set_padding(top_pad, bottom_pad, left_pad, right_pad)
 
-    def add(self, widget):
-        widget.show()
-        super(Alignment, self).add(widget)
+
+class Scroller(BinMixin, gtk.ScrolledWindow):
+    def __init__(self, horizontal=False, vertical=False):
+        super(Scroller, self).__init__()
+        h_policy = gtk.POLICY_AUTOMATIC if horizontal else gtk.POLICY_NEVER
+        v_policy = gtk.POLICY_AUTOMATIC if vertical else gtk.POLICY_NEVER
+        self.set_policy(h_policy, v_policy)

@@ -149,7 +149,9 @@ class Application(mvc.Application):
 
         # # finish up
         vbox = VBox()
-        vbox.pack_start(self.table, expand=True)
+        scroller = Scroller(vertical=True)
+        scroller.add(self.table)
+        vbox.pack_start(scroller, expand=True)
         vbox.pack_start(drop_target)
         vbox.pack_start(bottom)
 
@@ -195,7 +197,6 @@ class Application(mvc.Application):
             self.convert_button.set_label('Start Conversions!')
 
     def file_activated(self, widget, filename):
-        print 'activated?', filename, self.current_converter
         if self.current_converter is None:
             return
         vf = VideoFile(filename)
