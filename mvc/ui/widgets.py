@@ -10,7 +10,9 @@ import urllib
 
 from mvc.widgets import *
 
+from mvc.converter import ConverterInfo
 from mvc.video import VideoFile
+
 
 TABLE_COLUMNS = (
     ("Name", unicode),
@@ -20,6 +22,7 @@ TABLE_COLUMNS = (
     ("Duration", int),
     ("Progress", int),
     ("ETA", int))
+
 
 class FileDropTarget(Alignment):
     def __init__(self):
@@ -77,6 +80,8 @@ class FileDropTarget(Alignment):
                 self.emit('file-activated', pathname)
 
 
+EMPTY_CONVERTER = ConverterInfo("")
+
 
 class ConversionModel(TableModel):
     def __init__(self):
@@ -107,7 +112,7 @@ class Application(mvc.Application):
         if self.started:
             return
 
-        self.current_converter = None
+        self.current_converter = EMPTY_CONVERTER
 
         mvc.Application.startup(self)
 
@@ -186,7 +191,7 @@ class Application(mvc.Application):
                 can_cancel = True
             if c.status == 'initialized':
                 can_start = True
-        if (self.current_converter is None or not
+        if (self.current_converter is EMPTY_CONVERTER or not
             (can_cancel or can_start)):
             self.convert_button.disable()
         else:
@@ -197,8 +202,6 @@ class Application(mvc.Application):
             self.convert_button.set_label('Start Conversions!')
 
     def file_activated(self, widget, filename):
-        if self.current_converter is None:
-            return
         vf = VideoFile(filename)
         c = self.conversion_manager.get_conversion(vf,
                                                    self.current_converter)
@@ -215,7 +218,12 @@ class Application(mvc.Application):
             self.current_converter = self.converter_manager.get_by_id(
                 identifier)
         else:
-            self.current_converter = None
+            self.current_converter = EMPTY_CONVERTER
+
+        for c in self.model.conversions():
+            if c.status == 'initialized':
+                c.set_converter(self.current_converter)
+                self.model.update_conversion(c)
 
         self.update_convert_button()
 

@@ -14,12 +14,10 @@ class Conversion(object):
 
     def __init__(self, video, converter, manager, output_dir=None):
         self.video = video
-        self.converter = converter
         self.manager = manager
         if output_dir is None:
             output_dir = os.path.dirname(video.filename)
-        self.output = os.path.join(output_dir,
-                                   converter.get_output_filename(video))
+        self.output_dir = output_dir
         self.lines = []
         self.thread = None
         self.popen = None
@@ -31,6 +29,15 @@ class Conversion(object):
         self.progress_percent = None
         self.eta = None
         self.listeners = set()
+        self.set_converter(converter)
+
+    def set_converter(self, converter):
+        if self.status != 'initialized':
+            raise RuntimeError("can't change converter after starting")
+        self.converter = converter
+        self.output = os.path.join(self.output_dir,
+                                   converter.get_output_filename(self.video))
+
 
     def __str__(self):
         return unicode(self).encode('utf8')
