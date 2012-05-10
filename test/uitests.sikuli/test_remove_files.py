@@ -9,8 +9,6 @@ import devices
 
 data = datafiles.TestData()
 
-data = datafiles.TestData()
-
 
 
 class Test_Remove_Files(unittest.TestCase):
