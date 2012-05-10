@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite name="nosetests" tests="40" errors="40" failures="0" skip="0"><testcase classname="test_android_conversions" name="test_android_conversions('G2',)" time="0.531"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_android_conversions.py", line 53, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_android_conversions" name="test_android_conversions('Galaxy Tab',)" time="0.373"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_android_conversions.py", line 53, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_android_conversions" name="test_android_conversions('Droid',)" time="0.194"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_android_conversions.py", line 53, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_android_conversions" name="test_android_conversions('Dream',)" time="0.196"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_android_conversions.py", line 53, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_android_conversions" name="test_android_conversions('Epic',)" time="0.192"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_android_conversions.py", line 53, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_android_conversions" name="test_android_conversions('Xoom',)" time="0.186"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_android_conversions.py", line 53, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="nose.failure.Failure" name="runTest" time="0.001"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/loader.py", line 231, in generate
+    for test in g():
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_android_conversions.py", line 28, in test_android_size_output_default
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_apple_conversions" name="test_apple_conversions('Apple Universal',)" time="0.214"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_apple_conversions.py", line 50, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_apple_conversions" name="test_apple_conversions('iPad',)" time="0.195"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_apple_conversions.py", line 50, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_apple_conversions" name="test_apple_conversions('iPhone',)" time="0.174"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_apple_conversions.py", line 50, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_apple_conversions" name="test_apple_conversions('iPhone 4',)" time="0.198"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_apple_conversions.py", line 50, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="nose.failure.Failure" name="runTest" time="0.000"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/loader.py", line 231, in generate
+    for test in g():
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_apple_conversions.py", line 29, in test_apple_size_output_default
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_choose_files.Test_Choose_Files" name="skip_test_choose_a_directory_files" time="6.300"><error type="org.sikuli.script.FindFailed" message="FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_choose_files.py", line 27, in setUp
+    self.mvc.choose_save_location(self.output_dir)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 182, in choose_save_location
+    self.open_custom_menu()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 179, in open_custom_menu
+    click(self._CUSTOM_MENU)
+FindFailed: FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_choose_files.Test_Choose_Files" name="test_browse_for_a_file" time="6.274"><error type="org.sikuli.script.FindFailed" message="FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_choose_files.py", line 27, in setUp
+    self.mvc.choose_save_location(self.output_dir)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 182, in choose_save_location
+    self.open_custom_menu()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 179, in open_custom_menu
+    click(self._CUSTOM_MENU)
+FindFailed: FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_choose_files.Test_Choose_Files" name="test_browse_for_more_files_and_add_them" time="6.356"><error type="org.sikuli.script.FindFailed" message="FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_choose_files.py", line 27, in setUp
+    self.mvc.choose_save_location(self.output_dir)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 182, in choose_save_location
+    self.open_custom_menu()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 179, in open_custom_menu
+    click(self._CUSTOM_MENU)
+FindFailed: FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_choose_files.Test_Choose_Files" name="test_browse_more_files_while_converting" time="6.212"><error type="org.sikuli.script.FindFailed" message="FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_choose_files.py", line 27, in setUp
+    self.mvc.choose_save_location(self.output_dir)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 182, in choose_save_location
+    self.open_custom_menu()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 179, in open_custom_menu
+    click(self._CUSTOM_MENU)
+FindFailed: FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_choose_files.Test_Choose_Files" name="test_choose_several_files" time="6.219"><error type="org.sikuli.script.FindFailed" message="FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_choose_files.py", line 27, in setUp
+    self.mvc.choose_save_location(self.output_dir)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 182, in choose_save_location
+    self.open_custom_menu()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 179, in open_custom_menu
+    click(self._CUSTOM_MENU)
+FindFailed: FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_choose_files.Test_Choose_Files" name="test_drag_a_file_to_drop_zone" time="6.098"><error type="org.sikuli.script.FindFailed" message="FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_choose_files.py", line 27, in setUp
+    self.mvc.choose_save_location(self.output_dir)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 182, in choose_save_location
+    self.open_custom_menu()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 179, in open_custom_menu
+    click(self._CUSTOM_MENU)
+FindFailed: FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_choose_files.Test_Choose_Files" name="test_drag_and_drop_multiple_files" time="6.112"><error type="org.sikuli.script.FindFailed" message="FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_choose_files.py", line 27, in setUp
+    self.mvc.choose_save_location(self.output_dir)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 182, in choose_save_location
+    self.open_custom_menu()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 179, in open_custom_menu
+    click(self._CUSTOM_MENU)
+FindFailed: FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_choose_files.Test_Choose_Files" name="test_drag_more_file_while_converting" time="6.164"><error type="org.sikuli.script.FindFailed" message="FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_choose_files.py", line 27, in setUp
+    self.mvc.choose_save_location(self.output_dir)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 182, in choose_save_location
+    self.open_custom_menu()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 179, in open_custom_menu
+    click(self._CUSTOM_MENU)
+FindFailed: FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_choose_files.Test_Choose_Files" name="test_drag_more_files_to_drop_zone" time="6.190"><error type="org.sikuli.script.FindFailed" message="FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_choose_files.py", line 27, in setUp
+    self.mvc.choose_save_location(self.output_dir)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 182, in choose_save_location
+    self.open_custom_menu()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 179, in open_custom_menu
+    click(self._CUSTOM_MENU)
+FindFailed: FindFailed: can not find custom_menu.png on the screen.
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_clear_finished_conversions.Test_Clear_Finished_Conversions" name="test_clear_finished_after_conversion_errors" time="0.188"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_clear_finished_conversions.py", line 31, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_clear_finished_conversions.Test_Clear_Finished_Conversions" name="test_clear_finished_conversions" time="0.207"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_clear_finished_conversions.py", line 31, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_clear_finished_conversions.Test_Clear_Finished_Conversions" name="test_clear_finished_item_with_in_progress" time="0.180"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_clear_finished_conversions.py", line 31, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_completed_conversions_display" time="0.180"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_failed_conversion_display" time="0.184"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_ffmpeg_log_output_on_failure" time="0.191"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_file_in_default_location" time="0.191"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_output_file_name_in_custom_dir" time="0.178"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_output_file_name_in_default_dir" time="0.184"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_output_video_no_upsize" time="0.183"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_output_video_upsize" time="0.194"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_send_file_to_itunes" time="0.178"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_conversions.Test_Conversions" name="test_verify_custom_output_directory" time="0.190"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_conversions.py", line 30, in setUp
+    self.mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_other_conversions" name="test_other_conversions('Playstation',)" time="0.188"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_other_conversions.py", line 26, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_other_conversions" name="test_other_conversions('KindleFire',)" time="0.195"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 260, in run
+    testMethod()
+  File "/Library/Python/2.7/site-packages/nose/case.py", line 197, in runTest
+    self.test(*self.arg)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_other_conversions.py", line 26, in convert_to_format
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_remove_files.Test_Remove_Files" name="test_remove_a_file" time="0.184"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_remove_files.py", line 30, in setUp
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_remove_files.Test_Remove_Files" name="test_remove_all_files" time="0.196"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_remove_files.py", line 30, in setUp
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_remove_files.Test_Remove_Files" name="test_remove_from_list_with_in_progress_conversions" time="0.185"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_remove_files.py", line 30, in setUp
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase><testcase classname="test_remove_files.Test_Remove_Files" name="test_remove_last_queued_file_with_in_progress_conversions" time="0.186"><error type="org.sikuli.script.FindFailed" message="FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+"><![CDATA[Traceback (most recent call last):
+  File "/Applications/Sikuli-IDE.app/Contents/Resources/Java/sikuli-script.jar/Lib/unittest.py", line 251, in run
+    self.setUp()
+  File "/Users/janet/Public/mvc/test/tests.sikuli/test_remove_files.py", line 30, in setUp
+    mvc.browse_for_files(datadir, testfiles)
+  File "/Users/janet/Public/mvc/test/tests.sikuli/mvcgui.py", line 104, in browse_for_files
+    click(Pattern(self._CHOOSE_FILES))
+FindFailed: FindFailed: File choose_a_file.png not exists
+  Line 12, in file /Users/janet/Public/mvc/test/tests.sikuli/tests.py
+
+]]></error></testcase></testsuite>
