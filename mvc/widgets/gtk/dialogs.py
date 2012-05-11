@@ -7,6 +7,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
             buttons=(
                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
                 gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
+        self.set_select_multiple(True)
 
     def run(self):
         response = super(FileChooserDialog, self).run()
