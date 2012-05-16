@@ -7,6 +7,7 @@ except ImportError:
     import mvc
 
 import urllib
+import urlparse
 
 from mvc.widgets import *
 
@@ -30,34 +31,25 @@ class FileDropTarget(Alignment):
             xalign=0.5, yalign=0.5,
             top_pad=50, right_pad=40,
             bottom_pad=50, left_pad=40)
-        self.connect('drag-motion', self.drag_motion)
-        self.connect('drag-data-received', self.drag_data_received)
-        self.connect('drag-leave', self.drag_finished)
-        self.drag_dest_set(DEST_DEFAULT_ALL, [
-                ('text/uri-list', 0, 0)], ACTION_COPY)
 
         self.create_signal('file-activated')
-        hbox = self.normal = HBox()
-        hbox.pack_start(Label("Drag more videos here or "))
+        self.normal = Label(
+            "Drag more videos here or <a href=''>Choose File...</a>",
+            markup=True)
 
-        file_chooser = Label("<a href=''>Choose File...</a>", markup=True)
-        file_chooser.connect('clicked', self.choose_file)
-        hbox.pack_start(file_chooser)
-        self.add(hbox)
+        self.add(self.normal)
 
-        self.drag = HBox()
-        self.drag.pack_start(Label("Release button to drop off"))
+        self.drag = Label("Release button to drop off")
 
         self.in_drag = False
 
     def set_in_drag(self, in_drag):
         if in_drag != self.in_drag:
             self.in_drag = in_drag
-            self.remove(self.get_child())
             if in_drag:
-                self.add(self.drag)
+                self.set_child(self.drag)
             else:
-                self.add(self.normal)
+                self.set_child(self.normal)
 
     def choose_file(self, widget):
         dialog = FileChooserDialog('Choose File...')
@@ -65,19 +57,6 @@ class FileDropTarget(Alignment):
             for filename in dialog.get_filenames():
                 self.emit('file-activated', filename)
         dialog.destroy()
-
-    def drag_finished(self, widget, context, time):
-        self.set_in_drag(False)
-
-    def drag_motion(self, widget, context, x, y, time):
-        self.set_in_drag(True)
-
-    def drag_data_received(self, widget, context, x, y,
-                           selection_data, info, time):
-        for uri in selection_data.get_uris():
-            if uri.startswith('file://'):
-                pathname = urllib.url2pathname(uri[7:])
-                self.emit('file-activated', pathname)
 
 
 EMPTY_CONVERTER = ConverterInfo("")
@@ -149,15 +128,15 @@ class Application(mvc.Application):
             bottom.pack_start(menu)
 
 
-        drop_target = FileDropTarget()
-        drop_target.connect('file-activated', self.file_activated)
+        self.drop_target = FileDropTarget()
+        self.drop_target.connect('file-activated', self.file_activated)
 
         # # finish up
         vbox = VBox()
         scroller = Scroller(vertical=True)
         scroller.add(self.table)
         vbox.pack_start(scroller, expand=True)
-        vbox.pack_start(drop_target)
+        vbox.pack_start(self.drop_target)
         vbox.pack_start(bottom)
 
         self.convert_button = Button("Start Conversions!")
@@ -174,6 +153,24 @@ class Application(mvc.Application):
         idle_add(self.conversion_manager.check_notifications)
 
         self.window.show()
+
+        self.window.connect('file-drag-motion', self.drag_motion)
+        self.window.connect('file-drag-received', self.drag_data_received)
+        self.window.connect('file-drag-leave', self.drag_finished)
+        self.window.accept_file_drag(True)
+
+    def drag_finished(self, widget):
+        self.drop_target.set_in_drag(False)
+
+    def drag_motion(self, widget):
+        self.drop_target.set_in_drag(True)
+
+    def drag_data_received(self, widget, values):
+        for uri in values:
+            parsed = urlparse.urlparse(uri)
+            if parsed.scheme == 'file':
+                pathname = urllib.url2pathname(parsed.path)
+                self.file_activated(widget, pathname)
 
     def destroy(self, widget):
         for conversion in self.conversion_manager.in_progress.copy():
@@ -254,3 +251,4 @@ if __name__ == "__main__":
     app = Application()
     app.startup()
     app.run()
+

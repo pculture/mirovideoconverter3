@@ -65,3 +65,4 @@ class BorrowedViewport(Viewport):
 
     def get_height(self):
         return self.placement.size.height
+

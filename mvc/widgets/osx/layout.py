@@ -2,7 +2,7 @@ import itertools
 
 from AppKit import *
 
-from .base import Widget
+from .base import Widget, Bin, FlippedView
 
 def _extra_space_iter(extra_length, count):
     """Utility function to allocate extra space left over in containers."""
@@ -153,6 +153,7 @@ class Box(Widget):
     def viewport_repositioned(self):
         self.place_children()
 
+
 class VBox(Box):
 
     def translate_size(self, size):
@@ -179,3 +180,144 @@ class HBox(Box):
         placement = self.viewport.placement
         return NSMakeRect(placement.origin.x + position, placement.origin.y,
                 length, placement.size.height)
+
+
+class Alignment(Bin):
+
+    CREATES_VIEW = False
+
+    def __init__(self, xalign=0.0, yalign=0.0, xscale=0.0, yscale=0.0,
+            top_pad=0, bottom_pad=0, left_pad=0, right_pad=0):
+        super(Alignment, self).__init__()
+        self.xalign = xalign
+        self.yalign = yalign
+        self.xscale = xscale
+        self.yscale = yscale
+        self.top_pad = top_pad
+        self.bottom_pad = bottom_pad
+        self.left_pad = left_pad
+        self.right_pad = right_pad
+
+    def vertical_pad(self):
+        return self.top_pad + self.bottom_pad
+
+    def horizontal_pad(self):
+        return self.left_pad + self.right_pad
+
+    def calc_size_request(self):
+        if self.child:
+            child_width, child_height = self.child.get_size_request()
+            return (child_width + self.horizontal_pad(),
+                    child_height + self.vertical_pad())
+        else:
+            return (0, 0)
+
+    def calc_size(self, requested, total, scale):
+        extra_width = max(0, total - requested)
+        return requested + int(round(extra_width * scale))
+
+    def calc_position(self, size, total, align):
+        return int(round((total - size) * align))
+
+    def place_children(self):
+        if self.child is None:
+            return
+        total_width = self.viewport.placement.size.width
+        total_height = self.viewport.placement.size.height
+        total_width -= self.horizontal_pad()
+        total_height -= self.vertical_pad()
+        request_width, request_height = self.child.get_size_request()
+
+        child_width = self.calc_size(request_width, total_width, self.xscale)
+        child_height = self.calc_size(request_height,
+                                      total_height, self.yscale)
+        child_x = self.calc_position(child_width, total_width, self.xalign)
+        child_y = self.calc_position(child_height, total_height, self.yalign)
+        child_x += self.left_pad
+        child_y += self.top_pad
+
+        my_origin = self.viewport.area().origin
+        child_rect = NSMakeRect(my_origin.x + child_x, my_origin.y + child_y,
+                                child_width, child_height)
+        self.child.place(child_rect, self.viewport.view)
+        # Make sure the space not taken up by our child is redrawn.
+        self.viewport.queue_redraw()
+
+
+class Scroller(Bin):
+    def __init__(self, horizontal=False, vertical=False):
+        self.view = NSScrollView.alloc().init()
+        self.view.setAutohidesScrollers_(YES)
+        self.view.setHasHorizontalScroller_(horizontal)
+        self.view.setHasVerticalScroller_(vertical)
+        self.document_view = FlippedView.alloc().init()
+        self.view.setDocumentView_(self.document_view)
+        super(Scroller, self).__init__()
+
+    def viewport_repositioned(self):
+        # If the window is resized, this translates to a
+        # viewport_repositioned() event.  Instead of calling
+        # place_children() one, which is what our suporclass does, we need
+        # some extra logic here.  place the chilren to work out if we need a
+        # scrollbar, then get the new size, then replace the children (which
+        # now takes into account of scrollbar size.)
+        super(Scroller, self).viewport_repositioned()
+        self.cached_size_request = self.calc_size_request()
+        self.place_children()
+
+    def set_background_color(self, color):
+        self.view.setBackgroundColor_(self.make_color(color))
+
+    def add(self, child):
+        child.parent_is_scroller = True
+        Bin.add(self, child)
+
+    def remove(self):
+        child.parent_is_scroller = False
+        Bin.remove(self)
+
+    def children_changed(self):
+        # since our size isn't dependent on our children, don't call
+        # invalidate_size_request() here.  Just call place_children() so that
+        # they get positioned correctly in the document view.
+        #
+        # XXX dodgy - why are we laying out the children twice?  When the
+        # children change, the scroller could appear/disappear.  But you have
+        # no idea if that's going to happen without knowing how big your
+        # children are.  So we lay it out, get the size, then, place the 
+        # children again.  This makes sure that the right side of the children
+        # are redrawn.  There's got to be a better way??
+        self.place_children()
+        self.cached_size_request = self.calc_size_request()
+        self.place_children()
+
+    def calc_size_request(self):
+        if self.child:
+            width = height = 0
+            if not self.view.hasHorizontalScroller():
+                width = self.child.get_size_request()[0]
+            if not self.view.hasVerticalScroller():
+                height = self.child.get_size_request()[1]
+            # Add a little room for the scrollbars
+            if self.view.hasHorizontalScroller():
+                height += NSScroller.scrollerWidth()
+            if self.view.hasVerticalScroller():
+                width += NSScroller.scrollerWidth()
+            return width, height
+        else:
+            return 0, 0
+
+    def place_children(self):
+        if self.child is not None:
+            scroll_view_size = self.view.contentView().frame().size
+            child_width, child_height = self.child.get_size_request()
+            child_width = max(child_width, scroll_view_size.width)
+            child_height = max(child_height, scroll_view_size.height)
+            frame = NSRect(NSPoint(0,0), NSSize(child_width, child_height))
+            self.child.place(frame, self.document_view)
+            self.document_view.setFrame_(frame)
+            self.document_view.setNeedsDisplay_(YES)
+        self.view.setNeedsDisplay_(YES)
+        self.child.emit('place-in-scroller')
+
+

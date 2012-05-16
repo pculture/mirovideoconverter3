@@ -100,8 +100,8 @@ class TableView(Widget):
     def model_changed(self):
         if not self.row_height_set:
             self.try_to_set_row_height()
-        self.invalidate_size_request()
         self.view.reloadData()
+        self.invalidate_size_request()
 
     def add_column(self, name):
         id_ = len(self.view.tableColumns())
@@ -134,3 +134,4 @@ class TableView(Widget):
         self.header_view.setFrame_(NSMakeRect(x, y, width, 17))
         self.view.setFrame_(NSMakeRect(x, y + 17, width, height - 17))
         self.viewport.queue_redraw()
+

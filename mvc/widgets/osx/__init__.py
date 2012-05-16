@@ -3,10 +3,10 @@ from objc import nil
 
 from PyObjCTools import AppHelper
 
-from .window import Window
-from .layout import VBox, HBox
-from .controls import OptionMenu, Button, FileChooserButton
-from .table import TableModel, TableView
+from .window import *
+from .layout import *
+from .controls import *
+from .table import *
 
 def initialize():
     NSApplication.sharedApplication()
@@ -25,3 +25,4 @@ def idle_add(callback):
 
 def idle_remove(id_):
     pass
+
