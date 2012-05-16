@@ -1,3 +1,6 @@
 *.py[co]
 *~
 nosetests.xml
+dist
+build
+*_flymake.py
