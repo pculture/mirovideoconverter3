@@ -31,13 +31,46 @@
 
 import gtk
 
-class Window(gtk.Window):
+from .base import WidgetMixin
+
+class Window(WidgetMixin, gtk.Window):
 
     def __init__(self, title):
         super(Window, self).__init__()
         self.set_title(title)
+        self.create_signal('file-drag-motion')
+        self.create_signal('file-drag-received')
+        self.create_signal('file-drag-leave')
+        self.signal_handles = []
 
     def add(self, widget):
         widget.show()
         super(Window, self).add(widget)
+
+    def accept_file_drag(self, val):
+        if not val:
+            self.drag_dest_set(0, [], 0)
+            for handle in self.signal_handles:
+                self.disconnect(handle)
+            self.signal_handles = []
+        else:
+            self.drag_dest_set(gtk.DEST_DEFAULT_MOTION | gtk.DEST_DEFAULT_DROP,
+                               [('text/uri-list', 0, 0)],
+                               gtk.gdk.ACTION_COPY)
+            for signal, callback in (
+                ('drag-motion', self.on_drag_motion),
+                ('drag-data-received', self.on_drag_data_received),
+                ('drag-leave', self.on_drag_leave)):
+                self.signal_handles.append(
+                    self.connect(signal, callback))
+
+    def on_drag_motion(self, widget, context, x, y, time):
+        self.emit('file-drag-motion')
+
+    def on_drag_data_received(self, widget, context, x, y, selection_data,
+                              info, time):
+        self.emit('file-drag-received', selection_data.get_uris())
+
+    def on_drag_leave(self, widget, context, time):
+        self.emit('file-drag-leave')
 

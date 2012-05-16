@@ -32,3 +32,9 @@ class BinMixin(WidgetMixin):
     def add(self, widget):
         widget.show()
         super(BinMixin, self).add(widget)
+
+    def set_child(self, widget):
+        old_child = self.get_child()
+        if old_child is not None:
+            self.remove(old_child)
+        self.add(widget)
