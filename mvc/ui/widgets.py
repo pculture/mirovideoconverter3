@@ -186,7 +186,8 @@ class Application(mvc.Application):
         for c in self.model.conversions():
             if c.status == 'converting':
                 can_cancel = True
-            if c.status == 'initialized':
+                break
+            elif c.status == 'initialized':
                 can_start = True
         if (self.current_converter is EMPTY_CONVERTER or not
             (can_cancel or can_start)):
@@ -242,8 +243,7 @@ class Application(mvc.Application):
 
     def update_conversion(self, conversion):
         self.model.update_conversion(conversion)
-        if not self.conversion_manager.running:
-            self.update_convert_button()
+        self.update_convert_button()
 
 
 if __name__ == "__main__":
