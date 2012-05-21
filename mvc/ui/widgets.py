@@ -78,7 +78,8 @@ class ConversionModel(TableModel):
                   conversion.duration or 0,
                   conversion.progress or 0,
                   conversion.eta or 0,
-                  conversion.video.get_thumbnail(50, 50))
+                  #conversion.video.get_thumbnail(50, 50))
+                  )
         iter_ = self.conversion_to_iter.get(conversion)
         if iter_ is None:
             self.conversion_to_iter[conversion] = self.append(values)
@@ -103,10 +104,10 @@ class Application(mvc.Application):
         self.model = ConversionModel()
         self.table = TableView(self.model)
 
-        image_column = TableColumn("Thumbnail", ImageCellRenderer(),
-                                   image=len(TABLE_COLUMNS))
-        image_column.set_width(80)
-        self.table.add_column(image_column)
+        #image_column = TableColumn("Thumbnail", ImageCellRenderer(),
+        #                           image=len(TABLE_COLUMNS)-1)
+        #image_column.set_width(80)
+        #self.table.add_column(image_column)
         for index, name in enumerate(zip(*TABLE_COLUMNS)[0]):
             column = TableColumn(name, CellRenderer(),
                                  value=index)
@@ -259,4 +260,5 @@ if __name__ == "__main__":
     app = Application()
     app.startup()
     app.run()
+
 
