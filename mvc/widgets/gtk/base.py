@@ -1,4 +1,13 @@
+import gtk.gdk
+
 import logging
+
+def make_gdk_color(miro_color):
+    def convert_value(value):
+        return int(round(value * 65535))
+
+    values = tuple(convert_value(c) for c in miro_color)
+    return gtk.gdk.Color(*values)
 
 class WidgetMixin(object):
     def __init__(self):

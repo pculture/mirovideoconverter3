@@ -5,6 +5,7 @@ from .window import *
 from .layout import *
 from .controls import *
 from .table import *
+from .tablecells import *
 from .dialogs import *
 
 from gtk import DEST_DEFAULT_ALL
