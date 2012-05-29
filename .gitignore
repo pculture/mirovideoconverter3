@@ -4,3 +4,4 @@ nosetests.xml
 dist
 build
 *_flymake.py
+Slicing

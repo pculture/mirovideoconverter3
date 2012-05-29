@@ -1,19 +1,15 @@
 import gtk
 import gobject
 
-TABLE_COLUMNS = (
-    ("Name", gobject.TYPE_STRING),
-    ("Output", gobject.TYPE_STRING),
-    ("Converter", gobject.TYPE_STRING),
-    ("Status", gobject.TYPE_STRING),
-    ("Duration", gobject.TYPE_INT),
-    ("Progress", gobject.TYPE_INT),
-    ("ETA", gobject.TYPE_INT))
+from .image import Image
+from .layoutmanager import LayoutManager
 
 TYPE_MAPPING = {
     str: gobject.TYPE_STRING,
     unicode: gobject.TYPE_STRING,
-    int: gobject.TYPE_INT
+    int: gobject.TYPE_INT,
+    float: gobject.TYPE_FLOAT,
+    Image: gobject.TYPE_OBJECT
     }
 
 class TableModel(gtk.ListStore):
@@ -37,7 +33,6 @@ class TableColumn(object):
     FIXED_PADDING = 4
     def __init__(self, title, renderer, header=None, **attrs):
         # header widget not used yet in GTK (#15800)
-        print 'creating column', title, renderer, attrs
         self._column = gtk.TreeViewColumn(title, renderer._renderer)
         self._column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
         self.attrs = attrs
@@ -98,6 +93,7 @@ class TableView(gtk.TreeView):
 
     def __init__(self, model):
         super(TableView, self).__init__(model)
+        self.layout_manager = LayoutManager(self)
         self.set_size_request(-1, 200)
 
     def add_column(self, column):

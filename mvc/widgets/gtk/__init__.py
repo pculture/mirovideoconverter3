@@ -7,6 +7,8 @@ from .controls import *
 from .table import *
 from .tablecells import *
 from .dialogs import *
+from .image import *
+from .drawing import *
 
 from gtk import DEST_DEFAULT_ALL
 from gtk.gdk import ACTION_COPY
