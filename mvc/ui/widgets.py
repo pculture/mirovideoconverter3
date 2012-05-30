@@ -37,32 +37,81 @@ TEXT_ACTIVE = css_to_color('#ffffff')
 TEXT_INFO = css_to_color('#808080')
 TEXT_COLOR = css_to_color('#ffffff')
 
-class FileDropTarget(Alignment):
+class FileDropTarget(SolidBackground):
+
+    dropoff_on = ImageDisplay(Image.from_file(
+            image_path("dropoff-icon-on.png")))
+    dropoff_off = ImageDisplay(Image.from_file(
+            image_path("dropoff-icon-off.png")))
+    dropoff_small_on = ImageDisplay(Image.from_file(
+            image_path("dropoff-icon-small-on.png")))
+    dropoff_small_off = ImageDisplay(Image.from_file(
+            image_path("dropoff-icon-small-off.png")))
+
     def __init__(self):
-        super(FileDropTarget, self).__init__(
+        super(FileDropTarget, self).__init__()
+        self.set_background_color(DRAG_AREA)
+        self.alignment = Alignment(
             xscale=0.0, yscale=0.5,
             xalign=0.5, yalign=0.5,
             top_pad=10, right_pad=40,
             bottom_pad=10, left_pad=40)
+        self.add(self.alignment)
 
         self.create_signal('file-activated')
-        self.normal = Label(
-            "Drag more videos here or <a href=''>Choose File...</a>",
-            markup=True)
 
-        self.add(self.normal)
+        self.widgets = {
+            False: self.build_large_widgets(),
+            True: self.build_small_widgets()
+            }
 
-        self.drag = Label("Release button to drop off")
+        self.normal, self.drag = self.widgets[False]
+        self.alignment.add(self.normal)
 
         self.in_drag = False
+        self.small = False
 
-    def set_in_drag(self, in_drag):
-        if in_drag != self.in_drag:
+    def build_large_widgets(self):
+        normal = VBox(spacing=20)
+        normal.pack_start(self.dropoff_on)
+        normal.pack_start(Label(
+            "Drag videos here or <a href=''>Choose File...</a>",
+            markup=True,
+            color=TEXT_COLOR))
+
+        drag = VBox(spacing=20)
+        drag.pack_start(self.dropoff_off)
+        drag.pack_start(Label("Release button to drop off",
+                              color=TEXT_COLOR))
+        return normal, drag
+
+    def build_small_widgets(self):
+        normal = HBox(spacing=10)
+        normal.pack_start(self.dropoff_small_on)
+        normal.pack_start(Label(
+            "Drag more videos here or <a href=''>Choose File...</a>",
+            markup=True,
+            color=TEXT_COLOR))
+
+        drag = HBox(spacing=10)
+        drag.pack_start(self.dropoff_small_off)
+        drag.pack_start(Label("Release button to drop off",
+                              color=TEXT_COLOR))
+        return normal, drag
+
+    def set_small(self, small):
+        if small != self.small:
+            self.small = small
+            self.normal, self.drag = self.widgets[small]
+            self.set_in_drag(self.in_drag, force=True)
+
+    def set_in_drag(self, in_drag, force=False):
+        if force or in_drag != self.in_drag:
             self.in_drag = in_drag
             if in_drag:
-                self.set_child(self.drag)
+                self.alignment.set_child(self.drag)
             else:
-                self.set_child(self.normal)
+                self.alignment.set_child(self.normal)
 
     def choose_file(self, widget):
         dialog = FileChooserDialog('Choose File...')
@@ -192,7 +241,7 @@ class ConversionCellRenderer(CustomCellRenderer):
         elif self.status == 'error':
             return cellpack.Alignment(self.error, **alignment_kwargs)
         else:
-            return cellpack.Alignment(self.delete_on, **alignment_kwargs)
+            return cellpack.Alignment(self.delete_off, **alignment_kwargs)
 
     def layout_bottom(self, layout_manager):
         layout_manager.set_text_color(TEXT_COLOR)
@@ -440,13 +489,13 @@ class Application(mvc.Application):
     def update_table_size(self):
         conversions = len(self.model)
         if not conversions:
-            if self.scroller.get_child():
-                self.scroller.remove_child(self.table)
+            self.scroller.set_child(None)
+            self.drop_target.set_small(False)
         else:
             height = 94 * conversions
-            if not self.scroller.get_child():
-                self.scroller.add(self.table)
+            self.scroller.set_child(self.table)
             self.table.set_size_request(-1, min(height, 320))
+            self.drop_target.set_small(True)
 
 if __name__ == "__main__":
     initialize()

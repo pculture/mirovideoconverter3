@@ -10,8 +10,8 @@ def make_gdk_color(miro_color):
     return gtk.gdk.Color(*values)
 
 class WidgetMixin(object):
-    def __init__(self):
-        super(WidgetMixin, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(WidgetMixin, self).__init__(*args, **kwargs)
         self._new_signals = {}
 
     def create_signal(self, signal_name):

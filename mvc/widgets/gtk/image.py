@@ -1,5 +1,6 @@
 import gtk.gdk
 
+from .base import WidgetMixin
 class Image(gtk.gdk.Pixbuf):
 
     @classmethod
@@ -15,3 +16,14 @@ class Image(gtk.gdk.Pixbuf):
         return i
 
 
+class ImageDisplay(gtk.Image, WidgetMixin):
+    def __init__(self, image=None):
+        super(ImageDisplay, self).__init__()
+        self.set_image(image)
+
+    def set_image(self, image):
+        self.image = image
+        if image is not None:
+            self.set_from_pixbuf(image)
+        else:
+            self.clear()

@@ -27,8 +27,8 @@ class SolidBackground(BinMixin, gtk.EventBox):
         return color
 
     def set_background_color(self, color):
-        self.modify_style('base', gtk.STATE_NORMAL, self.make_color(color))
-        self.modify_style('bg', gtk.STATE_NORMAL, self.make_color(color))
+        self.modify_base(gtk.STATE_NORMAL, self.make_color(color))
+        self.modify_bg(gtk.STATE_NORMAL, self.make_color(color))
 
 
 class ImageSurface:

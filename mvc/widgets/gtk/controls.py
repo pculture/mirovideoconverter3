@@ -34,6 +34,8 @@ import logging
 import gtk
 import gobject
 
+from .base import make_gdk_color
+
 class OptionMenu(gtk.ComboBox):
     def __init__(self, options):
         store = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_PYOBJECT)
@@ -65,7 +67,7 @@ class Button(gtk.Button):
 
 
 class Label(gtk.Label):
-    def __init__(self, text=None, markup=False):
+    def __init__(self, text=None, markup=False, color=None):
         super(Label, self).__init__()
         if text:
             if markup:
@@ -73,6 +75,8 @@ class Label(gtk.Label):
                 self.set_track_visited_links(False)
             else:
                 self.set_text(text)
+        if color is not None:
+            self.set_color(color)
 
     def connect(self, signal, method, *args):
         if signal == 'clicked':
@@ -86,3 +90,9 @@ class Label(gtk.Label):
                 return True
             method = wrapper
         super(Label, self).connect(signal, method, *args)
+
+    def set_color(self, color):
+        color = make_gdk_color(color)
+        for state in xrange(5):
+            self.modify_fg(state, color)
+            self.modify_text(state, color)

@@ -62,6 +62,9 @@ class TableView(gtk.TreeView):
         self.layout_manager = LayoutManager(self)
         self.set_size_request(-1, 200)
         self.set_headers_visible(False)
+        style = self.style
+        self.modify_base(gtk.STATE_SELECTED, style.base[gtk.STATE_NORMAL])
+        self.modify_base(gtk.STATE_ACTIVE, style.base[gtk.STATE_NORMAL])
 
     def add_column(self, column):
         self.append_column(column._column)
