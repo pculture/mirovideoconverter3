@@ -23,6 +23,7 @@ class Widget(object):
                                            notification)
         self.emitting = set()
         self.listeners = defaultdict(set)
+        self.manual_size_request = None
         self.cached_size_request = None
         self.drag_dest = None
 
@@ -53,8 +54,20 @@ class Widget(object):
         old_size_request = self.cached_size_request
         self.cached_size_request = None
         self.emit('size-request-changed', old_size_request)
+        if self.viewport:
+            self.viewport.redraw_now()
 
     def get_size_request(self):
+        if self.manual_size_request:
+            width, height = self.manual_size_request
+            if width == -1:
+                width = self.get_natural_size_request()[0]
+            if height == -1:
+                height = self.get_natural_size_request()[1]
+            return width, height
+        return self.get_natural_size_request()
+
+    def get_natural_size_request(self):
         if self.cached_size_request is None:
             self.cached_size_request = self.calc_size_request()
         return self.cached_size_request
@@ -62,6 +75,10 @@ class Widget(object):
     def calc_size_request(self):
         raise NotImplementedError(
             "%s.calc_size_request()" % self.__class__.__name__)
+
+    def set_size_request(self, width, height):
+        self.manual_size_request = (width, height)
+        self.invalidate_size_request()
 
     def place(self, rect, containing_view):
         if self.viewport is None:
@@ -237,11 +254,42 @@ class Bin(Container):
         self.child.disable()
 
 
+class SimpleBin(Bin):
+    """Bin that whose child takes up it's entire space."""
+
+    def calc_size_request(self):
+        if self.child is None:
+            return (0, 0)
+        else:
+            return self.child.get_size_request()
+
+    def place_children(self):
+        if self.child:
+            self.child.place(self.viewport.area(), self.viewport.view)
+
+
 class FlippedView(NSView):
     """Flipped NSView.  We use these internally to lessen the differences
     between Cocoa and GTK.
     """
 
+    def init(self):
+        self = super(FlippedView, self).init()
+        self.background = None
+        return self
+
+    def initWithFrame_(self, rect):
+        self = super(FlippedView, self).initWithFrame_(rect)
+        self.background = None
+        return self
+
     def isFlipped(self):
         return YES
 
+    def setBackgroundColor_(self, color):
+        self.background = color
+
+    def drawRect_(self, rect):
+        if self.background:
+            self.background.set()
+            NSBezierPath.fillRect_(rect)

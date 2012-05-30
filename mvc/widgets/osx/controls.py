@@ -4,6 +4,8 @@ import math
 from AppKit import *
 
 from .base import Widget
+from .drawing import make_color
+
 
 class MVCPopUpButton(NSPopUpButton):
 
@@ -94,7 +96,7 @@ class FileChooserButton(Button):
 
 
 class Label(Widget):
-    def __init__(self, text=None, markup=False):
+    def __init__(self, text=None, markup=False, color=None):
         self.view = NSTextField.alloc().init()
         self.view.setEditable_(NO)
         self.view.setBezeled_(NO)
@@ -103,7 +105,8 @@ class Label(Widget):
         super(Label, self).__init__()
         self.sizer_cell = self.view.cell().copy()
         self.set_text(text)
-
+        if color is not None:
+            self.set_color(color)
 
     def set_text(self, text):
         self.view.setStringValue_(text)
@@ -114,3 +117,5 @@ class Label(Widget):
         size = self.sizer_cell.cellSize()
         return math.ceil(size.width), math.ceil(size.height)
 
+    def set_color(self, color):
+        self.view.setTextColor_(make_color(color))

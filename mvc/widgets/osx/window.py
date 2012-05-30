@@ -39,9 +39,9 @@ class Window(Widget):
 
     def __init__(self, title):
         self.content_widget = None
-        rect = NSMakeRect(200.0, 200.0, 800.0, 400.0)
+        rect = NSMakeRect(100.0, 400.0, 460.0, 600.0)
         self.view = MVCWindow.alloc().initWithContentRect_parent_(rect, self)
-        self.view.setMinSize_(NSSize(800, 400))
+        self.view.setMinSize_(NSSize(460, 600))
         self.view.setTitle_(title)
         self.content_view = FlippedView.alloc().initWithFrame_(rect)
         self.content_view.setAutoresizesSubviews_(NO)
@@ -106,3 +106,4 @@ class Window(Widget):
         # Need to call place() again, since our window has changed size
         contentView = self.view.contentView()
         self.content_widget.place(contentView.frame(), contentView)
+

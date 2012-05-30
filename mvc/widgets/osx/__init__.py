@@ -7,6 +7,8 @@ from .window import *
 from .layout import *
 from .controls import *
 from .table import *
+from .image import *
+from .drawing import *
 
 def initialize():
     NSApplication.sharedApplication()
@@ -25,4 +27,5 @@ def idle_add(callback):
 
 def idle_remove(id_):
     pass
+
 

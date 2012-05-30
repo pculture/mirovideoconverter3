@@ -3,7 +3,8 @@ import math
 from AppKit import *
 
 from .base import Widget
-
+from .drawing import DrawingStyle, DrawingContext
+from .layoutmanager import LayoutManager
 
 def calc_row_height(view, model_row):
     max_height = 0
@@ -12,9 +13,7 @@ def calc_row_height(view, model_row):
         cell = column.dataCell()
         data = model.get_column_data(model_row, column)
         cell.setObjectValue_(data)
-        font = cell.font()
-        cell_height = math.ceil(font.ascender() + abs(font.descender()) +
-                                font.leading())
+        cell_height = cell.calcHeight_(view)
         max_height = max(max_height, cell_height)
     if max_height == 0:
         max_height = 12
@@ -66,13 +65,13 @@ class TableModel(object):
     def append(self, values):
         self.check_values(values)
         retval = len(self.rows)
-        self.rows.append([str(v) for v in values])
+        self.rows.append(values)
         self.changed()
         return retval # the index of the new values
 
     def update_iter(self, iter_, values):
         self.check_values(values)
-        self.rows[iter_] = [str(v) for v in values]
+        self.rows[iter_] = values
         self.changed()
 
 
@@ -102,9 +101,6 @@ class TableView(Widget):
         self.row_height_set = False
         self.view.setDataSource_(self.data_source)
         self.view.reloadData()
-        self.header_view = NSTableHeaderView.alloc().initWithFrame_(
-            NSMakeRect(0, 0, 200, 17))
-        self.view.setHeaderView_(self.header_view)
         super(TableView, self).__init__()
 
     def calc_size_request(self):
@@ -141,7 +137,6 @@ class TableView(Widget):
             self.row_height_set = True
 
     def viewport_created(self):
-        self.viewport.view.addSubview_(self.header_view)
         self.viewport.view.addSubview_(self.view)
         self._do_layout()
 
@@ -153,17 +148,13 @@ class TableView(Widget):
         y = self.viewport.placement.origin.y
         width = self.viewport.get_width()
         height = self.viewport.get_height()
-        self.header_view.setFrame_(NSMakeRect(x, y, width, 17))
-        self.view.setFrame_(NSMakeRect(x, y + 17, width, height - 17))
+        self.view.setFrame_(NSMakeRect(x, y, width, height))
         self.viewport.queue_redraw()
 
 
 class TableColumn(object):
     def __init__(self, title, renderer, header=None, **attrs):
         self._column = NSTableColumn.alloc().initWithIdentifier_(attrs)
-        header_cell = NSTableHeaderCell.alloc().init()
-        self._column.setHeaderCell_(header_cell)
-        self._column.headerCell().setStringValue_(title)
         self._column.setEditable_(NO)
         self._column.setResizingMask_(NSTableColumnNoResizing)
         self.renderer = renderer
@@ -175,12 +166,6 @@ class TableColumn(object):
 
     def set_do_horizontal_padding(self, horizontal_padding):
         self.do_horizontal_padding = horizontal_padding
-
-    def set_right_aligned(self, right_aligned):
-        if right_aligned:
-            self._column.headerCell().setAlignment_(NSRightTextAlignment)
-        else:
-            self._column.headerCell().setAlignment_(NSLeftTextAlignment)
 
     def set_min_width(self, width):
         self.min_width = width
@@ -199,20 +184,6 @@ class TableColumn(object):
         if resizable:
             mask |= NSTableColumnUserResizingMask
         self._column.setResizingMask_(mask)
-
-    def set_sort_indicator_visible(self, visible):
-        self.sort_indicator_visible = visible
-        self._column.tableView().headerView().setNeedsDisplay_(True)
-
-    def get_sort_indicator_visible(self):
-        return self.sort_indicator_visible
-
-    def set_sort_order(self, ascending):
-        self.sort_order_ascending = ascending
-        self._column.tableView().headerView().setNeedsDisplay_(True)
-
-    def get_sort_order_ascending(self):
-        return self.sort_order_ascending
 
     def set_index(self, index):
         self.index = index
@@ -378,10 +349,11 @@ class CustomTableCell(NSCell):
         self.layout_manager.reset()
         self.set_wrapper_data()
         column = self.wrapper.get_index()
-        hover_pos = view.get_hover(self.row, column)
-        if hover_pos is not None:
-            hover_pos = [hover_pos[0] - hover_adjustment[0],
-                         hover_pos[1] - hover_adjustment[1]]
+        # hover_pos = view.get_hover(self.row, column)
+        # if hover_pos is not None:
+        #     hover_pos = [hover_pos[0] - hover_adjustment[0],
+        #                  hover_pos[1] - hover_adjustment[1]]
+        hover_pos = None
         self.wrapper.render(context, self.layout_manager, self.isHighlighted(),
                 self.hotspot, hover_pos)
         NSGraphicsContext.currentContext().restoreGraphicsState()
@@ -391,3 +363,29 @@ class CustomTableCell(NSCell):
 
     def set_wrapper_data(self):
         self.wrapper.__dict__.update(self.object_value)
+
+
+class CustomCellRenderer(CellRendererBase):
+    CellClass = CustomTableCell
+
+    IGNORE_PADDING = False
+
+    def __init__(self):
+        self.outline_column = False
+        self.index = None
+
+    def setDataCell_(self, column):
+        # Note that the ownership is the opposite of what happens in widgets.
+        # The NSObject owns it's wrapper widget.  This happens for a couple
+        # reasons:
+        # 1) The data cell gets copied a bunch of times, so wrappermap won't
+        # work with it.
+        # 2) The Wrapper should only needs to stay around as long as the
+        # NSCell that it's wrapping is around.  Once the column gets removed
+        # from the table, the wrapper can be deleted.
+        nscell = self.CellClass.alloc().init()
+        nscell.wrapper = self
+        column.setDataCell_(nscell)
+
+    def hotspot_test(self, style, layout, x, y, width, height):
+        return None

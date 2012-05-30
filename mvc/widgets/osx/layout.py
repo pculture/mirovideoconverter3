@@ -317,7 +317,9 @@ class Scroller(Bin):
             self.child.place(frame, self.document_view)
             self.document_view.setFrame_(frame)
             self.document_view.setNeedsDisplay_(YES)
+            self.child.emit('place-in-scroller')
         self.view.setNeedsDisplay_(YES)
-        self.child.emit('place-in-scroller')
+
+
 
 

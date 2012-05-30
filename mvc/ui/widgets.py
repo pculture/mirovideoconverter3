@@ -13,6 +13,7 @@ import urlparse
 
 from mvc.widgets import *
 from mvc.widgets import cellpack
+from mvc.widgets import widgetutil
 
 from mvc.converter import ConverterInfo
 from mvc.video import VideoFile
@@ -73,28 +74,28 @@ class FileDropTarget(SolidBackground):
 
     def build_large_widgets(self):
         normal = VBox(spacing=20)
-        normal.pack_start(self.dropoff_on)
+        normal.pack_start(widgetutil.align_center(self.dropoff_on))
         normal.pack_start(Label(
             "Drag videos here or <a href=''>Choose File...</a>",
             markup=True,
             color=TEXT_COLOR))
 
         drag = VBox(spacing=20)
-        drag.pack_start(self.dropoff_off)
+        drag.pack_start(widgetutil.align_center(self.dropoff_off))
         drag.pack_start(Label("Release button to drop off",
                               color=TEXT_COLOR))
         return normal, drag
 
     def build_small_widgets(self):
         normal = HBox(spacing=10)
-        normal.pack_start(self.dropoff_small_on)
+        normal.pack_start(widgetutil.align_middle(self.dropoff_small_on))
         normal.pack_start(Label(
             "Drag more videos here or <a href=''>Choose File...</a>",
             markup=True,
             color=TEXT_COLOR))
 
         drag = HBox(spacing=10)
-        drag.pack_start(self.dropoff_small_off)
+        drag.pack_start(widgetutil.align_middle(self.dropoff_small_off))
         drag.pack_start(Label("Release button to drop off",
                               color=TEXT_COLOR))
         return normal, drag
@@ -112,6 +113,7 @@ class FileDropTarget(SolidBackground):
                 self.alignment.set_child(self.drag)
             else:
                 self.alignment.set_child(self.normal)
+            self.set_child(self.alignment)
 
     def choose_file(self, widget):
         dialog = FileChooserDialog('Choose File...')
@@ -185,7 +187,7 @@ class ConversionCellRenderer(CustomCellRenderer):
             image_path("item-completed.png")))
 
     def get_size(self, style, layout_manager):
-        return 350, 90
+        return 450, 90
 
     def render(self, context, layout_manager, selected, hotspot, hover):
         left_right = cellpack.HBox()
@@ -296,9 +298,8 @@ class Application(mvc.Application):
                         **dict((n, v) for (v, n) in enumerate((
                         'input', 'output', 'converter', 'status',
                         'duration', 'progress', 'eta', 'thumbnail'))))
-        c.set_min_width(300)
+        c.set_min_width(450)
         self.table.add_column(c)
-        self.table.set_size_request(0, -1)
 
         if True:
             self.model.append([
@@ -371,8 +372,8 @@ class Application(mvc.Application):
         # # finish up
         vbox = VBox()
         self.scroller = Scroller(vertical=True)
-        #scroller.add(self.table)
-        self.scroller.set_size_request(0, -1)
+        self.scroller.set_size_request(0, 0)
+        self.scroller.add(self.table)
         vbox.pack_start(self.scroller)
         vbox.pack_start(self.drop_target, expand=True)
         vbox.pack_start(bottom)
@@ -380,11 +381,10 @@ class Application(mvc.Application):
         self.convert_button = Button("Start Conversions!")
         self.convert_button.disable()
         self.convert_button.connect('clicked', self.convert)
-        alignment = Alignment(xalign=0.5, yalign=0.5,
-                              top_pad=50, bottom_pad=50,
-                              left_pad=20, right_pad=50)
-        alignment.add(self.convert_button)
-        vbox.pack_start(alignment)
+
+        vbox.pack_start(widgetutil.align(self.convert_button,
+                                         xalign=0.5, yalign=0.5,
+                                         top_pad=50, bottom_pad=50))
 
         self.window.add(vbox)
 
@@ -489,12 +489,10 @@ class Application(mvc.Application):
     def update_table_size(self):
         conversions = len(self.model)
         if not conversions:
-            self.scroller.set_child(None)
             self.drop_target.set_small(False)
         else:
             height = 94 * conversions
-            self.scroller.set_child(self.table)
-            self.table.set_size_request(-1, min(height, 320))
+            self.scroller.set_size_request(-1, min(height, 320))
             self.drop_target.set_small(True)
 
 if __name__ == "__main__":
@@ -502,5 +500,6 @@ if __name__ == "__main__":
     app = Application()
     app.startup()
     app.run()
+
 
 
