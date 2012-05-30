@@ -18,24 +18,32 @@ from mvc.converter import ConverterInfo
 from mvc.video import VideoFile
 from mvc.resources import image_path
 
+LARGE_FONT = 13.0 / 13.0
 SMALL_FONT = 10.0 / 13.0
 
-TABLE_COLUMNS = (
-    ("Name", unicode),
-    ("Output", unicode),
-    ("Converter", unicode),
-    ("Status", unicode),
-    ("Duration", int),
-    ("Progress", int),
-    ("ETA", int))
 
+def css_to_color(css_string):
+    parts = (css_string[1:3], css_string[3:5], css_string[5:7])
+    return tuple((int(value, 16) / 255.0) for value in parts)
+
+
+GRADIENT_TOP = css_to_color('#585f63')
+GRADIENT_BOTTOM = css_to_color('#383d40')
+
+DRAG_AREA = css_to_color('#2b2e31')
+
+TEXT_DISABLED = css_to_color('#333333')
+TEXT_ACTIVE = css_to_color('#ffffff')
+TEXT_INFO = css_to_color('#808080')
+TEXT_COLOR = css_to_color('#ffffff')
 
 class FileDropTarget(Alignment):
     def __init__(self):
         super(FileDropTarget, self).__init__(
+            xscale=0.0, yscale=0.5,
             xalign=0.5, yalign=0.5,
-            top_pad=20, right_pad=40,
-            bottom_pad=20, left_pad=40)
+            top_pad=10, right_pad=40,
+            bottom_pad=10, left_pad=40)
 
         self.create_signal('file-activated')
         self.normal = Label(
@@ -128,17 +136,20 @@ class ConversionCellRenderer(CustomCellRenderer):
             image_path("item-completed.png")))
 
     def get_size(self, style, layout_manager):
-        return 350, 70
+        return 350, 90
 
     def render(self, context, layout_manager, selected, hotspot, hover):
         left_right = cellpack.HBox()
         top_bottom = cellpack.VBox()
+        left_right.pack(self.layout_left(layout_manager))
         left_right.pack(top_bottom, expand=True)
+        layout_manager.set_text_color(TEXT_COLOR)
+        layout_manager.set_font(LARGE_FONT, bold=True)
         title = layout_manager.textbox(os.path.basename(self.input))
         title.set_wrap_style('truncated-char')
-        alignment = cellpack.Alignment(cellpack.TruncatedTextLine(title),
-                                       yalign=0.5, yscale=0)
-        top_bottom.pack(alignment, expand=True)
+        alignment = cellpack.Padding(cellpack.TruncatedTextLine(title),
+                                     top=25)
+        top_bottom.pack(alignment)
         layout_manager.set_font(SMALL_FONT)
 
         bottom = self.layout_bottom(layout_manager)
@@ -147,7 +158,27 @@ class ConversionCellRenderer(CustomCellRenderer):
         left_right.pack(self.layout_right(layout_manager))
 
         alignment = cellpack.Alignment(left_right, yscale=0, yalign=0.5)
-        alignment.render_layout(context)
+
+        background = cellpack.Background(alignment)
+        background.set_callback(self.draw_background)
+        background.render_layout(context)
+
+    @staticmethod
+    def draw_background(context, x, y, width, height):
+        gradient = Gradient(x, y + 1, x, height - 1)
+        gradient.set_start_color(GRADIENT_TOP)
+        gradient.set_end_color(GRADIENT_BOTTOM)
+        context.rectangle(x, y + 1, width, height -1 )
+        context.gradient_fill(gradient)
+        context.set_line_width(1)
+        context.set_color((0, 0, 0))
+        context.move_to(0, 0.5)
+        context.line_to(context.width, 0.5)
+        context.stroke()
+
+    def layout_left(self, layout_manager):
+        surface = ImageSurface(self.thumbnail)
+        return cellpack.Padding(surface, 10, 10, 10, 10)
 
     def layout_right(self, layout_manager):
         alignment_kwargs = dict(
@@ -164,6 +195,7 @@ class ConversionCellRenderer(CustomCellRenderer):
             return cellpack.Alignment(self.delete_on, **alignment_kwargs)
 
     def layout_bottom(self, layout_manager):
+        layout_manager.set_text_color(TEXT_COLOR)
         if self.status in ('converting', 'staging'):
             box = cellpack.HBox(spacing=5)
             box.pack(cellpack.Alignment(self.progressbar_base,
@@ -188,6 +220,7 @@ class ConversionCellRenderer(CustomCellRenderer):
             bottom = cellpack.HBox(spacing=5)
             bottom.pack(cellpack.Alignment(self.converted_to,
                                            xscale=0, yscale=0))
+            layout_manager.set_text_color(TEXT_INFO)
             bottom.pack(layout_manager.textbox("Converted to 1034Mb"))
             vbox.pack(bottom)
             return vbox
@@ -210,56 +243,54 @@ class Application(mvc.Application):
         self.model = ConversionModel()
         self.table = TableView(self.model)
 
-        image_column = TableColumn("Thumbnail", ImageCellRenderer(),
-                                   image=7)
-        image_column.set_width(114)
-        self.table.add_column(image_column)
         c = TableColumn("Data", ConversionCellRenderer(),
                         **dict((n, v) for (v, n) in enumerate((
                         'input', 'output', 'converter', 'status',
-                        'duration', 'progress', 'eta'))))
+                        'duration', 'progress', 'eta', 'thumbnail'))))
         c.set_min_width(300)
         self.table.add_column(c)
+        self.table.set_size_request(0, -1)
 
-        self.model.append([
-                'Super_Bowl_XLVI_New_York_Giants_very_long_output_title.avi',
-                '/home/z3p/',
-                'conv',
-                'finished',
-                100,
-                100,
-                0,
-                Image.from_file(image_path('audio.png'))])
+        if True:
+            self.model.append([
+                    'Super_Bowl_XLVI_New_York_Giants_very_long_output_title.avi',
+                    '/home/z3p/',
+                    'conv',
+                    'finished',
+                    100,
+                    100,
+                    0,
+                    Image.from_file(image_path('audio.png'))])
 
-        self.model.append([
-                'Big_buck_bunny_original.avi',
-                '/home/z3p/',
-                'conv',
-                'error',
-                0,
-                0,
-                0,
-                Image.from_file(image_path('audio.png'))])
+            self.model.append([
+                    'Big_buck_bunny_original.avi',
+                    '/home/z3p/',
+                    'conv',
+                    'error',
+                    0,
+                    0,
+                    0,
+                    Image.from_file(image_path('audio.png'))])
 
-        self.model.append([
-                'LouisCK_1024x800.avi',
-                '/home/z3p/',
-                'conv',
-                'converting',
-                100.0,
-                64.0,
-                0,
-                Image.from_file(image_path('audio.png'))])
+            self.model.append([
+                    'LouisCK_1024x800.avi',
+                    '/home/z3p/',
+                    'conv',
+                    'converting',
+                    100.0,
+                    64.0,
+                    0,
+                    Image.from_file(image_path('audio.png'))])
 
-        self.model.append([
-                'JimmyFallon_21_01_2012.flv',
-                '/home/z3p/',
-                'conv',
-                'initialized',
-                0,
-                0,
-                0,
-                Image.from_file(image_path('audio.png'))])
+            self.model.append([
+                    'JimmyFallon_21_01_2012.flv',
+                    '/home/z3p/',
+                    'conv',
+                    'initialized',
+                    0,
+                    0,
+                    0,
+                    Image.from_file(image_path('audio.png'))])
 
         # bottom buttons
         converter_types = ('apple', 'android', 'other', 'format')
@@ -286,20 +317,22 @@ class Application(mvc.Application):
 
         self.drop_target = FileDropTarget()
         self.drop_target.connect('file-activated', self.file_activated)
+        self.drop_target.set_size_request(-1, 70)
 
         # # finish up
         vbox = VBox()
-        scroller = Scroller(vertical=True)
-        scroller.add(self.table)
-        vbox.pack_start(scroller, expand=True)
-        vbox.pack_start(self.drop_target)
+        self.scroller = Scroller(vertical=True)
+        #scroller.add(self.table)
+        self.scroller.set_size_request(0, -1)
+        vbox.pack_start(self.scroller)
+        vbox.pack_start(self.drop_target, expand=True)
         vbox.pack_start(bottom)
 
         self.convert_button = Button("Start Conversions!")
         self.convert_button.disable()
         self.convert_button.connect('clicked', self.convert)
         alignment = Alignment(xalign=0.5, yalign=0.5,
-                              top_pad=20, bottom_pad=50,
+                              top_pad=50, bottom_pad=50,
                               left_pad=20, right_pad=50)
         alignment.add(self.convert_button)
         vbox.pack_start(alignment)
@@ -316,6 +349,7 @@ class Application(mvc.Application):
         self.window.accept_file_drag(True)
 
         self.window.show()
+        self.update_table_size()
 
     def drag_finished(self, widget):
         self.drop_target.set_in_drag(False)
@@ -403,6 +437,16 @@ class Application(mvc.Application):
         self.model.update_conversion(conversion)
         self.update_convert_button()
 
+    def update_table_size(self):
+        conversions = len(self.model)
+        if not conversions:
+            if self.scroller.get_child():
+                self.scroller.remove_child(self.table)
+        else:
+            height = 94 * conversions
+            if not self.scroller.get_child():
+                self.scroller.add(self.table)
+            self.table.set_size_request(-1, min(height, 320))
 
 if __name__ == "__main__":
     initialize()
