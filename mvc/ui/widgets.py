@@ -75,29 +75,31 @@ class FileDropTarget(SolidBackground):
     def build_large_widgets(self):
         normal = VBox(spacing=20)
         normal.pack_start(widgetutil.align_center(self.dropoff_on))
-        normal.pack_start(Label(
-            "Drag videos here or <a href=''>Choose File...</a>",
-            markup=True,
-            color=TEXT_COLOR))
+        normal.pack_start(widgetutil.align_center(Label(
+                    "Drag videos here or <a href=''>Choose File...</a>",
+                    markup=True,
+                    color=TEXT_COLOR)))
 
         drag = VBox(spacing=20)
         drag.pack_start(widgetutil.align_center(self.dropoff_off))
-        drag.pack_start(Label("Release button to drop off",
-                              color=TEXT_COLOR))
+        drag.pack_start(widgetutil.align_center(
+                Label("Release button to drop off",
+                      color=TEXT_COLOR)))
         return normal, drag
 
     def build_small_widgets(self):
         normal = HBox(spacing=10)
         normal.pack_start(widgetutil.align_middle(self.dropoff_small_on))
-        normal.pack_start(Label(
-            "Drag more videos here or <a href=''>Choose File...</a>",
-            markup=True,
-            color=TEXT_COLOR))
+        normal.pack_start(widgetutil.align_middle(Label(
+                    "Drag more videos here or <a href=''>Choose File...</a>",
+                    markup=True,
+                    color=TEXT_COLOR)))
 
         drag = HBox(spacing=10)
         drag.pack_start(widgetutil.align_middle(self.dropoff_small_off))
-        drag.pack_start(Label("Release button to drop off",
-                              color=TEXT_COLOR))
+        drag.pack_start(widgetutil.align_middle(
+                Label("Release button to drop off",
+                      color=TEXT_COLOR)))
         return normal, drag
 
     def set_small(self, small):
