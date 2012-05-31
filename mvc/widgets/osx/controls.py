@@ -1,7 +1,9 @@
 import os
 import math
 
+from objc import *
 from AppKit import *
+from Foundation import *
 
 from .base import Widget
 from .drawing import make_color
@@ -109,8 +111,12 @@ class Label(Widget):
             self.set_color(color)
 
     def set_text(self, text):
-        self.view.setStringValue_(text)
-        self.sizer_cell.setStringValue_(text)
+        self.string_value, _ = NSAttributedString.alloc().initWithHTML_documentAttributes_(buffer(text), nil)
+        # fallback
+        if self.string_value is None:
+            self.string_value = text
+        self.view.setAttributedStringValue_(self.string_value)
+        self.sizer_cell.setAttributedStringValue_(self.string_value)
         self.invalidate_size_request()
 
     def calc_size_request(self):
