@@ -10,7 +10,6 @@ from setuptools import setup
 APP = ['mvc/ui/widgets.py']
 DATA_FILES = ['mvc/widgets/osx/Resources-Widgets/MainMenu.nib']
 OPTIONS = {'alias': True,
- 'argv_emulation': True,
  'excludes': 'mvc.widgets.gtk',
  'packages': 'mvc',
 }
