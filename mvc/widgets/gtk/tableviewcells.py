@@ -33,8 +33,11 @@ import gobject
 import gtk
 import pango
 
+from mvc.widgets import signals
+from mvc.widgets import widgetconst
+from .import drawing
+from .import wrappermap
 from .base import make_gdk_color
-from .drawing import DrawingStyle, DrawingContext
 
 class CellRenderer(object):
     """Simple Cell Renderer
@@ -67,6 +70,17 @@ class CellRenderer(object):
             font_desc.set_weight(pango.WEIGHT_NORMAL)
         self._renderer.props.font_desc = font_desc
 
+    def set_text_size(self, size):
+        if size == widgetconst.SIZE_NORMAL:
+            self._renderer.props.scale = 1.0
+        elif size == widgetconst.SIZE_SMALL:
+            # FIXME: on 3.5 we just ignored the call.  Always setting scale to
+            # 1.0 basically replicates that behavior, but should we actually
+            # try to implement the semantics of SIZE_SMALL?
+            self._renderer.props.scale = 1.0
+        else:
+            raise ValueError("unknown size: %s" % size)
+
     def set_font_scale(self, scale_factor):
         self._renderer.props.scale = scale_factor
 
@@ -80,38 +94,61 @@ class ImageCellRenderer(object):
     def setup_attributes(self, column, attr_map):
         column.add_attribute(self._renderer, 'pixbuf', attr_map['image'])
 
+class GTKCheckboxCellRenderer(gtk.CellRendererToggle):
+    def do_activate(self, event, treeview, path, background_area, cell_area,
+            flags):
+        iter = treeview.get_model().get_iter(path)
+        self.set_active(not self.get_active())
+        wrappermap.wrapper(self).emit('clicked', iter)
+
+gobject.type_register(GTKCheckboxCellRenderer)
+
+class CheckboxCellRenderer(signals.SignalEmitter):
+    """Cell Renderer for booleans
+    https://develop.participatoryculture.org/index.php/WidgetAPITableView"""
+    def __init__(self):
+        signals.SignalEmitter.__init__(self)
+        self.create_signal("clicked")
+        self._renderer = GTKCheckboxCellRenderer()
+        wrappermap.add(self._renderer, self)
+        self.want_hover = False
+
+    def set_control_size(self, size):
+        pass
+
+    def setup_attributes(self, column, attr_map):
+        column.add_attribute(self._renderer, 'active', attr_map['value'])
+
 class GTKCustomCellRenderer(gtk.GenericCellRenderer):
-    """Handles the GTK side of CustomCellRenderer
+    """Handles the GTK hide of CustomCellRenderer
     https://develop.participatoryculture.org/index.php/WidgetAPITableView"""
 
-    def __init__(self, wrapper):
-        super(GTKCustomCellRenderer, self).__init__()
-        self.wrapper = wrapper
-
     def on_get_size(self, widget, cell_area=None):
-        style = DrawingStyle(widget, use_base_color=True)
+        wrapper = wrappermap.wrapper(self)
+        widget_wrapper = wrappermap.wrapper(widget)
+        style = drawing.DrawingStyle(widget_wrapper, use_base_color=True)
         # NOTE: CustomCellRenderer.cell_data_func() sets up its attributes
         # from the model itself, so we don't have to worry about setting them
         # here.
-        width, height = self.wrapper.get_size(style, widget.layout_manager)
-        if self.wrapper.IGNORE_PADDING:
-            x_offset = y_offset = 0
-        else:
-            x_offset = self.props.xpad
-            y_offset = self.props.ypad
-            width += self.props.xpad * 2
-            height += self.props.ypad * 2
-            if cell_area:
-                x_offset += cell_area.x
-                y_offset += cell_area.x
-                extra_width = max(0, cell_area.width - width)
-                extra_height = max(0, cell_area.height - height)
-                x_offset += int(round(self.props.xalign * extra_width))
-                y_offset += int(round(self.props.yalign * extra_height))
+        width, height = wrapper.get_size(style, widget_wrapper.layout_manager)
+        x_offset = self.props.xpad
+        y_offset = self.props.ypad
+        width += self.props.xpad * 2
+        height += self.props.ypad * 2
+        if cell_area:
+            x_offset += cell_area.x
+            y_offset += cell_area.x
+            extra_width = max(0, cell_area.width - width)
+            extra_height = max(0, cell_area.height - height)
+            x_offset += int(round(self.props.xalign * extra_width))
+            y_offset += int(round(self.props.yalign * extra_height))
         return x_offset, y_offset, width, height
 
     def on_render(self, window, widget, background_area, cell_area, expose_area,
             flags):
+        widget_wrapper = wrappermap.wrapper(widget)
+        cell_wrapper = wrappermap.wrapper(self)
+
         selected = (flags & gtk.CELL_RENDERER_SELECTED)
         if selected:
             if widget.flags() & gtk.HAS_FOCUS:
@@ -120,40 +157,41 @@ class GTKCustomCellRenderer(gtk.GenericCellRenderer):
                 state = gtk.STATE_ACTIVE
         else:
             state = gtk.STATE_NORMAL
-        if self.wrapper.IGNORE_PADDING:
+        if cell_wrapper.IGNORE_PADDING:
             area = background_area
         else:
             xpad = self.props.xpad
             ypad = self.props.ypad
             area = gtk.gdk.Rectangle(cell_area.x + xpad, cell_area.y + ypad,
                     cell_area.width - xpad * 2, cell_area.height - ypad * 2)
-        context = DrawingContext(window, area, expose_area)
-        # Draw the base color as our background.  This erases the gradient that
-        # GTK draws for selected items.
-        window.draw_rectangle(widget.style.base_gc[state], True,
-                              background_area.x, background_area.y,
-                              background_area.width, background_area.height)
-        context.style = DrawingStyle(widget,
+        context = drawing.DrawingContext(window, area, expose_area)
+        if (selected and not widget_wrapper.draws_selection and
+                widget_wrapper.use_custom_style):
+            # Draw the base color as our background.  This erases the gradient
+            # that GTK draws for selected items.
+            window.draw_rectangle(widget.style.base_gc[state], True,
+                    background_area.x, background_area.y,
+                    background_area.width, background_area.height)
+        context.style = drawing.DrawingStyle(widget_wrapper,
                 use_base_color=True, state=state)
-        widget.layout_manager.update_cairo_context(context.context)
-        # hotspot_tracker = widget.hotspot_tracker
-        # if (hotspot_tracker and hotspot_tracker.hit and
-        #         hotspot_tracker.column == self.column and
-        #         hotspot_tracker.path == self.path):
-        #     hotspot = hotspot_tracker.name
-        # else:
-        #     hotspot = None
-        # if (self.path, self.column) == widget.hover_info:
-        #     hover = widget.hover_pos
-        #     hover = (hover[0] - xpad, hover[1] - ypad)
-        # else:
-        #     hover = None
+        widget_wrapper.layout_manager.update_cairo_context(context.context)
+        hotspot_tracker = widget_wrapper.hotspot_tracker
+        if (hotspot_tracker and hotspot_tracker.hit and
+                hotspot_tracker.column == self.column and
+                hotspot_tracker.path == self.path):
+            hotspot = hotspot_tracker.name
+        else:
+            hotspot = None
+        if (self.path, self.column) == widget_wrapper.hover_info:
+            hover = widget_wrapper.hover_pos
+            hover = (hover[0] - xpad, hover[1] - ypad)
+        else:
+            hover = None
         # NOTE: CustomCellRenderer.cell_data_func() sets up its attributes
         # from the model itself, so we don't have to worry about setting them
         # here.
-        hotspot = hover = None
-        widget.layout_manager.reset()
-        self.wrapper.render(context, widget.layout_manager, selected,
+        widget_wrapper.layout_manager.reset()
+        cell_wrapper.render(context, widget_wrapper.layout_manager, selected,
                 hotspot, hover)
 
     def on_activate(self, event, widget, path, background_area, cell_area,
@@ -163,20 +201,18 @@ class GTKCustomCellRenderer(gtk.GenericCellRenderer):
     def on_start_editing(self, event, widget, path, background_area,
             cell_area, flags):
         pass
-
-
 gobject.type_register(GTKCustomCellRenderer)
-
 
 class CustomCellRenderer(object):
     """Customizable Cell Renderer
     https://develop.participatoryculture.org/index.php/WidgetAPITableView"""
 
-    IGNORE_PADDING = True
+    IGNORE_PADDING = False
 
     def __init__(self):
-        self._renderer = GTKCustomCellRenderer(self)
+        self._renderer = GTKCustomCellRenderer()
         self.want_hover = False
+        wrappermap.add(self._renderer, self)
 
     def setup_attributes(self, column, attr_map):
         column.set_cell_data_func(self._renderer, self.cell_data_func,
@@ -194,8 +230,20 @@ class CustomCellRenderer(object):
     def hotspot_test(self, style, layout, x, y, width, height):
         return None
 
-    def get_size(self, context, layout_manager):
-        return 0, 0
+class InfoListRenderer(CustomCellRenderer):
+    """Custom Renderer for InfoListModels
+    https://develop.participatoryculture.org/index.php/WidgetAPITableView"""
 
-    def render(self, context, layout_manager, selected, hotspot, hover):
-        pass
+    def cell_data_func(self, column, cell, model, iter, attr_map):
+        self.info, self.attrs, self.group_info = \
+                wrappermap.wrapper(model).row_for_iter(iter)
+        cell.column = column
+        cell.path = model.get_path(iter)
+
+class InfoListRendererText(CellRenderer):
+    """Renderer for InfoListModels that only display text
+    https://develop.participatoryculture.org/index.php/WidgetAPITableView"""
+
+    def setup_attributes(self, column, attr_map):
+        infolist.gtk.setup_text_cell_data_func(column, self._renderer,
+                self.get_value)

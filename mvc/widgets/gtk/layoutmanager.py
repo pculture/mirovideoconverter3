@@ -1,11 +1,57 @@
+# Miro - an RSS based video player application
+# Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011
+# Participatory Culture Foundation
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+# In addition, as a special exception, the copyright holders give
+# permission to link the code of portions of this program with the OpenSSL
+# library.
+#
+# You must obey the GNU General Public License in all respects for all of
+# the code used other than OpenSSL. If you modify file(s) with this
+# exception, you may extend this exception to your version of the file(s),
+# but you are not obligated to do so. If you do not wish to do so, delete
+# this exception statement from your version. If you delete this exception
+# statement from all source files in the program, then also delete it here.
+
 """drawing.py -- Contains the LayoutManager class.  LayoutManager is
 handles laying out complex objects for the custom drawing code like
 text blocks and buttons.
 """
 
+import math
+
+import cairo
 import gtk
 import pango
 
+from mvc import utils
+
+use_native_buttons = False # not implemented in MVC
+
+class FontCache(utils.Cache):
+    def get(self, context, description, scale_factor, bold, italic):
+        key = (context, description, scale_factor, bold, italic)
+        return utils.Cache.get(self, key)
+
+    def create_new_value(self, key, invalidator=None):
+        (context, description, scale_factor, bold, italic) = key
+        return Font(context, description, scale_factor, bold, italic)
+
+_font_cache = FontCache(512)
 
 class LayoutManager(object):
     def __init__(self, widget):
@@ -43,7 +89,7 @@ class LayoutManager(object):
             self.pango_context.set_base_dir(pango.DIRECTION_LTR)
 
     def font(self, scale_factor, bold=False, italic=False, family=None):
-        return Font(self.pango_context, self.style_font_desc,
+        return _font_cache.get(self.pango_context, self.style_font_desc,
                 scale_factor, bold, italic)
 
     def set_font(self, scale_factor, bold=False, italic=False, family=None):
@@ -75,7 +121,6 @@ class LayoutManager(object):
     def update_cairo_context(self, cairo_context):
         cairo_context.update_context(self.pango_context)
 
-
 class Font(object):
     def __init__(self, context, style_font_desc, scale, bold, italic):
         self.context = context
@@ -104,7 +149,6 @@ class Font(object):
         # (#17329)
         return (pango.PIXELS(metrics.get_ascent()) +
                 pango.PIXELS(metrics.get_descent()) + 1)
-
 
 class TextBox(object):
     def __init__(self, context, font, color, shadow):
@@ -150,10 +194,11 @@ class TextBox(object):
         self.width = width
 
     def set_height(self, height):
-        #if height is not None:
-        #    self.layout.set_height(int(height * pango.SCALE))
-        #else:
-        #    self.layout.set_height(-1)
+        # if height is not None:
+        #     # not sure why set_height isn't in the python bindings, but it
+        #     # isn't
+        #     pygtkhacks.set_pango_layout_height(self.layout,
+        #         int(height * pango.SCALE))
         self.height = height
 
     def set_wrap_style(self, wrap):
@@ -242,20 +287,22 @@ class TextBox(object):
         self.ensure_layout()
         cairo_context = context.context
         cairo_context.save()
+        underline_drawer = UnderlineDrawer(self.underlines)
         if self.shadow:
             # draw shadow first so that it's underneath the regular text
             # FIXME: we don't use the blur_radius setting
             cairo_context.set_source_rgba(self.shadow.color[0],
                     self.shadow.color[1], self.shadow.color[2],
                     self.shadow.opacity)
-            self._draw_layout(context, x + self.shadow.offset[0],
-                    y + self.shadow.offset[1], width, height)
+            self._draw_layout(context, x + self.shadow.offset[0], 
+                    y + self.shadow.offset[1], width, height,
+                    underline_drawer)
         cairo_context.set_source_rgb(*self.color)
-        self._draw_layout(context, x, y, width, height)
+        self._draw_layout(context, x, y, width, height, underline_drawer)
         cairo_context.restore()
         cairo_context.new_path()
 
-    def _draw_layout(self, context, x, y, width, height):
+    def _draw_layout(self, context, x, y, width, height, underline_drawer):
         line_height = 0
         alignment = self.layout.get_alignment()
         for i in xrange(self.layout.get_line_count()):
@@ -273,4 +320,231 @@ class TextBox(object):
             baseline = y + line_height + pango.ASCENT(extents)
             context.move_to(line_x, baseline)
             context.context.show_layout_line(line)
+            underline_drawer.draw(context, line_x, baseline, line)
             line_height = next_line_height
+
+class UnderlineDrawer(object):
+    """Class to draw our own underlines because cairo's don't look
+    that great at small fonts.  We make sure that the underline is
+    always drawn at a pixel boundary and that there always is space
+    between the text and the baseline.
+
+    This class makes a couple assumptions that might not be that
+    great.  It assumes that the correct underline size is 1 pixel and
+    that the text color doesn't change in the middle of an underline.
+    """
+    def __init__(self, underlines):
+        self.underline_iter = iter(underlines)
+        self.finished = False
+        self.next_underline()
+
+    def next_underline(self):
+        try:
+            self.startpos, self.endpos = self.underline_iter.next()
+        except StopIteration:
+            self.finished = True
+        else:
+            # endpos is the char to stop underlining at
+            self.endpos -= 1
+
+    def draw(self, context, x, baseline, line):
+        baseline = round(baseline) + 0.5
+        context.set_line_width(1)
+        while not self.finished and line.start_index <= self.startpos:
+            startpos = max(line.start_index, self.startpos)
+            endpos = min(self.endpos, line.start_index + line.length)
+            x1 = x + pango.PIXELS(line.index_to_x(startpos, 0))
+            x2 = x + pango.PIXELS(line.index_to_x(endpos, 1))
+            context.move_to(x1, baseline + 1)
+            context.line_to(x2, baseline + 1)
+            context.stroke()
+            if endpos < self.endpos:
+                break
+            else:
+                self.next_underline()
+
+class NativeButton(object):
+    ICON_PAD = 4
+
+    def __init__(self, text, context, font, pressed, style, widget):
+        self.layout = pango.Layout(context)
+        self.font = font
+        self.pressed = pressed
+        self.layout.set_font_description(font.description.copy())
+        self.layout.set_text(text)
+        self.pad_x = style.xthickness + 11
+        self.pad_y = style.ythickness + 1
+        self.style = style
+        self.widget = widget
+        # The above code assumes an "inner-border" style property of
+        # 1. PyGTK doesn't seem to support Border objects very well,
+        # so can't get it from the widget style.
+        self.min_width = 0
+        self.icon = None
+
+    def set_min_width(self, width):
+        self.min_width = width
+
+    def set_icon(self, icon):
+        self.icon = icon
+
+    def get_size(self):
+        width, height = self.layout.get_pixel_size()
+        if self.icon:
+            width += self.icon.width + self.ICON_PAD
+            height = max(height, self.icon.height)
+        width += self.pad_x * 2
+        height += self.pad_y * 2
+        return max(self.min_width, width), height
+
+    def draw(self, context, x, y, width, height):
+        text_width, text_height = self.layout.get_pixel_size()
+        if self.icon:
+            inner_width = text_width + self.icon.width + self.ICON_PAD
+            # calculate the icon position x and y are still in cairo
+            # coordinates
+            icon_x = x + (width - inner_width) / 2.0
+            icon_y = y + (height - self.icon.height) / 2.0
+            text_x = icon_x + self.icon.width + self.ICON_PAD
+        else:
+            text_x = x + (width - text_width) / 2.0
+        text_y = y + (height - text_height) / 2.0
+
+        x, y = context.context.user_to_device(x, y)
+        text_x, text_y = context.context.user_to_device(text_x, text_y)
+        # Hmm, maybe we should somehow support floating point numbers
+        # here, but I don't know how to.
+        x, y, width, height = (int(f) for f in (x, y, width, height))
+        context.context.get_target().flush()
+        self.draw_box(context.window, x, y, width, height)
+        self.draw_text(context.window, text_x, text_y)
+        if self.icon:
+            self.icon.draw(context, icon_x, icon_y, self.icon.width,
+                    self.icon.height)
+
+    def draw_box(self, window, x, y, width, height):
+        if self.pressed:
+            shadow = gtk.SHADOW_IN
+            state = gtk.STATE_ACTIVE
+        else:
+            shadow = gtk.SHADOW_OUT
+            state = gtk.STATE_NORMAL
+        if 'QtCurveStyle' in str(self.style):
+            # This is a horrible hack for the libqtcurve library.  See
+            # http://bugzilla.pculture.org/show_bug.cgi?id=10380 for
+            # details
+            widget = window.get_user_data()
+        else:
+            widget = self.widget
+
+        self.style.paint_box(window, state, shadow, None, widget, "button",
+                int(x), int(y), int(width), int(height))
+
+    def draw_text(self, window, x, y):
+        if self.pressed:
+            state = gtk.STATE_ACTIVE
+        else:
+            state = gtk.STATE_NORMAL
+        self.style.paint_layout(window, state, True, None, None, None,
+                int(x), int(y), self.layout)
+
+class StyledButton(object):
+    PAD_HORIZONTAL = 4
+    PAD_VERTICAL = 3
+    TOP_COLOR = (1, 1, 1)
+    BOTTOM_COLOR = (0.86, 0.86, 0.86)
+    LINE_COLOR_TOP = (0.71, 0.71, 0.71)
+    LINE_COLOR_BOTTOM = (0.45, 0.45, 0.45)
+    TEXT_COLOR = (0.184, 0.184, 0.184)
+    DISABLED_COLOR = (0.86, 0.86, 0.86)
+    DISABLED_TEXT_COLOR = (0.5, 0.5, 0.5)
+    ICON_PAD = 8
+
+    def __init__(self, text, context, font, pressed, disabled=False):
+        self.layout = pango.Layout(context)
+        self.font = font
+        self.layout.set_font_description(font.description.copy())
+        self.layout.set_text(text)
+        self.min_width = 0
+        self.pressed = pressed
+        self.disabled = disabled
+        self.icon = None
+
+    def set_icon(self, icon):
+        self.icon = icon
+
+    def set_min_width(self, width):
+        self.min_width = width
+
+    def get_size(self):
+        width, height = self.layout.get_pixel_size()
+        if self.icon:
+            width += self.icon.width + self.ICON_PAD
+            height = max(height, self.icon.height)
+        height += self.PAD_VERTICAL * 2
+        if height % 2 == 1:
+            # make height even so that the radius of our circle is
+            # whole
+            height += 1
+        width += self.PAD_HORIZONTAL * 2 + height
+        return max(self.min_width, width), height
+
+    def draw_path(self, context, x, y, width, height, radius):
+        inner_width = width - radius * 2
+        context.move_to(x + radius, y)
+        context.rel_line_to(inner_width, 0)
+        context.arc(x + width - radius, y+radius, radius, -math.pi/2,
+                    math.pi/2)
+        context.rel_line_to(-inner_width, 0)
+        context.arc(x + radius, y+radius, radius, math.pi/2, -math.pi/2)
+
+    def draw_button(self, context, x, y, width, height, radius):
+        context.context.save()
+        self.draw_path(context, x, y, width, height, radius)
+        if self.disabled:
+            end_color = self.DISABLED_COLOR
+            start_color = self.DISABLED_COLOR
+        elif self.pressed:
+            end_color = self.TOP_COLOR
+            start_color = self.BOTTOM_COLOR
+        else:
+            context.set_line_width(1)
+            start_color = self.TOP_COLOR
+            end_color = self.BOTTOM_COLOR
+        gradient = cairo.LinearGradient(x, y, x, y + height)
+        gradient.add_color_stop_rgb(0, *start_color)
+        gradient.add_color_stop_rgb(1, *end_color)
+        context.context.set_source(gradient)
+        context.fill()
+        context.set_line_width(1)
+        self.draw_path(context, x+0.5, y+0.5, width, height, radius)
+        gradient = cairo.LinearGradient(x, y, x, y + height)
+        gradient.add_color_stop_rgb(0, *self.LINE_COLOR_TOP)
+        gradient.add_color_stop_rgb(1, *self.LINE_COLOR_BOTTOM)
+        context.context.set_source(gradient)
+        context.stroke()
+        context.context.restore()
+
+    def draw(self, context, x, y, width, height):
+        radius = height / 2
+        self.draw_button(context, x, y, width, height, radius)
+
+        text_width, text_height = self.layout.get_pixel_size()
+        # draw the text in the center of the button
+        text_x = x + (width - text_width) / 2
+        text_y = y + (height - text_height) / 2
+        if self.icon:
+            icon_x = text_x - (self.icon.width + self.ICON_PAD) / 2
+            text_x += (self.icon.width + self.ICON_PAD) / 2
+            icon_y = y + (height - self.icon.height) / 2
+            self.icon.draw(context, icon_x, icon_y, self.icon.width,
+                    self.icon.height)
+        self.draw_text(context, text_x, text_y, width, height, radius)
+
+    def draw_text(self, context, x, y, width, height, radius):
+        if self.disabled:
+            context.set_color(self.DISABLED_TEXT_COLOR)
+        else:
+            context.set_color(self.TEXT_COLOR)
+        context.move_to(x, y)
+        context.context.show_layout(self.layout)

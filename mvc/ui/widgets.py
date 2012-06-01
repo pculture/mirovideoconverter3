@@ -11,7 +11,8 @@ except ImportError:
 import urllib
 import urlparse
 
-from mvc.widgets import *
+from mvc.widgets import initialize, idle_add, mainloop_start, mainloop_stop
+from mvc.widgets import widgetset
 from mvc.widgets import cellpack
 from mvc.widgets import widgetutil
 
@@ -23,36 +24,31 @@ LARGE_FONT = 13.0 / 13.0
 SMALL_FONT = 10.0 / 13.0
 
 
-def css_to_color(css_string):
-    parts = (css_string[1:3], css_string[3:5], css_string[5:7])
-    return tuple((int(value, 16) / 255.0) for value in parts)
+GRADIENT_TOP = widgetutil.css_to_color('#585f63')
+GRADIENT_BOTTOM = widgetutil.css_to_color('#383d40')
 
+DRAG_AREA = widgetutil.css_to_color('#2b2e31')
 
-GRADIENT_TOP = css_to_color('#585f63')
-GRADIENT_BOTTOM = css_to_color('#383d40')
+TEXT_DISABLED = widgetutil.css_to_color('#333333')
+TEXT_ACTIVE = widgetutil.css_to_color('#ffffff')
+TEXT_INFO = widgetutil.css_to_color('#808080')
+TEXT_COLOR = widgetutil.css_to_color('#ffffff')
 
-DRAG_AREA = css_to_color('#2b2e31')
+class FileDropTarget(widgetset.SolidBackground):
 
-TEXT_DISABLED = css_to_color('#333333')
-TEXT_ACTIVE = css_to_color('#ffffff')
-TEXT_INFO = css_to_color('#808080')
-TEXT_COLOR = css_to_color('#ffffff')
-
-class FileDropTarget(SolidBackground):
-
-    dropoff_on = ImageDisplay(Image.from_file(
+    dropoff_on = widgetset.ImageDisplay(widgetset.Image(
             image_path("dropoff-icon-on.png")))
-    dropoff_off = ImageDisplay(Image.from_file(
+    dropoff_off = widgetset.ImageDisplay(widgetset.Image(
             image_path("dropoff-icon-off.png")))
-    dropoff_small_on = ImageDisplay(Image.from_file(
+    dropoff_small_on = widgetset.ImageDisplay(widgetset.Image(
             image_path("dropoff-icon-small-on.png")))
-    dropoff_small_off = ImageDisplay(Image.from_file(
+    dropoff_small_off = widgetset.ImageDisplay(widgetset.Image(
             image_path("dropoff-icon-small-off.png")))
 
     def __init__(self):
         super(FileDropTarget, self).__init__()
         self.set_background_color(DRAG_AREA)
-        self.alignment = Alignment(
+        self.alignment = widgetset.Alignment(
             xscale=0.0, yscale=0.5,
             xalign=0.5, yalign=0.5,
             top_pad=10, right_pad=40,
@@ -73,32 +69,32 @@ class FileDropTarget(SolidBackground):
         self.small = False
 
     def build_large_widgets(self):
-        normal = VBox(spacing=20)
+        normal = widgetset.VBox(spacing=20)
         normal.pack_start(widgetutil.align_center(self.dropoff_on))
-        normal.pack_start(widgetutil.align_center(Label(
+        normal.pack_start(widgetutil.align_center(widgetset.Label(
                     "Drag videos here or <a href=''>Choose File...</a>",
                     markup=True,
                     color=TEXT_COLOR)))
 
-        drag = VBox(spacing=20)
+        drag = widgetset.VBox(spacing=20)
         drag.pack_start(widgetutil.align_center(self.dropoff_off))
         drag.pack_start(widgetutil.align_center(
-                Label("Release button to drop off",
+                widgetset.Label("Release button to drop off",
                       color=TEXT_COLOR)))
         return normal, drag
 
     def build_small_widgets(self):
-        normal = HBox(spacing=10)
+        normal = widgetset.HBox(spacing=10)
         normal.pack_start(widgetutil.align_middle(self.dropoff_small_on))
-        normal.pack_start(widgetutil.align_middle(Label(
+        normal.pack_start(widgetutil.align_middle(widgetset.Label(
                     "Drag more videos here or <a href=''>Choose File...</a>",
                     markup=True,
                     color=TEXT_COLOR)))
 
-        drag = HBox(spacing=10)
+        drag = widgetset.HBox(spacing=10)
         drag.pack_start(widgetutil.align_middle(self.dropoff_small_off))
         drag.pack_start(widgetutil.align_middle(
-                Label("Release button to drop off",
+                widgetset.Label("Release button to drop off",
                       color=TEXT_COLOR)))
         return normal, drag
 
@@ -118,14 +114,14 @@ class FileDropTarget(SolidBackground):
             self.queue_redraw()
 
     def choose_file(self, widget):
-        dialog = FileChooserDialog('Choose File...')
+        dialog = widgetset.FileChooserDialog('Choose File...')
         if dialog.run():
             for filename in dialog.get_filenames():
                 self.emit('file-activated', filename)
         dialog.destroy()
 
 
-class BottomBackground(SolidBackground):
+class BottomBackground(widgetset.SolidBackground):
 
     def __init__(self):
         super(BottomBackground, self).__init__(color=GRADIENT_BOTTOM)
@@ -141,18 +137,18 @@ class BottomBackground(SolidBackground):
 EMPTY_CONVERTER = ConverterInfo("")
 
 
-class ConversionModel(TableModel):
+class ConversionModel(widgetset.TableModel):
     def __init__(self):
-        super(ConversionModel, self).__init__((
-            unicode, # filename
-            unicode, # output
-            unicode, # converter
-            unicode, # status
-            float, # duration
-            float, # progress
-            float, # eta,
-            Image, # image
-            ))
+        super(ConversionModel, self).__init__(
+            'text', # filename
+            'text', # output
+            'text', # converter
+            'text', # status
+            'numeric', # duration
+            'numeric', # progress
+            'numeric', # eta,
+            'object', # image
+            )
         self.conversion_to_iter = {}
         self.thumbnail_to_image = {}
 
@@ -161,7 +157,7 @@ class ConversionModel(TableModel):
 
     def get_image(self, path):
         if path not in self.thumbnail_to_image:
-            self.thumbnail_to_image[path] = Image.from_file(path)
+            self.thumbnail_to_image[path] = widgetset.Image(path)
         return self.thumbnail_to_image[path]
 
     def update_conversion(self, conversion):
@@ -176,7 +172,7 @@ class ConversionModel(TableModel):
                   )
         iter_ = self.conversion_to_iter.get(conversion)
         if iter_ is None:
-            self.conversion_to_iter[conversion] = self.append(values)
+            self.conversion_to_iter[conversion] = self.append(*values)
         else:
             self.update_iter(iter_, values)
 
@@ -190,25 +186,25 @@ class IconHotspot(cellpack.Hotspot):
         super(IconHotspot, self).__init__(name, box)
 
 
-class ConversionCellRenderer(CustomCellRenderer):
+class ConversionCellRenderer(widgetset.CustomCellRenderer):
 
-    clear = ImageSurface(Image.from_file(
+    clear = widgetset.ImageSurface(widgetset.Image(
             image_path("clear-icon.png")))
-    converted_to = ImageSurface(Image.from_file(
+    converted_to = widgetset.ImageSurface(widgetset.Image(
             image_path("converted_to-icon.png")))
-    queued = ImageSurface(Image.from_file(
+    queued = widgetset.ImageSurface(widgetset.Image(
             image_path("queued-icon.png")))
-    showfile = ImageSurface(Image.from_file(
+    showfile = widgetset.ImageSurface(widgetset.Image(
             image_path("showfile-icon.png")))
-    progressbar_base = ImageSurface(Image.from_file(
+    progressbar_base = widgetset.ImageSurface(widgetset.Image(
             image_path("progressbar-base.png")))
-    delete_on = ImageSurface(Image.from_file(
+    delete_on = widgetset.ImageSurface(widgetset.Image(
             image_path("item-delete-button-on.png")))
-    delete_off = ImageSurface(Image.from_file(
+    delete_off = widgetset.ImageSurface(widgetset.Image(
             image_path("item-delete-button-off.png")))
-    error = ImageSurface(Image.from_file(
+    error = widgetset.ImageSurface(widgetset.Image(
             image_path("item-error.png")))
-    completed = ImageSurface(Image.from_file(
+    completed = widgetset.ImageSurface(widgetset.Image(
             image_path("item-completed.png")))
 
     def __init__(self):
@@ -246,7 +242,7 @@ class ConversionCellRenderer(CustomCellRenderer):
 
     @staticmethod
     def draw_background(context, x, y, width, height):
-        gradient = Gradient(x, y + 1, x, height - 1)
+        gradient = widgetset.Gradient(x, y + 1, x, height - 1)
         gradient.set_start_color(GRADIENT_TOP)
         gradient.set_end_color(GRADIENT_BOTTOM)
         context.rectangle(x, y + 1, width, height -1 )
@@ -266,7 +262,7 @@ class ConversionCellRenderer(CustomCellRenderer):
         context.fill()
 
     def layout_left(self, layout_manager):
-        surface = ImageSurface(self.thumbnail)
+        surface = widgetset.ImageSurface(self.thumbnail)
         return cellpack.Padding(surface, 10, 10, 10, 10)
 
     def layout_right(self, layout_manager):
@@ -332,12 +328,12 @@ class ConversionCellRenderer(CustomCellRenderer):
             print 'HOTSPOT INFO', hotspot_info
             return hotspot_info[0]
 
-class ConvertButton(CustomButton):
-    off = ImageSurface(Image.from_file(
+class ConvertButton(widgetset.CustomButton):
+    off = widgetset.ImageSurface(widgetset.Image(
             image_path("convert-button-off.png")))
-    on = ImageSurface(Image.from_file(
+    on = widgetset.ImageSurface(widgetset.Image(
             image_path("convert-button-on.png")))
-    stop = ImageSurface(Image.from_file(
+    stop = widgetset.ImageSurface(widgetset.Image(
             image_path("convert-button-stop.png")))
 
     def __init__(self):
@@ -386,14 +382,18 @@ class Application(mvc.Application):
 
         mvc.Application.startup(self)
 
-        self.window = Window("Miro Video Converter")
-        self.window.connect('destroy', self.destroy)
+        self.window = widgetset.Window("Miro Video Converter")
+        self.window.connect('will-close', self.destroy)
 
         # # table on top
         self.model = ConversionModel()
-        self.table = TableView(self.model)
+        self.table = widgetset.TableView(self.model)
+        self.table.set_row_spacing(0)
+        self.table.set_fixed_height(True)
+        self.table.set_grid_lines(False, False)
+        self.table.set_show_headers(False)
 
-        c = TableColumn("Data", ConversionCellRenderer(),
+        c = widgetset.TableColumn("Data", ConversionCellRenderer(),
                         **dict((n, v) for (v, n) in enumerate((
                         'input', 'output', 'converter', 'status',
                         'duration', 'progress', 'eta', 'thumbnail'))))
@@ -401,7 +401,7 @@ class Application(mvc.Application):
         self.table.add_column(c)
 
         if True:
-            self.model.append([
+            self.model.append(
                     'Super_Bowl_XLVI_New_York_Giants_very_long_output_title.avi',
                     '/home/z3p/',
                     'conv',
@@ -409,9 +409,9 @@ class Application(mvc.Application):
                     100,
                     100,
                     0,
-                    Image.from_file(image_path('audio.png'))])
+                    widgetset.Image(image_path('audio.png')))
 
-            self.model.append([
+            self.model.append(
                     'Big_buck_bunny_original.avi',
                     '/home/z3p/',
                     'conv',
@@ -419,9 +419,9 @@ class Application(mvc.Application):
                     0,
                     0,
                     0,
-                    Image.from_file(image_path('audio.png'))])
+                    widgetset.Image(image_path('audio.png')))
 
-            self.model.append([
+            self.model.append(
                     'LouisCK_1024x800.avi',
                     '/home/z3p/',
                     'conv',
@@ -429,9 +429,9 @@ class Application(mvc.Application):
                     100.0,
                     64.0,
                     0,
-                    Image.from_file(image_path('audio.png'))])
+                    widgetset.Image(image_path('audio.png')))
 
-            self.model.append([
+            self.model.append(
                     'JimmyFallon_21_01_2012.flv',
                     '/home/z3p/',
                     'conv',
@@ -439,7 +439,7 @@ class Application(mvc.Application):
                     0,
                     0,
                     0,
-                    Image.from_file(image_path('audio.png'))])
+                    widgetset.Image(image_path('audio.png')))
 
         # bottom buttons
         converter_types = ('apple', 'android', 'other', 'format')
@@ -451,14 +451,14 @@ class Application(mvc.Application):
             converters.setdefault(media_type, []).append(c)
 
         self.menus = []
-        buttons = HBox()
+        buttons = widgetset.HBox()
 
         for type_ in converter_types:
             options = [(c.name, c.identifier) for c in
                        converters[type_]]
             options.sort()
             options.insert(0, (type_.title(), None))
-            menu = OptionMenu(options)
+            menu = widgetset.OptionMenu(options)
             menu.set_size_request(460 / len(converter_types), -1)
             menu.connect('changed', self.change_conversion)
             self.menus.append(menu)
@@ -470,15 +470,15 @@ class Application(mvc.Application):
         self.drop_target.set_size_request(-1, 70)
 
         # # finish up
-        vbox = VBox()
-        self.scroller = Scroller(vertical=True)
+        vbox = widgetset.VBox()
+        self.scroller = widgetset.Scroller(False, True)
         self.scroller.set_size_request(0, 0)
         self.scroller.add(self.table)
         vbox.pack_start(self.scroller)
         vbox.pack_start(self.drop_target, expand=True)
 
         bottom = BottomBackground()
-        bottom_box = VBox()
+        bottom_box = widgetset.VBox()
         bottom_box.pack_start(buttons)
 
 
@@ -490,11 +490,11 @@ class Application(mvc.Application):
                                          top_pad=50, bottom_pad=50))
         bottom.set_child(bottom_box)
         vbox.pack_start(bottom)
-        self.window.add(vbox)
+        self.window.set_content_widget(vbox)
 
         idle_add(self.conversion_manager.check_notifications)
 
-        self.window.set_size_request(460, 600)
+        self.window.set_frame(width=460, height=600)
 
         self.window.connect('file-drag-motion', self.drag_motion)
         self.window.connect('file-drag-received', self.drag_data_received)
@@ -549,12 +549,12 @@ class Application(mvc.Application):
         c.listen(self.update_conversion)
         self.update_conversion(c)
 
-    def change_conversion(self, widget):
+    def change_conversion(self, widget, index):
         if hasattr(self, '_doing_conversion_change'):
             return
         self._doing_conversion_change = True
 
-        identifier = widget.get_selected()
+        identifier = widget.options[index][1]
         if identifier is not None:
             self.current_converter = self.converter_manager.get_by_id(
                 identifier)

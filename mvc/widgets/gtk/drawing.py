@@ -1,48 +1,60 @@
-import gtk
-import gobject
+# Miro - an RSS based video player application
+# Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011
+# Participatory Culture Foundation
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+# In addition, as a special exception, the copyright holders give
+# permission to link the code of portions of this program with the OpenSSL
+# library.
+#
+# You must obey the GNU General Public License in all respects for all of
+# the code used other than OpenSSL. If you modify file(s) with this
+# exception, you may extend this exception to your version of the file(s),
+# but you are not obligated to do so. If you do not wish to do so, delete
+# this exception statement from your version. If you delete this exception
+# statement from all source files in the program, then also delete it here.
+
+""".drawing -- Contains classes used to draw on
+widgets.
+"""
+
 import cairo
-from .base import BinMixin
+import gobject
+import gtk
+
+from .import wrappermap
+from .base import Widget, Bin
 from .layoutmanager import LayoutManager
 
-def make_gdk_color(color):
-    def convert_value(value):
-        return int(round(value * 65535))
-
-    values = tuple(convert_value(c) for c in color)
-    return gtk.gdk.Color(*values)
-
-
-def convert_gtk_color(color):
-    return (color.red / 65535.0, color.green / 65535.0,
-            color.blue / 65535.0)
-
-
-class SolidBackground(BinMixin, gtk.EventBox):
-    def __init__(self, color=None):
-        super(SolidBackground, self).__init__()
-        if color is not None:
-            self.set_background_color(color)
-
-    def make_color(self, color_value):
-        color = make_gdk_color(color_value)
-        self.get_colormap().alloc_color(color)
-        return color
-
-    def set_background_color(self, color):
-        self.modify_base(gtk.STATE_NORMAL, self.make_color(color))
-        self.modify_bg(gtk.STATE_NORMAL, self.make_color(color))
-
+# XXX - clagged from miro.frontends.widgets.style due to circular import
+# issue
+def css_to_color(css_string):
+    parts = (css_string[1:3], css_string[3:5], css_string[5:7])
+    return tuple((int(value, 16) / 255.0) for value in parts)
 
 class ImageSurface:
     def __init__(self, image):
         format = cairo.FORMAT_RGB24
-        if image.get_has_alpha():
+        if image.pixbuf.get_has_alpha():
             format = cairo.FORMAT_ARGB32
         self.image = cairo.ImageSurface(
             format, int(image.width), int(image.height))
         context = cairo.Context(self.image)
         gdkcontext = gtk.gdk.CairoContext(context)
-        gdkcontext.set_source_pixbuf(image, 0, 0)
+        gdkcontext.set_source_pixbuf(image.pixbuf, 0, 0)
         gdkcontext.paint()
         self.pattern = cairo.SurfacePattern(self.image)
         self.pattern.set_extend(cairo.EXTEND_REPEAT)
@@ -88,18 +100,17 @@ class ImageSurface:
             cairo_context.paint_with_alpha(fraction)
         cairo_context.restore()
 
-
 class DrawingStyle(object):
     def __init__(self, widget, use_base_color=False, state=None):
         if state is None:
-            state = widget.state
-        self.style = widget.style
-        self.text_color = convert_gtk_color(self.style.text[state])
+            state = widget._widget.state
+        self.use_custom_style = widget.use_custom_style
+        self.style = widget._widget.style
+        self.text_color = widget.convert_gtk_color(self.style.text[state])
         if use_base_color:
-            self.bg_color = convert_gtk_color(self.style.base[state])
+            self.bg_color = widget.convert_gtk_color(self.style.base[state])
         else:
-            self.bg_color = convert_gtk_color(self.style.bg[state])
-
+            self.bg_color = widget.convert_gtk_color(self.style.bg[state])
 
 class DrawingContext(object):
     """DrawingContext.  This basically just wraps a Cairo context and adds a
@@ -137,7 +148,6 @@ class DrawingContext(object):
         self.context.fill_preserve()
         self.context.set_source(old_source)
 
-
 class Gradient(object):
     def __init__(self, x1, y1, x2, y2):
         self.pattern = cairo.LinearGradient(x1, y1, x2, y2)
@@ -148,11 +158,79 @@ class Gradient(object):
     def set_end_color(self, (red, green, blue)):
         self.pattern.add_color_stop_rgb(1, red, green, blue)
 
-
 class CustomDrawingMixin(object):
+    def do_expose_event(self, event):
+        wrapper = wrappermap.wrapper(self)
+        if self.flags() & gtk.NO_WINDOW:
+            drawing_area = self.allocation
+        else:
+            drawing_area = gtk.gdk.Rectangle(0, 0, 
+                    self.allocation.width, self.allocation.height)
+        context = DrawingContext(event.window, drawing_area, event.area)
+        context.style = DrawingStyle(wrapper)
+        if self.flags() & gtk.CAN_FOCUS:
+            focus_space = (self.style_get_property('focus-padding') +
+                    self.style_get_property('focus-line-width'))
+            if not wrapper.squish_width:
+                context.width -= focus_space * 2
+                translate_x = focus_space
+            else:
+                translate_x = 0
+            if not wrapper.squish_height:
+                context.height -= focus_space * 2
+                translate_y = focus_space
+            else:
+                translate_y = 0
+            context.translate(translate_x, translate_y)
+        wrapper.layout_manager.update_cairo_context(context.context)
+        self.draw(wrapper, context)
+
+    def draw(self, wrapper, context):
+        wrapper.layout_manager.reset()
+        wrapper.draw(context, wrapper.layout_manager)
+
+    def do_size_request(self, requesition):
+        wrapper = wrappermap.wrapper(self)
+        width, height = wrapper.size_request(wrapper.layout_manager)
+        requesition.width = width
+        requesition.height = height
+        if self.flags() & gtk.CAN_FOCUS:
+            focus_space = (self.style_get_property('focus-padding') +
+                    self.style_get_property('focus-line-width'))
+            if not wrapper.squish_width:
+                requesition.width += focus_space * 2
+            if not wrapper.squish_height:
+                requesition.height += focus_space * 2
+
+class MiroDrawingArea(CustomDrawingMixin, gtk.Widget):
     def __init__(self):
-        super(CustomDrawingMixin, self).__init__()
-        self.layout_manager = LayoutManager(self)
+        gtk.Widget.__init__(self)
+        CustomDrawingMixin.__init__(self)
+        self.set_flags(gtk.NO_WINDOW)
+
+class BackgroundWidget(CustomDrawingMixin, gtk.Bin):
+    def do_size_request(self, requesition):
+        CustomDrawingMixin.do_size_request(self, requesition)
+        if self.get_child():
+            child_width, child_height = self.get_child().size_request()
+            requesition.width = max(child_width, requesition.width)
+            requesition.height = max(child_height, requesition.height)
+
+    def do_expose_event(self, event):
+        CustomDrawingMixin.do_expose_event(self, event)
+        if self.get_child():
+            self.propagate_expose(self.get_child(), event)
+
+    def do_size_allocate(self, allocation):
+        gtk.Bin.do_size_allocate(self, allocation)
+        if self.get_child():
+            self.get_child().size_allocate(allocation)
+
+gobject.type_register(MiroDrawingArea)
+gobject.type_register(BackgroundWidget)
+
+class Drawable:
+    def __init__(self):
         self.squish_width = self.squish_height = False
 
     def set_squish_width(self, setting):
@@ -161,63 +239,14 @@ class CustomDrawingMixin(object):
     def set_squish_height(self, setting):
         self.squish_height = setting
 
-    def do_expose_event(self, event):
-        if self.flags() & gtk.NO_WINDOW:
-            drawing_area = self.allocation
+    def set_widget(self, drawing_widget):
+        if self.is_opaque() and 0:
+            box = gtk.EventBox()
+            box.add(drawing_widget)
+            Widget.set_widget(self, box)
         else:
-            drawing_area = gtk.gdk.Rectangle(0, 0, 
-                    self.allocation.width, self.allocation.height)
-        context = DrawingContext(event.window, drawing_area, event.area)
-        context.style = DrawingStyle(self)
-        if self.flags() & gtk.CAN_FOCUS:
-            focus_space = (self.style_get_property('focus-padding') +
-                    self.style_get_property('focus-line-width'))
-            if not self.squish_width:
-                context.width -= focus_space * 2
-                translate_x = focus_space
-            else:
-                translate_x = 0
-            if not self.squish_height:
-                context.height -= focus_space * 2
-                translate_y = focus_space
-            else:
-                translate_y = 0
-            context.translate(translate_x, translate_y)
-        self.layout_manager.update_cairo_context(context.context)
-        self.layout_manager.reset()
-        self.draw(context, self.layout_manager)
-
-    def do_size_request(self, requesition):
-        width, height = self.size_request(self.layout_manager)
-        requesition.width = width
-        requesition.height = height
-        if self.flags() & gtk.CAN_FOCUS:
-            focus_space = (self.style_get_property('focus-padding') +
-                    self.style_get_property('focus-line-width'))
-            if not self.squish_width:
-                requesition.width += focus_space * 2
-            if not self.squish_height:
-                requesition.height += focus_space * 2
-
-
-class Background(CustomDrawingMixin, BinMixin, gtk.Bin):
-    def do_size_request(self, requesition):
-        super(Background, self).do_size_request(requesition)
-        if self.get_child():
-            child_width, child_height = self.get_child().size_request()
-            requesition.width = max(child_width, requesition.width)
-            requesition.height = max(child_height, requesition.height)
-
-    def do_expose_event(self, event):
-        super(Background, self).do_expose_event(event)
-        if self.get_child():
-            self.propagate_expose(self.get_child(), event)
-
-    # def do_size_allocate(self, allocation):
-    #     print 'DO SIZE ALLOCATE BG'
-    #     super(Background, self).do_size_allocate(self, allocation)
-    #     if self.get_child():
-    #         self.get_child().size_allocate(allocation)
+            Widget.set_widget(self, drawing_widget)
+        self.layout_manager = LayoutManager(self._widget)
 
     def size_request(self, layout_manager):
         return 0, 0
@@ -225,5 +254,17 @@ class Background(CustomDrawingMixin, BinMixin, gtk.Bin):
     def draw(self, context, layout_manager):
         pass
 
+    def is_opaque(self):
+        return False
 
-gobject.type_register(Background)
+class DrawingArea(Drawable, Widget):
+    def __init__(self):
+        Widget.__init__(self)
+        Drawable.__init__(self)
+        self.set_widget(MiroDrawingArea())
+
+class Background(Drawable, Bin):
+    def __init__(self):
+        Bin.__init__(self)
+        Drawable.__init__(self)
+        self.set_widget(BackgroundWidget())

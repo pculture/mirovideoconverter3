@@ -1,11 +1,15 @@
 from math import pi as PI
-from mvc.widgets import *
+from mvc.widgets import widgetset
+
+def css_to_color(css_string):
+    parts = (css_string[1:3], css_string[3:5], css_string[5:7])
+    return tuple((int(value, 16) / 255.0) for value in parts)
 
 def align(widget, xalign=0, yalign=0, xscale=0, yscale=0,
         top_pad=0, bottom_pad=0, left_pad=0, right_pad=0):
     """Create an alignment, then add widget to it and return the alignment.
     """
-    alignment = Alignment(xalign, yalign, xscale, yscale,
+    alignment = widgetset.Alignment(xalign, yalign, xscale, yscale,
                           top_pad, bottom_pad, left_pad, right_pad)
     alignment.add(widget)
     return alignment
@@ -45,7 +49,7 @@ def align_bottom(widget, top_pad=0, bottom_pad=0, left_pad=0, right_pad=0):
 def pad(widget, top=0, bottom=0, left=0, right=0):
     """Wrap a widget in an Alignment that will pad it.
     """
-    alignment = Alignment(0, 0, 1, 1,
+    alignment = widgetset.Alignment(0, 0, 1, 1,
                           top, bottom, left, right)
     alignment.add(widget)
     return alignment
