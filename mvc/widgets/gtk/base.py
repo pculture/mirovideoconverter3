@@ -34,7 +34,7 @@ class WidgetMixin(object):
                     logging.exception('while handling signal %r (%r) on %r',
                                       signal_name, args, self)
         else:
-            super(WidgetMixin, self).emit(signal_name, *args)
+            super(WidgetMixin, self).emit(signal_name, *signal_args)
 
 
 class BinMixin(WidgetMixin):

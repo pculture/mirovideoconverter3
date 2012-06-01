@@ -115,7 +115,6 @@ class FileDropTarget(SolidBackground):
                 self.alignment.set_child(self.drag)
             else:
                 self.alignment.set_child(self.normal)
-            self.set_child(self.alignment)
 
     def choose_file(self, widget):
         dialog = FileChooserDialog('Choose File...')
@@ -279,6 +278,47 @@ class ConversionCellRenderer(CustomCellRenderer):
             return vbox
 
 
+class ConvertButton(CustomButton):
+    off = ImageSurface(Image.from_file(
+            image_path("convert-button-off.png")))
+    on = ImageSurface(Image.from_file(
+            image_path("convert-button-on.png")))
+    stop = ImageSurface(Image.from_file(
+            image_path("convert-button-stop.png")))
+
+    def __init__(self):
+        super(ConvertButton, self).__init__()
+        self.set_off()
+
+    def set_on(self):
+        self.label = 'Start Conversions!'
+        self.image = self.on
+
+    def set_off(self):
+        self.label = 'Start Conversions!'
+        self.image = self.off
+
+    def set_stop(self):
+        self.label = 'Stop Conversions'
+        self.image = self.stop
+
+    def size_request(self, layout_manager):
+        return self.off.width, self.off.height
+
+    def draw(self, context, layout_manager):
+        x = (context.width - self.image.width) // 2
+        y = (context.height - self.image.height) // 2
+        self.image.draw(context, x, y, self.image.width, self.image.height)
+        if self.image == self.off:
+            layout_manager.set_text_color(TEXT_DISABLED)
+        else:
+            layout_manager.set_text_color(TEXT_ACTIVE)
+        textbox = layout_manager.textbox(self.label)
+        alignment = cellpack.Alignment(textbox, xalign=0.5, xscale=0.0,
+                                       yalign=0.5, yscale=0)
+        alignment.render_layout(context)
+
+
 class Application(mvc.Application):
 
     def startup(self):
@@ -380,8 +420,8 @@ class Application(mvc.Application):
         vbox.pack_start(self.drop_target, expand=True)
         vbox.pack_start(bottom)
 
-        self.convert_button = Button("Start Conversions!")
-        self.convert_button.disable()
+        self.convert_button = ConvertButton()
+        self.convert_button.set_off()
         self.convert_button.connect('clicked', self.convert)
 
         vbox.pack_start(widgetutil.align(self.convert_button,
@@ -434,13 +474,11 @@ class Application(mvc.Application):
                 can_start = True
         if (self.current_converter is EMPTY_CONVERTER or not
             (can_cancel or can_start)):
-            self.convert_button.disable()
+            self.convert_button.set_off()
         else:
-            self.convert_button.enable()
+            self.convert_button.set_on()
         if can_cancel:
-            self.convert_button.set_label('Cancel Conversions')
-        else:
-            self.convert_button.set_label('Start Conversions!')
+            self.convert_button.set_stop()
 
     def file_activated(self, widget, filename):
         vf = VideoFile(filename)

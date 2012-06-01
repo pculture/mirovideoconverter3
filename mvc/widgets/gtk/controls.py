@@ -34,7 +34,8 @@ import logging
 import gtk
 import gobject
 
-from .base import make_gdk_color
+from .base import make_gdk_color, WidgetMixin
+from .drawing import CustomDrawingMixin
 
 class OptionMenu(gtk.ComboBox):
     def __init__(self, options):
@@ -64,6 +65,69 @@ class Button(gtk.Button):
 
     def disable(self):
         self.set_sensitive(False)
+
+
+class CustomControlMixin(CustomDrawingMixin):
+    def __init__(self):
+        super(CustomControlMixin, self).__init__()
+        self._gtk_cursor = gtk.gdk.Cursor(gtk.gdk.HAND2)
+        self._entry_handlers = None
+        self._connect_enter_notify_handlers()
+
+    def do_expose_event(self, event):
+        CustomDrawingMixin.do_expose_event(self, event)
+        if self.is_focus():
+            style = self.get_style()
+            style.paint_focus(self.window, self.state,
+                    event.area, self, None, self.allocation.x,
+                    self.allocation.y, self.allocation.width,
+                    self.allocation.height)
+
+    def _connect_enter_notify_handlers(self):
+        if self._entry_handlers is None:
+            self._entry_handlers = [
+                    self.connect('enter-notify-event',
+                        self.on_enter_notify),
+                    self.connect('leave-notify-event',
+                        self.on_leave_notify),
+                    self.connect('button-release-event',
+                        self.on_click)
+            ]
+
+    def _disconnect_enter_notify_handlers(self):
+        if self._entry_handlers is not None:
+            for handle in self._entry_handlers:
+                self.disconnect(handle)
+            self._entry_handlers = None
+
+    def on_enter_notify(self, widget, event):
+        self.window.set_cursor(self._gtk_cursor)
+
+    def on_leave_notify(self, widget, event):
+        if self.window:
+            self.window.set_cursor(None)
+
+    def on_click(self, widget, event):
+        self.emit('clicked')
+        return True
+
+
+class CustomButton(CustomControlMixin, WidgetMixin, gtk.Button):
+    def draw(self, wrapper, context):
+        if self.is_active():
+            wrapper.state = 'pressed'
+        elif self.state == gtk.STATE_PRELIGHT:
+            wrapper.state = 'hover'
+        else:
+            wrapper.state = 'normal'
+        wrapper.draw(context, wrapper.layout_manager)
+        self.set_focus_on_click(False)
+
+    def is_active(self):
+        return self.state == gtk.STATE_ACTIVE
+
+
+gobject.type_register(CustomButton)
 
 
 class Label(gtk.Label):

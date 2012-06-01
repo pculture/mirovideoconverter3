@@ -1,6 +1,8 @@
 import gtk
+import gobject
 import cairo
 from .base import BinMixin
+from .layoutmanager import LayoutManager
 
 def make_gdk_color(color):
     def convert_value(value):
@@ -145,3 +147,83 @@ class Gradient(object):
 
     def set_end_color(self, (red, green, blue)):
         self.pattern.add_color_stop_rgb(1, red, green, blue)
+
+
+class CustomDrawingMixin(object):
+    def __init__(self):
+        super(CustomDrawingMixin, self).__init__()
+        self.layout_manager = LayoutManager(self)
+        self.squish_width = self.squish_height = False
+
+    def set_squish_width(self, setting):
+        self.squish_width = setting
+
+    def set_squish_height(self, setting):
+        self.squish_height = setting
+
+    def do_expose_event(self, event):
+        if self.flags() & gtk.NO_WINDOW:
+            drawing_area = self.allocation
+        else:
+            drawing_area = gtk.gdk.Rectangle(0, 0, 
+                    self.allocation.width, self.allocation.height)
+        context = DrawingContext(event.window, drawing_area, event.area)
+        context.style = DrawingStyle(self)
+        if self.flags() & gtk.CAN_FOCUS:
+            focus_space = (self.style_get_property('focus-padding') +
+                    self.style_get_property('focus-line-width'))
+            if not self.squish_width:
+                context.width -= focus_space * 2
+                translate_x = focus_space
+            else:
+                translate_x = 0
+            if not self.squish_height:
+                context.height -= focus_space * 2
+                translate_y = focus_space
+            else:
+                translate_y = 0
+            context.translate(translate_x, translate_y)
+        self.layout_manager.update_cairo_context(context.context)
+        self.layout_manager.reset()
+        self.draw(context, self.layout_manager)
+
+    def do_size_request(self, requesition):
+        width, height = self.size_request(self.layout_manager)
+        requesition.width = width
+        requesition.height = height
+        if self.flags() & gtk.CAN_FOCUS:
+            focus_space = (self.style_get_property('focus-padding') +
+                    self.style_get_property('focus-line-width'))
+            if not self.squish_width:
+                requesition.width += focus_space * 2
+            if not self.squish_height:
+                requesition.height += focus_space * 2
+
+
+class Background(CustomDrawingMixin, BinMixin, gtk.Bin):
+    def do_size_request(self, requesition):
+        super(Background, self).do_size_request(requesition)
+        if self.get_child():
+            child_width, child_height = self.get_child().size_request()
+            requesition.width = max(child_width, requesition.width)
+            requesition.height = max(child_height, requesition.height)
+
+    def do_expose_event(self, event):
+        super(Background, self).do_expose_event(event)
+        if self.get_child():
+            self.propagate_expose(self.get_child(), event)
+
+    # def do_size_allocate(self, allocation):
+    #     print 'DO SIZE ALLOCATE BG'
+    #     super(Background, self).do_size_allocate(self, allocation)
+    #     if self.get_child():
+    #         self.get_child().size_allocate(allocation)
+
+    def size_request(self, layout_manager):
+        return 0, 0
+
+    def draw(self, context, layout_manager):
+        pass
+
+
+gobject.type_register(Background)
