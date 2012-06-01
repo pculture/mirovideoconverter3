@@ -115,6 +115,7 @@ class FileDropTarget(SolidBackground):
                 self.alignment.set_child(self.drag)
             else:
                 self.alignment.set_child(self.normal)
+            self.queue_redraw()
 
     def choose_file(self, widget):
         dialog = FileChooserDialog('Choose File...')
@@ -122,6 +123,19 @@ class FileDropTarget(SolidBackground):
             for filename in dialog.get_filenames():
                 self.emit('file-activated', filename)
         dialog.destroy()
+
+
+class BottomBackground(SolidBackground):
+
+    def __init__(self):
+        super(BottomBackground, self).__init__(color=GRADIENT_BOTTOM)
+
+    # def draw(self, context, layout_manager):
+    #     gradient = Gradient(0, 0, 0, context.height)
+    #     gradient.set_start_color(GRADIENT_TOP)
+    #     gradient.set_end_color(GRADIENT_BOTTOM)
+    #     context.rectangle(0, 0, context.width, context.height)
+    #     context.gradient_fill(gradient)
 
 
 EMPTY_CONVERTER = ConverterInfo("")
@@ -293,14 +307,17 @@ class ConvertButton(CustomButton):
     def set_on(self):
         self.label = 'Start Conversions!'
         self.image = self.on
+        self.queue_redraw()
 
     def set_off(self):
         self.label = 'Start Conversions!'
         self.image = self.off
+        self.queue_redraw()
 
     def set_stop(self):
         self.label = 'Stop Conversions'
         self.image = self.stop
+        self.queue_redraw()
 
     def size_request(self, layout_manager):
         return self.off.width, self.off.height
@@ -394,7 +411,7 @@ class Application(mvc.Application):
             converters.setdefault(media_type, []).append(c)
 
         self.menus = []
-        bottom = HBox()
+        buttons = HBox()
 
         for type_ in converter_types:
             options = [(c.name, c.identifier) for c in
@@ -402,9 +419,10 @@ class Application(mvc.Application):
             options.sort()
             options.insert(0, (type_.title(), None))
             menu = OptionMenu(options)
+            menu.set_size_request(460 / len(converter_types), -1)
             menu.connect('changed', self.change_conversion)
             self.menus.append(menu)
-            bottom.pack_start(menu)
+            buttons.pack_start(menu)
 
 
         self.drop_target = FileDropTarget()
@@ -418,16 +436,20 @@ class Application(mvc.Application):
         self.scroller.add(self.table)
         vbox.pack_start(self.scroller)
         vbox.pack_start(self.drop_target, expand=True)
-        vbox.pack_start(bottom)
+
+        bottom = BottomBackground()
+        bottom_box = VBox()
+        bottom_box.pack_start(buttons)
+
 
         self.convert_button = ConvertButton()
-        self.convert_button.set_off()
         self.convert_button.connect('clicked', self.convert)
 
-        vbox.pack_start(widgetutil.align(self.convert_button,
+        bottom_box.pack_start(widgetutil.align(self.convert_button,
                                          xalign=0.5, yalign=0.5,
                                          top_pad=50, bottom_pad=50))
-
+        bottom.set_child(bottom_box)
+        vbox.pack_start(bottom)
         self.window.add(vbox)
 
         idle_add(self.conversion_manager.check_notifications)

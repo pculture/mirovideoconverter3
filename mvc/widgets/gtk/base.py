@@ -36,6 +36,13 @@ class WidgetMixin(object):
         else:
             super(WidgetMixin, self).emit(signal_name, *signal_args)
 
+    def queue_redraw(self):
+        self.queue_draw()
+
+    def redraw_now(self):
+        self.queue_draw()
+        self.window.process_updates(True)
+
 
 class BinMixin(WidgetMixin):
     def add(self, widget):
