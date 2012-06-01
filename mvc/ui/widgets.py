@@ -180,6 +180,16 @@ class ConversionModel(TableModel):
         else:
             self.update_iter(iter_, values)
 
+
+class IconHotspot(cellpack.Hotspot):
+
+    def __init__(self, name, icon, textbox):
+        box = cellpack.HBox(spacing=5)
+        box.pack(cellpack.Alignment(icon, xscale=0, yscale=0))
+        box.pack(textbox)
+        super(IconHotspot, self).__init__(name, box)
+
+
 class ConversionCellRenderer(CustomCellRenderer):
 
     clear = ImageSurface(Image.from_file(
@@ -200,6 +210,10 @@ class ConversionCellRenderer(CustomCellRenderer):
             image_path("item-error.png")))
     completed = ImageSurface(Image.from_file(
             image_path("item-completed.png")))
+
+    def __init__(self):
+        super(ConversionCellRenderer, self).__init__()
+        self.alignment = None
 
     def get_size(self, style, layout_manager):
         return 450, 90
@@ -224,6 +238,7 @@ class ConversionCellRenderer(CustomCellRenderer):
         left_right.pack(self.layout_right(layout_manager))
 
         alignment = cellpack.Alignment(left_right, yscale=0, yalign=0.5)
+        self.alignment = alignment
 
         background = cellpack.Background(alignment)
         background.set_callback(self.draw_background)
@@ -291,22 +306,31 @@ class ConversionCellRenderer(CustomCellRenderer):
             box.pack(cellpack.Alignment(self.queued))
             box.pack(layout_manager.textbox("Queued"))
             return box
-        elif self.status == 'finished':
+        elif self.status in ('finished', 'error'):
             vbox = cellpack.VBox(spacing=10)
             top = cellpack.HBox(spacing=5)
-            top.pack(cellpack.Alignment(self.showfile, xscale=0, yscale=0))
-            top.pack(layout_manager.textbox("Show File"))
-            top.pack(cellpack.Alignment(self.clear, xscale=0, yscale=0))
-            top.pack(layout_manager.textbox("Clear"))
+            if self.status == 'finished':
+                top.pack(IconHotspot('show-file', self.showfile,
+                                     layout_manager.textbox('Show File')))
+            top.pack(IconHotspot('clear', self.showfile,
+                                 layout_manager.textbox('Clear')))
             vbox.pack(top)
-            bottom = cellpack.HBox(spacing=5)
-            bottom.pack(cellpack.Alignment(self.converted_to,
-                                           xscale=0, yscale=0))
-            layout_manager.set_text_color(TEXT_INFO)
-            bottom.pack(layout_manager.textbox("Converted to 1034Mb"))
-            vbox.pack(bottom)
+            if self.status == 'finished':
+                bottom = cellpack.HBox(spacing=5)
+                bottom.pack(cellpack.Alignment(self.converted_to,
+                                               xscale=0, yscale=0))
+                layout_manager.set_text_color(TEXT_INFO)
+                bottom.pack(layout_manager.textbox("Converted to 1034Mb"))
+                vbox.pack(bottom)
             return vbox
 
+    def hotspot_test(self, style, layout_manager, x, y, width, height):
+        if self.alignment is None:
+            return
+        hotspot_info = self.alignment.find_hotspot(x, y, width, height)
+        if hotspot_info:
+            print 'HOTSPOT INFO', hotspot_info
+            return hotspot_info[0]
 
 class ConvertButton(CustomButton):
     off = ImageSurface(Image.from_file(
