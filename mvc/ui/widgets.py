@@ -174,7 +174,7 @@ class ConversionModel(widgetset.TableModel):
         if iter_ is None:
             self.conversion_to_iter[conversion] = self.append(*values)
         else:
-            self.update_iter(iter_, values)
+            self.update(iter_, *values)
 
 
 class IconHotspot(cellpack.Hotspot):
@@ -400,48 +400,6 @@ class Application(mvc.Application):
         c.set_min_width(450)
         self.table.add_column(c)
 
-        if True:
-            self.model.append(
-                    'Super_Bowl_XLVI_New_York_Giants_very_long_output_title.avi',
-                    '/home/z3p/',
-                    'conv',
-                    'finished',
-                    100,
-                    100,
-                    0,
-                    widgetset.Image(image_path('audio.png')))
-
-            self.model.append(
-                    'Big_buck_bunny_original.avi',
-                    '/home/z3p/',
-                    'conv',
-                    'error',
-                    0,
-                    0,
-                    0,
-                    widgetset.Image(image_path('audio.png')))
-
-            self.model.append(
-                    'LouisCK_1024x800.avi',
-                    '/home/z3p/',
-                    'conv',
-                    'converting',
-                    100.0,
-                    64.0,
-                    0,
-                    widgetset.Image(image_path('audio.png')))
-
-            self.model.append(
-                    'JimmyFallon_21_01_2012.flv',
-                    '/home/z3p/',
-                    'conv',
-                    'initialized',
-                    0,
-                    0,
-                    0,
-                    widgetset.Image(image_path('audio.png')))
-            self.table.model_changed()
-
         # bottom buttons
         converter_types = ('apple', 'android', 'other', 'format')
         converters = {}
@@ -547,6 +505,7 @@ class Application(mvc.Application):
                                                    self.current_converter)
         c.listen(self.update_conversion)
         self.update_conversion(c)
+        self.update_table_size()
 
     def change_conversion(self, widget, index):
         if hasattr(self, '_doing_conversion_change'):
@@ -590,12 +549,15 @@ class Application(mvc.Application):
 
     def update_table_size(self):
         conversions = len(self.model)
+        total_height = 385
         if not conversions:
             self.drop_target.set_small(False)
+            self.drop_target.set_size_request(-1, total_height)
         else:
-            height = 94 * conversions
-            self.scroller.set_size_request(-1, min(height, 320))
+            height = min(94 * conversions, 320)
+            self.scroller.set_size_request(-1, height)
             self.drop_target.set_small(True)
+            self.drop_target.set_size_request(-1, total_height - height)
 
 if __name__ == "__main__":
     initialize()
