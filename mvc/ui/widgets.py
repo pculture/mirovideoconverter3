@@ -440,6 +440,7 @@ class Application(mvc.Application):
                     0,
                     0,
                     widgetset.Image(image_path('audio.png')))
+            self.table.model_changed()
 
         # bottom buttons
         converter_types = ('apple', 'android', 'other', 'format')
@@ -493,8 +494,6 @@ class Application(mvc.Application):
         self.window.set_content_widget(vbox)
 
         idle_add(self.conversion_manager.check_notifications)
-
-        self.window.set_frame(width=460, height=600)
 
         self.window.connect('file-drag-motion', self.drag_motion)
         self.window.connect('file-drag-received', self.drag_data_received)
@@ -586,6 +585,7 @@ class Application(mvc.Application):
 
     def update_conversion(self, conversion):
         self.model.update_conversion(conversion)
+        self.table.model_changed()
         self.update_convert_button()
 
     def update_table_size(self):
@@ -602,6 +602,7 @@ if __name__ == "__main__":
     app = Application()
     app.startup()
     app.run()
+
 
 
 

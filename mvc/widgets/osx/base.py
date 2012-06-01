@@ -1,61 +1,79 @@
-from collections import defaultdict
-import logging
+# Miro - an RSS based video player application
+# Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011
+# Participatory Culture Foundation
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+# In addition, as a special exception, the copyright holders give
+# permission to link the code of portions of this program with the OpenSSL
+# library.
+#
+# You must obey the GNU General Public License in all respects for all of
+# the code used other than OpenSSL. If you modify file(s) with this
+# exception, you may extend this exception to your version of the file(s),
+# but you are not obligated to do so. If you do not wish to do so, delete
+# this exception statement from your version. If you delete this exception
+# statement from all source files in the program, then also delete it here.
+
+""".base.py -- Widget base classes."""
 
 from AppKit import *
-from objc import YES, NO
+from Foundation import *
+from objc import YES, NO, nil
 
-from .helpers import NotificationForwarder
+from mvc.widgets import signals
+import wrappermap
 from .viewport import Viewport, BorrowedViewport
 
+class Widget(signals.SignalEmitter):
+    """Base class for Cocoa widgets.
+    
+    attributes:
 
-class Widget(object):
+    CREATES_VIEW -- Does the widget create a view for itself?  If this is True
+    the widget must have an attribute named view, which is the view that the
+    widget uses.
 
-    SIGNAL_MAP = {}
-    CREATES_VIEW = True
-    view = None
-    viewport = None
+    placement -- What portion of view the widget occupies.
+    """
+
+    CREATES_VIEW = True 
 
     def __init__(self):
-        if self.CREATES_VIEW and self.view:
-            self.notifications = NotificationForwarder.create(self.view)
-            for signal, notification in self.SIGNAL_MAP.iteritems():
-                self.notifications.connect(lambda n: self.emit(signal),
-                                           notification)
-        self.emitting = set()
-        self.listeners = defaultdict(set)
+        signals.SignalEmitter.__init__(self, 'size-request-changed',
+                'size-allocated', 'key-press', 'focus-out')
+        self.create_signal('place-in-scroller')
+        self.viewport = None
+        self.parent_is_scroller = False
         self.manual_size_request = None
         self.cached_size_request = None
-        self.drag_dest = None
+        self._disabled = False
 
-    def create_signal(self, signal):
-        pass
+    def set_can_focus(self, allow):
+        assert isinstance(self.view, NSControl)
+        self.view.setRefusesFirstResponder_(not allow)
 
-    def connect(self, signal, callback):
-        self.listeners[signal].add(callback)
-        return (signal, callback)
+    def set_size_request(self, width, height):
+        self.manual_size_request = (width, height)
+        self.invalidate_size_request()
 
-    def disconnect(self, (signal, callback)):
-        self.listeners[signal].remove(callback)
-
-    def emit(self, signal, *args):
-        if signal in self.emitting:
-            return
-        self.emitting.add(signal)
-        if signal in self.listeners:
-            for listener in self.listeners[signal]:
-                try:
-                    listener(self, *args)
-                except:
-                    logging.error('during signal %r on %r', signal, self,
-                                  exc_info=True)
-        self.emitting.remove(signal)
-
-    def invalidate_size_request(self):
-        old_size_request = self.cached_size_request
-        self.cached_size_request = None
-        self.emit('size-request-changed', old_size_request)
-        if self.viewport:
-            self.viewport.redraw_now()
+    def clear_size_request_cache(self):
+        from mvc.widgets.osx import size_request_manager
+        if size_request_manager is not None:
+            while size_request_manager.widgets_to_request:
+                size_request_manager._run_requests()
 
     def get_size_request(self):
         if self.manual_size_request:
@@ -68,23 +86,48 @@ class Widget(object):
         return self.get_natural_size_request()
 
     def get_natural_size_request(self):
-        if self.cached_size_request is None:
+        if self.cached_size_request:
+            return self.cached_size_request
+        else:
             self.cached_size_request = self.calc_size_request()
-        return self.cached_size_request
+            return self.cached_size_request
+
+    def invalidate_size_request(self):
+        from mvc.widgets.osx import size_request_manager
+        if size_request_manager is not None:
+            size_request_manager.add_widget(self)
+
+    def do_invalidate_size_request(self):
+        """Recalculate the size request for this widget."""
+        old_size_request = self.cached_size_request
+        self.cached_size_request = None
+        self.emit('size-request-changed', old_size_request)
 
     def calc_size_request(self):
-        raise NotImplementedError(
-            "%s.calc_size_request()" % self.__class__.__name__)
+        """Return the minimum size needed to display this widget.
+        Must be Implemented by subclasses.  
+        """
+        raise NotImplementedError()
 
-    def set_size_request(self, width, height):
-        self.manual_size_request = (width, height)
-        self.invalidate_size_request()
+    def _debug_size_request(self, nesting_level=0):
+        """Debug size request calculations.
+
+        This method recursively prints out the size request for each widget.
+        """
+        request = self.calc_size_request()
+        width = int(request[0])
+        height = int(request[1])
+        indent = '    ' * nesting_level
+        me = str(self.__class__).split('.')[-1]
+        print '%s%s: %sx%s' % (indent, me, width, height)
 
     def place(self, rect, containing_view):
+        """Place this widget on a view.  """
         if self.viewport is None:
             if self.CREATES_VIEW:
                 self.viewport = Viewport(self.view, rect)
                 containing_view.addSubview_(self.view)
+                wrappermap.add(self.view, self)
             else:
                 self.viewport = BorrowedViewport(containing_view, rect)
             self.viewport_created()
@@ -92,48 +135,42 @@ class Widget(object):
             if not self.viewport.at_position(rect):
                 self.viewport.reposition(rect)
                 self.viewport_repositioned()
+        self.emit('size-allocated', rect.size.width, rect.size.height)
 
     def remove_viewport(self):
         if self.viewport is not None:
             self.viewport.remove()
             self.viewport = None
+            if self.CREATES_VIEW:
+                wrappermap.remove(self.view)
 
     def viewport_created(self):
-        pass
+        """Called after we first create a viewport.  Subclasses can override
+        this method if they want to handle this event.
+        """
 
     def viewport_repositioned(self):
-        pass
+        """Called when we reposition our viewport.  Subclasses can override
+        this method if they want to handle this event.
+        """
 
-    def accept_file_drag(self, val):
-        if not val:
-            self.drag_dest = None
-        else:
-            self.drag_dest = NSDragOperationCopy
-            self.view.registerForDraggedTypes_([NSURLPboardType])
+    def viewport_scrolled(self):
+        """Called by the Scroller widget on it's child widget when it is
+        scrolled.
+        """
 
-    def prepareForDragOperation_(self, info):
-        return NO if self.drag_dest is None else YES
+    def get_width(self):
+        return int(self.viewport.get_width())
+    width = property(get_width)
 
-    def performDragOperation_(self, info):
-        pb = info.draggingPasteboard()
-        point = info.draggingLocation()
-        available_types = set(pb.types()) & set([NSURLPboardType])
-        if available_types:
-            type_ = available_types.pop()
-            values = list(pb.propertyListForType_(type_))
-            self.emit('file-drag-received', values)
-        self.draggingExited_(info)
+    def get_height(self):
+        return int(self.viewport.get_height())
+    height = property(get_height)
 
-    def draggingEntered_(self, info):
-        return self.draggingUpdated_(info)
-
-    def draggingUpdated_(self, info):
-        point = info.draggingLocation()
-        self.emit('file-drag-motion')
-        return self.drag_dest
-
-    def draggingExited_(self, info):
-        self.emit('file-drag-leave')
+    def get_window(self):
+        if not self.viewport.view:
+            return None
+        return wrappermap.wrapper(self.viewport.view.window())
 
     def queue_redraw(self):
         if self.viewport:
@@ -143,6 +180,32 @@ class Widget(object):
         if self.viewport:
             self.viewport.redraw_now()
 
+    def relative_position(self, other_widget):
+        """Get the position of another widget, relative to this widget."""
+        basePoint = self.viewport.view.convertPoint_fromView_(
+                other_widget.viewport.area().origin,
+                other_widget.viewport.view)
+        return (basePoint.x - self.viewport.area().origin.x,
+                basePoint.y - self.viewport.area().origin.y)
+
+    def make_color(self, (red, green, blue)):
+        return NSColor.colorWithDeviceRed_green_blue_alpha_(red, green, blue, 
+                1.0)
+
+    def enable(self):
+        self._disabled = False
+
+    def disable(self):
+        self._disabled = True
+
+    def set_disabled(self, disabled):
+        if disabled:
+            self.disable()
+        else:
+            self.enable()
+
+    def get_disabled(self):
+        return self._disabled
 
 class Container(Widget):
     """Widget that holds other widgets.  """
@@ -155,8 +218,8 @@ class Container(Widget):
         self.invalidate_size_request()
 
     def connect_child_signals(self, child):
-        handle = child.connect('size-request-changed',
-                               self.on_child_size_request_changed)
+        handle = child.connect_weak('size-request-changed',
+                self.on_child_size_request_changed)
         self.callback_handles[child] = handle
 
     def disconnect_child_signals(self, child):
@@ -194,10 +257,10 @@ class Container(Widget):
 
     def children_changed(self):
         """Invoked when the set of children for this widget changes."""
-        self.invalidate_size_request()
+        self.do_invalidate_size_request()
 
-    def invalidate_size_request(self):
-        Widget.invalidate_size_request(self)
+    def do_invalidate_size_request(self):
+        Widget.do_invalidate_size_request(self)
         if self.viewport:
             self.place_children()
 
@@ -213,9 +276,12 @@ class Container(Widget):
 
     def place_children(self):
         """Layout our child widgets.  Must be implemented by subclasses."""
-        raise NotImplementedError(
-            "%s.place_children()" % self.__class__.__name__)
+        raise NotImplementedError()
 
+    def _debug_size_request(self, nesting_level=0):
+        for child in self.children:
+            child._debug_size_request(nesting_level+1)
+        Widget._debug_size_request(self, nesting_level)
 
 class Bin(Container):
     """Container that only has one child widget."""
@@ -233,16 +299,13 @@ class Bin(Container):
             return []
     children = property(get_children)
 
-    def get_child(self):
-        return self.child
-
     def add(self, child):
         if self.child is not None:
             raise ValueError("Already have a child: %s" % self.child)
         self.child = child
         self.child_added(self.child)
 
-    def remove(self, child=None):
+    def remove(self):
         if self.child is not None:
             old_child = self.child
             self.child = None
@@ -261,7 +324,6 @@ class Bin(Container):
         Container.disable(self)
         self.child.disable()
 
-
 class SimpleBin(Bin):
     """Bin that whose child takes up it's entire space."""
 
@@ -274,7 +336,6 @@ class SimpleBin(Bin):
     def place_children(self):
         if self.child:
             self.child.place(self.viewport.area(), self.viewport.view)
-
 
 class FlippedView(NSView):
     """Flipped NSView.  We use these internally to lessen the differences
@@ -293,6 +354,9 @@ class FlippedView(NSView):
 
     def isFlipped(self):
         return YES
+
+    def isOpaque(self):
+        return self.background is not None
 
     def setBackgroundColor_(self, color):
         self.background = color

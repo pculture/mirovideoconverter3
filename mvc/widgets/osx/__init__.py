@@ -3,15 +3,13 @@ from objc import nil
 
 from PyObjCTools import AppHelper
 
-from .window import *
-from .layout import *
-from .controls import *
-from .table import *
-from .image import *
-from .drawing import *
+size_request_manager = None
 
 def initialize():
+    global size_request_manager
     NSApplication.sharedApplication()
+    from mvc.widgets.osx.widgetupdates import SizeRequestManager
+    size_request_manager = SizeRequestManager()
 
 def mainloop_start():
     NSApplicationMain([])
@@ -27,5 +25,6 @@ def idle_add(callback):
 
 def idle_remove(id_):
     pass
+
 
 

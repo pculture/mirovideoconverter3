@@ -1,3 +1,31 @@
+# Miro - an RSS based video player application
+# Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011
+# Participatory Culture Foundation
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+# In addition, as a special exception, the copyright holders give
+# permission to link the code of portions of this program with the OpenSSL
+# library.
+#
+# You must obey the GNU General Public License in all respects for all of
+# the code used other than OpenSSL. If you modify file(s) with this
+# exception, you may extend this exception to your version of the file(s),
+# but you are not obligated to do so. If you do not wish to do so, delete
+# this exception statement from your version. If you delete this exception
+# statement from all source files in the program, then also delete it here.
 
 """textlayout.py -- Contains the LayoutManager class.  It handles laying text,
 buttons, getting font metrics and other tasks that are required to size
@@ -8,6 +36,8 @@ import math
 from AppKit import *
 from Foundation import *
 from objc import YES, NO, nil
+
+from .import drawing
 
 INFINITE = 1000000 # size of an "infinite" dimension
 
@@ -259,3 +289,149 @@ class TextBox(object):
         if self.shadow is not None:
             context.restore()
         context.path.removeAllPoints()
+
+class NativeButton(object):
+
+    def __init__(self, text, font, pressed, disabled=False):
+        self.min_width = 0
+        self.cell = NSButtonCell.alloc().init()
+        self.cell.setBezelStyle_(NSRoundRectBezelStyle)
+        self.cell.setButtonType_(NSMomentaryPushInButton)
+        self.cell.setFont_(font.nsfont)
+        self.cell.setEnabled_(not disabled)
+        self.cell.setTitle_(text)
+        if pressed:
+            self.cell.setState_(NSOnState)
+        else:
+            self.cell.setState_(NSOffState)
+        self.cell.setImagePosition_(NSImageLeft)
+
+    def set_icon(self, icon):
+        image = icon.image.copy()
+        image.setFlipped_(NO)
+        self.cell.setImage_(image)
+
+    def get_size(self):
+        size = self.cell.cellSize()
+        return size.width, size.height
+
+    def draw(self, context, x, y, width, height):
+        rect = NSMakeRect(x, y, width, height)
+        NSGraphicsContext.currentContext().saveGraphicsState()
+        self.cell.drawWithFrame_inView_(rect, context.view)
+        NSGraphicsContext.currentContext().restoreGraphicsState()
+        context.path.removeAllPoints()
+
+class StyledButton(object):
+    PAD_HORIZONTAL = 11
+    BIG_PAD_VERTICAL = 4
+    SMALL_PAD_VERTICAL = 2
+    TOP_COLOR = (1, 1, 1)
+    BOTTOM_COLOR = (0.86, 0.86, 0.86)
+    LINE_COLOR_TOP = (0.71, 0.71, 0.71)
+    LINE_COLOR_BOTTOM = (0.45, 0.45, 0.45)
+    TEXT_COLOR = (0.19, 0.19, 0.19)
+    DISABLED_COLOR = (0.86, 0.86, 0.86)
+    DISABLED_TEXT_COLOR = (0.43, 0.43, 0.43)
+    ICON_PAD = 8
+    
+    def __init__(self, text, font, pressed, disabled=False):
+        self.pressed = pressed
+        self.disabled = disabled
+        attributes = NSMutableDictionary.alloc().init()
+        attributes.setObject_forKey_(font.nsfont, NSFontAttributeName)
+        if self.disabled:
+            color = self.DISABLED_TEXT_COLOR
+        else:
+            color = self.TEXT_COLOR
+        nscolor = NSColor.colorWithDeviceRed_green_blue_alpha_(color[0], color[1], color[2], 1.0)
+        attributes.setObject_forKey_(nscolor, NSForegroundColorAttributeName)
+        self.title = NSAttributedString.alloc().initWithString_attributes_(text, attributes)
+        self.image = None
+
+    def set_icon(self, icon):
+        self.image = icon.image.copy()
+        self.image.setFlipped_(YES)
+
+    def get_size(self):
+        width, height = self.get_text_size()
+        if self.image is not None:
+            width += self.image.size().width + self.ICON_PAD
+            height = max(height, self.image.size().height)
+            height += self.BIG_PAD_VERTICAL * 2
+        else:
+            height += self.SMALL_PAD_VERTICAL * 2
+        if height % 2 == 1:
+            # make height even so that the radius of our circle is whole
+            height += 1
+        width += self.PAD_HORIZONTAL * 2
+        return width, height
+
+    def get_text_size(self):
+        size = self.title.size()
+        return size.width, size.height
+
+    def draw(self, context, x, y, width, height):
+        self._draw_button(context, x, y, width, height)
+        self._draw_title(context, x, y)
+        context.path.removeAllPoints()
+
+    def _draw_button(self, context, x, y, width, height):
+        radius = height / 2
+        self._draw_path(context, x, y, width, height, radius)
+        if self.disabled:
+            end_color = self.DISABLED_COLOR
+            start_color = self.DISABLED_COLOR
+        elif self.pressed:
+            end_color = self.TOP_COLOR
+            start_color = self.BOTTOM_COLOR
+        else:
+            context.set_line_width(1)
+            start_color = self.TOP_COLOR
+            end_color = self.BOTTOM_COLOR
+        gradient = drawing.Gradient(x, y, x, y+height)
+        gradient.set_start_color(start_color)
+        gradient.set_end_color(end_color)
+        context.gradient_fill(gradient)
+        self._draw_border(context, x, y, width, height, radius)
+
+    def _draw_path(self, context, x, y, width, height, radius):
+        inner_width = width - radius * 2
+        context.move_to(x + radius, y)
+        context.rel_line_to(inner_width, 0)
+        context.arc(x + width - radius, y+radius, radius, -math.pi/2, math.pi/2)
+        context.rel_line_to(-inner_width, 0)
+        context.arc(x + radius, y+radius, radius, math.pi/2, -math.pi/2)
+
+    def _draw_path_reverse(self, context, x, y, width, height, radius):
+        inner_width = width - radius * 2
+        context.move_to(x + radius, y)
+        context.arc_negative(x + radius, y+radius, radius, -math.pi/2, math.pi/2)
+        context.rel_line_to(inner_width, 0)
+        context.arc_negative(x + width - radius, y+radius, radius, math.pi/2, -math.pi/2)
+        context.rel_line_to(-inner_width, 0)
+
+    def _draw_border(self, context, x, y, width, height, radius):
+        self._draw_path(context, x, y, width, height, radius)
+        self._draw_path_reverse(context, x+1, y+1, width-2, height-2, radius-1)
+        gradient = drawing.Gradient(x, y, x, y+height)
+        gradient.set_start_color(self.LINE_COLOR_TOP)
+        gradient.set_end_color(self.LINE_COLOR_BOTTOM)
+        context.save()
+        context.clip()
+        context.rectangle(x, y, width, height)
+        context.gradient_fill(gradient)
+        context.restore()
+
+    def _draw_title(self, context, x, y):
+        c_width, c_height = self.get_size()
+        t_width, t_height = self.get_text_size()
+        x = x + self.PAD_HORIZONTAL
+        y = y + (c_height - t_height) / 2
+        if self.image is not None:
+            self.image.drawAtPoint_fromRect_operation_fraction_(
+                NSPoint(x, y+3), NSZeroRect, NSCompositeSourceOver, 1.0)
+            x += self.image.size().width + self.ICON_PAD
+        else:
+            y += 0.5
+        self.title.drawAtPoint_(NSPoint(x, y))
