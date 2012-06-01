@@ -135,6 +135,14 @@ class Widget(object):
     def draggingExited_(self, info):
         self.emit('file-drag-leave')
 
+    def queue_redraw(self):
+        if self.viewport:
+            self.viewport.queue_redraw()
+
+    def redraw_now(self):
+        if self.viewport:
+            self.viewport.redraw_now()
+
 
 class Container(Widget):
     """Widget that holds other widgets.  """

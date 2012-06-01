@@ -246,3 +246,30 @@ class Gradient(object):
         end_point = NSPoint(self.x2, self.y2)
         nsgradient.drawFromPoint_toPoint_options_(start_point, end_point, 0)
 
+class DrawingMixin(object):
+    def calc_size_request(self):
+        return self.size_request(self.view.layout_manager)
+
+    # squish width / squish height only make sense on GTK
+    def set_squish_width(self, setting):
+        pass
+
+    def set_squish_height(self, setting):
+        pass
+
+    # Default implementations for methods that subclasses override.
+
+    def is_opaque(self):
+        return False
+
+    def size_request(self, layout_manager):
+        return 0, 0
+
+    def draw(self, context, layout_manager):
+        pass
+
+    def viewport_repositioned(self):
+        # since this is a Mixin class, we want to make sure that our other
+        # classes see the viewport_repositioned() call.
+        super(DrawingMixin, self).viewport_repositioned()
+        self.queue_redraw()
