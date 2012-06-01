@@ -242,6 +242,14 @@ class ConversionCellRenderer(CustomCellRenderer):
         context.line_to(context.width, 0.5)
         context.stroke()
 
+    def draw_progressbar(self, context, x, y, _, height, width):
+        # We're only drawing a certain amount of width, not however much we're
+        # allocated.  So, we ignore the passed-in width and just use what we
+        # set in layout_bottom.
+        widgetutil.circular_rect(context, x, y, width-1, height-1)
+        context.set_color((1, 1, 1))
+        context.fill()
+
     def layout_left(self, layout_manager):
         surface = ImageSurface(self.thumbnail)
         return cellpack.Padding(surface, 10, 10, 10, 10)
@@ -264,10 +272,18 @@ class ConversionCellRenderer(CustomCellRenderer):
         layout_manager.set_text_color(TEXT_COLOR)
         if self.status in ('converting', 'staging'):
             box = cellpack.HBox(spacing=5)
-            box.pack(cellpack.Alignment(self.progressbar_base,
+            stack = cellpack.Stack()
+            stack.pack(cellpack.Alignment(self.progressbar_base,
+                                          xscale=0, yscale=0))
+            percent = self.progress / self.duration
+            width = int(percent * self.progressbar_base.width)
+            stack.pack(cellpack.DrawingArea(
+                    width, self.progressbar_base.height,
+                    self.draw_progressbar, width))
+            box.pack(cellpack.Alignment(stack,
                                         xscale=0, yscale=0))
             textbox = layout_manager.textbox("%d%%" % (
-                        100 * self.progress / self.duration))
+                        100 * percent))
             box.pack(textbox)
             return box
         elif self.status == 'initialized': # queued

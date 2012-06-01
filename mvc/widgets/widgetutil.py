@@ -1,3 +1,4 @@
+from math import pi as PI
 from mvc.widgets import *
 
 def align(widget, xalign=0, yalign=0, xscale=0, yscale=0,
@@ -49,3 +50,32 @@ def pad(widget, top=0, bottom=0, left=0, right=0):
     alignment.add(widget)
     return alignment
 
+def circular_rect(context, x, y, width, height):
+    """Make a path for a rectangle with the left/right side being circles.
+    """
+    radius = height / 2.0
+    inner_width = width - height
+    inner_y = y + radius
+    inner_x1 = x + radius
+    inner_x2 = inner_x1 + inner_width
+
+    context.move_to(inner_x1, y)
+    context.rel_line_to(inner_width, 0)
+    context.arc(inner_x2, inner_y, radius, -PI/2, PI/2)
+    context.rel_line_to(-inner_width, 0)
+    context.arc(inner_x1, inner_y, radius, PI/2, -PI/2)
+
+def circular_rect_negative(context, x, y, width, height):
+    """The same path as ``circular_rect()``, but going counter clockwise.
+    """
+    radius = height / 2.0
+    inner_width = width - height
+    inner_y = y + radius
+    inner_x1 = x + radius
+    inner_x2 = inner_x1 + inner_width
+
+    context.move_to(inner_x1, y)
+    context.arc_negative(inner_x1, inner_y, radius, -PI/2, PI/2)
+    context.rel_line_to(inner_width, 0)
+    context.arc_negative(inner_x2, inner_y, radius, PI/2, -PI/2)
+    context.rel_line_to(-inner_width, 0)
