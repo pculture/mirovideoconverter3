@@ -23,6 +23,9 @@ class VideoFile(object):
             get_media_info(self.filename))
 
     def get_thumbnail(self, width=None, height=None, type_='.png'):
+        if not self.video_codec:
+            # don't bother with thumbnails for audio files
+            return None
         if width is None:
             width = -1
         if height is None:

@@ -172,7 +172,6 @@ class GetThumbnailTest(base.Test):
         self.assertEqual(thumbnail.width, 100)
         self.assertEqual(thumbnail.height, 100)
 
-
 class VideoFileTest(base.Test):
 
     def setUp(self):
@@ -211,3 +210,9 @@ class VideoFileTest(base.Test):
         thumbnail2 = self.get_thumbnail_from_video()
         self.assertEqual(thumbnail.filename,
                          thumbnail2.filename)
+
+    def test_get_thumbnail_audio(self):
+        audio_path = os.path.join(self.testdata_dir, 'mp3-0.mp3')
+        audio = video.VideoFile(audio_path)
+        self.assertEqual(audio.get_thumbnail(), None)
+        self.assertEqual(audio.get_thumbnail(90, 70), None)

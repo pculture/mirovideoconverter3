@@ -181,7 +181,8 @@ class ConversionModel(widgetset.TableModel):
             'object', # the actual conversion
             )
         self.conversion_to_iter = {}
-        self.thumbnail_to_image = {}
+        self.thumbnail_to_image = {None: widgetset.Image(
+                image_path('audio.png'))}
 
     def conversions(self):
         return iter(self.conversion_to_iter)
@@ -212,6 +213,13 @@ class ConversionModel(widgetset.TableModel):
         else:
             self.update(iter_, *values)
 
+    def remove(self, iter_):
+        conversion = self[iter_][-1]
+        del self.conversion_to_iter[conversion]
+        thumbnail_path = conversion.video.get_thumbnail(90, 70)
+        if thumbnail_path:
+            del self.thumbnail_to_image[thumbnail_path]
+        super(ConversionModel, self).remove(iter_)
 
 class IconHotspot(cellpack.Hotspot):
 
