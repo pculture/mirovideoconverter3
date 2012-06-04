@@ -558,6 +558,10 @@ class Application(mvc.Application):
         c = self.conversion_manager.get_conversion(vf,
                                                    self.current_converter)
         c.listen(self.update_conversion)
+        if self.conversion_manager.running:
+            # start running automatically if a conversion is already in
+            # progress
+            self.conversion_manager.run_conversion(c)
         self.update_conversion(c)
         self.update_table_size()
 
