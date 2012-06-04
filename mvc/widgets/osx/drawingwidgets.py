@@ -29,8 +29,8 @@
 
 """drawingviews.py -- views that support custom drawing."""
 
-from .import wrappermap
-from .import drawing
+import wrappermap
+import drawing
 from .base import Widget, SimpleBin, FlippedView
 from .layoutmanager import LayoutManager
 

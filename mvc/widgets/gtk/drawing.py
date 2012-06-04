@@ -35,7 +35,7 @@ import cairo
 import gobject
 import gtk
 
-from .import wrappermap
+import wrappermap
 from .base import Widget, Bin
 from .layoutmanager import LayoutManager
 

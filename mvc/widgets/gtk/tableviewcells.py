@@ -35,8 +35,8 @@ import pango
 
 from mvc.widgets import signals
 from mvc.widgets import widgetconst
-from .import drawing
-from .import wrappermap
+import drawing
+import wrappermap
 from .base import make_gdk_color
 
 class CellRenderer(object):

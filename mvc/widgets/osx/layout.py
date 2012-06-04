@@ -46,8 +46,8 @@ from AppKit import *
 from Foundation import *
 from objc import YES, NO, nil, signature, loadBundle
 
-from .import tableview
-from .import wrappermap
+import tableview
+import wrappermap
 from .base import Container, Bin, FlippedView
 from mvc.utils import Matrix
 

@@ -37,7 +37,7 @@ from AppKit import *
 from Foundation import *
 from objc import YES, NO, nil
 
-from .import drawing
+import drawing
 
 INFINITE = 1000000 # size of an "infinite" dimension
 

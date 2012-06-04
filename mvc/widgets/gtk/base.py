@@ -32,9 +32,9 @@
 import gtk
 
 from miro import signals
-from .import wrappermap
+import wrappermap
 from .weakconnect import weak_connect
-from .import keymap
+import keymap
 
 def make_gdk_color(miro_color):
     def convert_value(value):

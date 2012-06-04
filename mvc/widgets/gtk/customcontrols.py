@@ -38,7 +38,7 @@ import math
 import gtk
 import gobject
 
-from .import wrappermap
+import wrappermap
 from .base import Widget
 from .simple import Label, Image
 from .drawing import (CustomDrawingMixin, Drawable,
