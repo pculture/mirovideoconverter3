@@ -11,7 +11,8 @@ except ImportError:
 import urllib
 import urlparse
 
-from mvc.widgets import initialize, idle_add, mainloop_start, mainloop_stop
+from mvc.widgets import (initialize, idle_add, mainloop_start, mainloop_stop,
+                         reveal_file)
 from mvc.widgets import widgetset
 from mvc.widgets import cellpack
 from mvc.widgets import widgetconst
@@ -32,6 +33,7 @@ DRAG_AREA = widgetutil.css_to_color('#2b2e31')
 
 TEXT_DISABLED = widgetutil.css_to_color('#333333')
 TEXT_ACTIVE = widgetutil.css_to_color('#ffffff')
+TEXT_CLICKED = widgetutil.css_to_color('#cccccc')
 TEXT_INFO = widgetutil.css_to_color('#808080')
 TEXT_COLOR = widgetutil.css_to_color('#ffffff')
 
@@ -90,18 +92,21 @@ class FileDropTarget(widgetset.SolidBackground):
         self.small = False
 
     def build_large_widgets(self):
-        normal = widgetset.VBox(spacing=4)
+        normal = widgetset.VBox(spacing=20)
         normal.pack_start(widgetutil.align_center(self.dropoff_on,
-                                                  right_pad=16))
-        normal.pack_start(widgetutil.align_center(widgetset.Label(
+                                                  top_pad=60))
+        hbox = widgetset.HBox(spacing=4)
+        hbox.pack_start(widgetutil.align_center(widgetset.Label(
                     "Drag videos here or",
                     color=TEXT_COLOR)))
         cfb = ChooseFileButton()
         cfb.connect('clicked', self.choose_file)
-        normal.pack_start(cfb)
+        hbox.pack_start(cfb)
+        normal.pack_start(hbox)
 
         drag = widgetset.VBox(spacing=20)
-        drag.pack_start(widgetutil.align_center(self.dropoff_off))
+        drag.pack_start(widgetutil.align_center(self.dropoff_off,
+                                                top_pad=60))
         drag.pack_start(widgetutil.align_center(
                 widgetset.Label("Release button to drop off",
                       color=TEXT_COLOR)))
@@ -172,6 +177,7 @@ class ConversionModel(widgetset.TableModel):
             'numeric', # progress
             'numeric', # eta,
             'object', # image
+            'object', # the actual conversion
             )
         self.conversion_to_iter = {}
         self.thumbnail_to_image = {}
@@ -193,12 +199,13 @@ class ConversionModel(widgetset.TableModel):
                   conversion.progress or 0,
                   conversion.eta or 0,
                   self.get_image(conversion.video.get_thumbnail(90, 70)),
+                  conversion
                   )
         iter_ = self.conversion_to_iter.get(conversion)
         if iter_ is None:
             self.conversion_to_iter[conversion] = self.append(*values)
         else:
-            self.update_iter(iter_, values)
+            self.update(iter_, *values)
 
 
 class IconHotspot(cellpack.Hotspot):
@@ -252,10 +259,10 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
         top_bottom.pack(alignment)
         layout_manager.set_font(SMALL_FONT)
 
-        bottom = self.layout_bottom(layout_manager)
+        bottom = self.layout_bottom(layout_manager, hotspot)
         if bottom is not None:
             top_bottom.pack(bottom)
-        left_right.pack(self.layout_right(layout_manager))
+        left_right.pack(self.layout_right(layout_manager, hotspot))
 
         alignment = cellpack.Alignment(left_right, yscale=0, yalign=0.5)
         self.alignment = alignment
@@ -289,7 +296,7 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
         surface = widgetset.ImageSurface(self.thumbnail)
         return cellpack.Padding(surface, 10, 10, 10, 10)
 
-    def layout_right(self, layout_manager):
+    def layout_right(self, layout_manager, hotspot):
         alignment_kwargs = dict(
             xalign=0.5,
             xscale=0,
@@ -298,14 +305,18 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             min_width=80)
         if self.status == 'finished':
             return cellpack.Alignment(self.completed, **alignment_kwargs)
-        elif self.status == 'error':
+        elif self.status == 'failed':
             return cellpack.Alignment(self.error, **alignment_kwargs)
         else:
+            if hotspot == 'cancel':
+                image = self.delete_on
+            else:
+                image = self.delete_off
             return cellpack.Hotspot('cancel',
-                                    cellpack.Alignment(self.delete_off,
+                                    cellpack.Alignment(image,
                                                        **alignment_kwargs))
 
-    def layout_bottom(self, layout_manager):
+    def layout_bottom(self, layout_manager, hotspot):
         layout_manager.set_text_color(TEXT_COLOR)
         if self.status in ('converting', 'staging'):
             box = cellpack.HBox(spacing=5)
@@ -313,7 +324,8 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             stack.pack(cellpack.Alignment(self.progressbar_base,
                                           xscale=0, yscale=0))
             percent = self.progress / self.duration
-            width = int(percent * self.progressbar_base.width)
+            width = max(int(percent * self.progressbar_base.width),
+                        5)
             stack.pack(cellpack.DrawingArea(
                     width, self.progressbar_base.height,
                     self.draw_progressbar, width))
@@ -328,12 +340,18 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             box.pack(cellpack.Alignment(self.queued))
             box.pack(layout_manager.textbox("Queued"))
             return box
-        elif self.status in ('finished', 'error'):
+        elif self.status in ('finished', 'failed'):
             vbox = cellpack.VBox(spacing=10)
             top = cellpack.HBox(spacing=5)
             if self.status == 'finished':
+                if hotspot == 'show-file':
+                    layout_manager.set_text_color(TEXT_CLICKED)
                 top.pack(IconHotspot('show-file', self.showfile,
                                      layout_manager.textbox('Show File')))
+            if hotspot == 'clear':
+                layout_manager.set_text_color(TEXT_CLICKED)
+            else:
+                layout_manager.set_text_color(TEXT_COLOR)
             top.pack(IconHotspot('clear', self.showfile,
                                  layout_manager.textbox('Clear')))
             vbox.pack(top)
@@ -351,7 +369,6 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             return
         hotspot_info = self.alignment.find_hotspot(x, y, width, height)
         if hotspot_info:
-            print 'HOTSPOT INFO', hotspot_info
             return hotspot_info[0]
 
 class ConvertButton(widgetset.CustomButton):
@@ -428,6 +445,7 @@ class Application(mvc.Application):
                         'duration', 'progress', 'eta', 'thumbnail'))))
         c.set_min_width(450)
         self.table.add_column(c)
+        self.table.connect('hotspot-clicked', self.hotspot_clicked)
 
         if True:
             self.model.append(
@@ -438,17 +456,19 @@ class Application(mvc.Application):
                     100,
                     100,
                     0,
-                    widgetset.Image(image_path('audio.png')))
+                    widgetset.Image(image_path('audio.png')),
+                    1)
 
             self.model.append(
                     'Big_buck_bunny_original.avi',
                     '/home/z3p/',
                     'conv',
-                    'error',
+                    'failed',
                     0,
                     0,
                     0,
-                    widgetset.Image(image_path('audio.png')))
+                    widgetset.Image(image_path('audio.png')),
+                    2)
 
             self.model.append(
                     'LouisCK_1024x800.avi',
@@ -456,9 +476,10 @@ class Application(mvc.Application):
                     'conv',
                     'converting',
                     100.0,
-                    64.0,
+                    1.1,
                     0,
-                    widgetset.Image(image_path('audio.png')))
+                    widgetset.Image(image_path('audio.png')),
+                    3)
 
             self.model.append(
                     'JimmyFallon_21_01_2012.flv',
@@ -468,7 +489,8 @@ class Application(mvc.Application):
                     0,
                     0,
                     0,
-                    widgetset.Image(image_path('audio.png')))
+                    widgetset.Image(image_path('audio.png')),
+                    4)
             self.table.model_changed()
 
         # bottom buttons
@@ -614,17 +636,36 @@ class Application(mvc.Application):
 
     def update_conversion(self, conversion):
         self.model.update_conversion(conversion)
-        self.table.model_changed()
         self.update_convert_button()
+        self.update_table_size()
 
     def update_table_size(self):
         conversions = len(self.model)
+        total_height = 385
         if not conversions:
+            self.scroller.set_size_request(-1, 0)
             self.drop_target.set_small(False)
+            self.drop_target.set_size_request(-1, total_height)
         else:
-            height = 94 * conversions
-            self.scroller.set_size_request(-1, min(height, 320))
+            height = min(94 * conversions, 320)
+            self.scroller.set_size_request(-1, height)
             self.drop_target.set_small(True)
+            self.drop_target.set_size_request(-1, total_height - height)
+        self.table.model_changed()
+
+    def hotspot_clicked(self, widget, name, iter_):
+        conversion = self.model[iter_][-1]
+        if name == 'show-file':
+            reveal_file(os.path.dirname(conversion.output))
+        elif name == 'clear':
+            self.model.remove(iter_)
+            self.update_table_size()
+        elif name == 'cancel':
+            if conversion.status == 'initialized':
+                self.model.remove(iter_)
+                self.update_table_size()
+            else:
+                conversion.stop()
 
 if __name__ == "__main__":
     initialize()

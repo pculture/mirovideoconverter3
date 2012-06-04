@@ -73,6 +73,7 @@ class Conversion(object):
         except EnvironmentError, e:
             logging.exception('while stopping %s' % (self,))
             self.error = str(e)
+        self.popen = None
 
     def _thread(self):
         os.close(self.temp_fd)
