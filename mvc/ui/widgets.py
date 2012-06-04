@@ -148,17 +148,14 @@ class FileDropTarget(widgetset.SolidBackground):
         dialog.destroy()
 
 
-class BottomBackground(widgetset.SolidBackground):
+class BottomBackground(widgetset.Background):
 
-    def __init__(self):
-        super(BottomBackground, self).__init__(color=GRADIENT_BOTTOM)
-
-    # def draw(self, context, layout_manager):
-    #     gradient = Gradient(0, 0, 0, context.height)
-    #     gradient.set_start_color(GRADIENT_TOP)
-    #     gradient.set_end_color(GRADIENT_BOTTOM)
-    #     context.rectangle(0, 0, context.width, context.height)
-    #     context.gradient_fill(gradient)
+    def draw(self, context, layout_manager):
+        gradient = widgetset.Gradient(0, 0, 0, context.height)
+        gradient.set_start_color(GRADIENT_TOP)
+        gradient.set_end_color(GRADIENT_BOTTOM)
+        context.rectangle(0, 0, context.width, context.height)
+        context.gradient_fill(gradient)
 
 
 EMPTY_CONVERTER = ConverterInfo("")
