@@ -304,7 +304,9 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
         elif self.status == 'error':
             return cellpack.Alignment(self.error, **alignment_kwargs)
         else:
-            return cellpack.Alignment(self.delete_off, **alignment_kwargs)
+            return cellpack.Hotspot('cancel',
+                                    cellpack.Alignment(self.delete_off,
+                                                       **alignment_kwargs))
 
     def layout_bottom(self, layout_manager):
         layout_manager.set_text_color(TEXT_COLOR)
