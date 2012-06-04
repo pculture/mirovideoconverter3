@@ -1,4 +1,4 @@
-from AppKit import NSApplication, NSApplicationMain
+from AppKit import NSApplication, NSApplicationMain, NSWorkspace
 from objc import nil
 
 from PyObjCTools import AppHelper
@@ -26,5 +26,6 @@ def idle_add(callback):
 def idle_remove(id_):
     pass
 
-
-
+def reveal_file(filename):
+    NSWorkspace.sharedWorkspace().selectFile_inFileViewerRootedAtPath_(
+        filename, nil)

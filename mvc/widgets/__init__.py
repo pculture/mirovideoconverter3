@@ -12,4 +12,4 @@ mainloop_start = plat.mainloop_start
 mainloop_stop = plat.mainloop_stop
 idle_add = plat.idle_add
 idle_remove = plat.idle_remove
-
+reveal_file = plat.reveal_file

@@ -122,11 +122,11 @@ class AnimatedImageDisplay(Widget):
 
 class Label(Widget):
     """Widget that displays simple text."""
-    def __init__(self, text="", color=None, markup=False):
+    def __init__(self, text="", color=None):
         Widget.__init__(self)
         self.set_widget(gtk.Label())
         if text:
-            self.set_text(text, markup=markup)
+            self.set_text(text)
         self.attr_list = pango.AttrList()
         self.font_description = self._widget.style.font_desc.copy()
         self.scale_factor = 1.0
@@ -179,12 +179,8 @@ class Label(Widget):
     def get_width(self):
         return self._widget.get_layout().get_pixel_size()[0]
 
-    def set_text(self, text, markup=False):
-        if markup:
-            self._widget.set_markup(text)
-            self._widget.set_track_visited_links(False)
-        else:
-            self._widget.set_text(text)
+    def set_text(self, text):
+        self._widget.set_text(text)
 
     def get_text(self):
         return self._widget.get_text().decode('utf-8')
