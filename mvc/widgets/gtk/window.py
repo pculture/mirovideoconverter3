@@ -508,14 +508,14 @@ class FileOpenDialog(FileDialogBase):
         self._window.add_filter(f)
 
     def get_filenames(self):
-        return [FilenameType(f) for f in self._files]
+        return [unicode(f) for f in self._files]
 
     def get_filename(self):
         if self._files is None:
             # clicked Cancel
             return None
         else:
-            return FilenameType(self._files[0])
+            return unicode(self._files[0])
 
     # provide a common interface for file chooser dialogs
     get_path = get_filename
@@ -544,7 +544,7 @@ class FileSaveDialog(FileDialogBase):
             # clicked Cancel
             return None
         else:
-            return FilenameType(self._files[0])
+            return unicode(self._files[0])
 
     # provide a common interface for file chooser dialogs
     get_path = get_filename
@@ -574,7 +574,7 @@ class DirectorySelectDialog(FileDialogBase):
             # clicked Cancel
             return None
         else:
-            return FilenameType(self._files[0])
+            return unicode(self._files[0])
 
     # provide a common interface for file chooser dialogs
     get_path = get_directory

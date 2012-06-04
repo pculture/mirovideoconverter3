@@ -231,7 +231,7 @@ class AnimatedImageDisplay(Widget):
 
 class Label(Widget):
     """See https://develop.participatoryculture.org/index.php/WidgetAPI for a description of the API for this class."""
-    def __init__(self, text="", wrap=False, color=None, markup=False):
+    def __init__(self, text="", wrap=False, color=None):
         Widget.__init__(self)
         self.view = NSTextField.alloc().init()
         self.view.setEditable_(NO)
@@ -243,7 +243,7 @@ class Label(Widget):
         self.size = NSFont.systemFontSize()
         self.sizer_cell = self.view.cell().copy()
         self.set_font()
-        self.set_text(text, markup=markup)
+        self.set_text(text)
         self.__color = self.view.textColor()
         if color is not None:
             self.set_color(color)
@@ -301,9 +301,7 @@ class Label(Widget):
     def baseline(self):
         return -self.view.font().descender()
 
-    def set_text(self, text, markup=False):
-        if markup:
-            text, _ = NSAttributedString.alloc().initWithHTML_documentAttributes_(buffer(text), nil)
+    def set_text(self, text):
         self.view.setStringValue_(text)
         self.sizer_cell.setStringValue_(text)
         self.invalidate_size_request()

@@ -14,6 +14,7 @@ import urlparse
 from mvc.widgets import initialize, idle_add, mainloop_start, mainloop_stop
 from mvc.widgets import widgetset
 from mvc.widgets import cellpack
+from mvc.widgets import widgetconst
 from mvc.widgets import widgetutil
 
 from mvc.converter import ConverterInfo
@@ -33,6 +34,26 @@ TEXT_DISABLED = widgetutil.css_to_color('#333333')
 TEXT_ACTIVE = widgetutil.css_to_color('#ffffff')
 TEXT_INFO = widgetutil.css_to_color('#808080')
 TEXT_COLOR = widgetutil.css_to_color('#ffffff')
+
+class ChooseFileButton(widgetset.CustomButton):
+
+    def __init__(self):
+        super(ChooseFileButton, self).__init__()
+        self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
+
+    def textbox(self, layout_manager):
+        return layout_manager.textbox('Choose File...', underline=True)
+
+    def size_request(self, layout_manager):
+        textbox = self.textbox(layout_manager)
+        return textbox.get_size()
+
+    def draw(self, context, layout_manager):
+        layout_manager.set_text_color(TEXT_COLOR)
+        textbox = self.textbox(layout_manager)
+        size = textbox.get_size()
+        textbox.draw(context, 0, (context.height - size[1]) // 2,
+                     context.width, context.height)
 
 class FileDropTarget(widgetset.SolidBackground):
 
@@ -69,12 +90,15 @@ class FileDropTarget(widgetset.SolidBackground):
         self.small = False
 
     def build_large_widgets(self):
-        normal = widgetset.VBox(spacing=20)
-        normal.pack_start(widgetutil.align_center(self.dropoff_on))
+        normal = widgetset.VBox(spacing=4)
+        normal.pack_start(widgetutil.align_center(self.dropoff_on,
+                                                  right_pad=16))
         normal.pack_start(widgetutil.align_center(widgetset.Label(
-                    "Drag videos here or <a href=''>Choose File...</a>",
-                    markup=True,
+                    "Drag videos here or",
                     color=TEXT_COLOR)))
+        cfb = ChooseFileButton()
+        cfb.connect('clicked', self.choose_file)
+        normal.pack_start(cfb)
 
         drag = widgetset.VBox(spacing=20)
         drag.pack_start(widgetutil.align_center(self.dropoff_off))
@@ -84,12 +108,15 @@ class FileDropTarget(widgetset.SolidBackground):
         return normal, drag
 
     def build_small_widgets(self):
-        normal = widgetset.HBox(spacing=10)
-        normal.pack_start(widgetutil.align_middle(self.dropoff_small_on))
+        normal = widgetset.HBox(spacing=3)
+        normal.pack_start(widgetutil.align_middle(self.dropoff_small_on,
+                                                  right_pad=7))
         normal.pack_start(widgetutil.align_middle(widgetset.Label(
-                    "Drag more videos here or <a href=''>Choose File...</a>",
-                    markup=True,
+                    "Drag more videos here or",
                     color=TEXT_COLOR)))
+        cfb = ChooseFileButton()
+        cfb.connect('clicked', self.choose_file)
+        normal.pack_start(cfb)
 
         drag = widgetset.HBox(spacing=10)
         drag.pack_start(widgetutil.align_middle(self.dropoff_small_off))
@@ -114,8 +141,8 @@ class FileDropTarget(widgetset.SolidBackground):
             self.queue_redraw()
 
     def choose_file(self, widget):
-        dialog = widgetset.FileChooserDialog('Choose File...')
-        if dialog.run():
+        dialog = widgetset.FileOpenDialog('Choose File...')
+        if dialog.run() == 0: # success
             for filename in dialog.get_filenames():
                 self.emit('file-activated', filename)
         dialog.destroy()
@@ -343,16 +370,19 @@ class ConvertButton(widgetset.CustomButton):
     def set_on(self):
         self.label = 'Start Conversions!'
         self.image = self.on
+        self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
 
     def set_off(self):
         self.label = 'Start Conversions!'
         self.image = self.off
+        self.set_cursor(widgetconst.CURSOR_NORMAL)
         self.queue_redraw()
 
     def set_stop(self):
         self.label = 'Stop Conversions'
         self.image = self.stop
+        self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
 
     def size_request(self, layout_manager):
