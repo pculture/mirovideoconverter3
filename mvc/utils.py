@@ -169,3 +169,26 @@ class Cache(object):
 
     def create_new_value(self, val, invalidator=None):
         raise NotImplementedError()
+
+
+def size_string(nbytes):
+    # when switching from the enclosure reported size to the
+    # downloader reported size, it takes a while to get the new size
+    # and the downloader returns -1.  the user sees the size go to -1B
+    # which is weird....  better to return an empty string.
+    if nbytes == -1 or nbytes == 0:
+        return ""
+
+    # FIXME this is a repeat of util.format_size_for_user ...  should
+    # probably ditch one of them.
+    if nbytes >= (1 << 30):
+        value = "%.1f" % (nbytes / float(1 << 30))
+        return "%(size)s GB" % {"size": value}
+    elif nbytes >= (1 << 20):
+        value = "%.1f" % (nbytes / float(1 << 20))
+        return "%(size)s MB" % {"size": value}
+    elif nbytes >= (1 << 10):
+        value = "%.1f" % (nbytes / float(1 << 10))
+        return "%(size)s KB" % {"size": value}
+    else:
+        return "%(size)s B" % {"size": nbytes}

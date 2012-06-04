@@ -21,6 +21,7 @@ from mvc.widgets import widgetutil
 from mvc.converter import ConverterInfo
 from mvc.video import VideoFile
 from mvc.resources import image_path
+from mvc.utils import size_string
 
 LARGE_FONT = 13.0 / 13.0
 SMALL_FONT = 10.0 / 13.0
@@ -170,7 +171,7 @@ class ConversionModel(widgetset.TableModel):
     def __init__(self):
         super(ConversionModel, self).__init__(
             'text', # filename
-            'text', # output
+            'numeric', # output_size
             'text', # converter
             'text', # status
             'numeric', # duration
@@ -191,8 +192,12 @@ class ConversionModel(widgetset.TableModel):
         return self.thumbnail_to_image[path]
 
     def update_conversion(self, conversion):
+        try:
+            output_size = os.stat(conversion.output).st_size
+        except OSError:
+            output_size = 0
         values = (conversion.video.filename,
-                  conversion.output,
+                  output_size,
                   conversion.converter.name,
                   conversion.status,
                   conversion.duration or 0,
@@ -360,7 +365,8 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
                 bottom.pack(cellpack.Alignment(self.converted_to,
                                                xscale=0, yscale=0))
                 layout_manager.set_text_color(TEXT_INFO)
-                bottom.pack(layout_manager.textbox("Converted to 1034Mb"))
+                bottom.pack(layout_manager.textbox("Converted to %s" % (
+                            size_string(self.output_size))))
                 vbox.pack(bottom)
             return vbox
 
@@ -441,8 +447,9 @@ class Application(mvc.Application):
 
         c = widgetset.TableColumn("Data", ConversionCellRenderer(),
                         **dict((n, v) for (v, n) in enumerate((
-                        'input', 'output', 'converter', 'status',
-                        'duration', 'progress', 'eta', 'thumbnail'))))
+                        'input', 'output_size', 'converter', 'status',
+                        'duration', 'progress', 'eta', 'thumbnail',
+                        'conversion'))))
         c.set_min_width(450)
         self.table.add_column(c)
         self.table.connect('hotspot-clicked', self.hotspot_clicked)
