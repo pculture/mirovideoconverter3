@@ -183,6 +183,7 @@ class VideoFileTest(base.Test):
 
     def get_thumbnail_from_video(self, **kwargs):
         path = self.video.get_thumbnail(**kwargs)
+        self.assertNotEqual(path, None, 'thumbnail not created')
         return video.VideoFile(path)
 
     def test_get_thumbnail_original_size(self):

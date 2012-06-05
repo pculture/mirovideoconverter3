@@ -247,16 +247,21 @@ def get_media_info(filepath):
     return extract_info(ast)
 
 def get_thumbnail(filename, width, height, output, skip=0):
-    commandline = [get_ffmpeg_executable_path(),
-                   '-ss', str(skip), '-i', filename, '-vf',
-                   'thumbnail,scale=%i:%i' % (width, height),
-                   '-frames', '1', output]
+    executable = get_ffmpeg_executable_path()
+    filter_ = 'scale=%i:%i' % (width, height)
+    if 'ffmpeg' in executable:
+        # supports the thumbnail filter, we hope
+        filter_ = 'thumbnail,' + filter_
+    commandline = [executable,
+                   '-ss', str(skip), '-i', filename, '-vf', filter_,
+                   '-vframes', '1', output]
 
     try:
         subprocess.check_output(commandline,
                                 stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, e:
-        logging.exception('error calling %r\noutput:%s', commandline, e.output)
+        logging.exception('error calling %r\ncode:%s\noutput:%s',
+                          commandline, e.returncode, e.output)
         return None
 
     return output
