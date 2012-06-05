@@ -7,9 +7,10 @@ Usage:
 import sys
 if sys.version < '2.7':
     raise RuntimeError('MVC requires Python 2.7')
+import glob
 import os.path
 import shutil
-import setuptools
+
 from setuptools import setup
 from setuptools.extension import Extension
 
@@ -34,13 +35,42 @@ class py2app_mvc(py2app_cmd):
         py2app_cmd.run(self)
         bundle_root = os.path.join(self.dist_dir, 'widgets.app/Contents')
         helpers_root = os.path.join(bundle_root, 'Helpers')
+        if os.path.exists(helpers_root):
+            shutil.rmtree(helpers_root)
         print 'Copying FFmpeg to', helpers_root
-        try:
-            os.mkdir(helpers_root)
-        except OSError:
-            pass
-        shutil.copy(get_ffmpeg_executable_path(), helpers_root)
-        shutil.copy(get_ffmpeg2theora_executable_path(), helpers_root)
+        os.mkdir(helpers_root)
+        self.copy_file(get_ffmpeg_executable_path(), helpers_root)
+        self.copy_file(get_ffmpeg2theora_executable_path(), helpers_root)
+        ffmpeg_lib_dir = os.path.join(
+            os.path.dirname(get_ffmpeg_executable_path()),
+            '..', 'lib')
+        libs = [
+            'libavcodec.dylib',
+            'libavdevice.dylib',
+            'libavfilter.dylib',
+            'libavformat.dylib',
+            'libavutil.dylib',
+            'libmp3lame.dylib',
+            'libogg.dylib',
+            'libpostproc.dylib',
+            'libspeex.dylib',
+            'libspeexdsp.dylib',
+            'libswresample.dylib',
+            'libswscale.dylib',
+            'libvorbis.dylib',
+            'libvorbisenc.dylib',
+            'libvorbisfile.dylib',
+            'libx264.dylib',
+            'libxvidcore.dylib']
+        for lib in libs:
+            self.copy_file(os.path.join(ffmpeg_lib_dir, lib), helpers_root)
+            glob_path = os.path.join(ffmpeg_lib_dir,
+                                     lib.replace('.dylib', '.*.dylib'))
+            for path in glob.iglob(glob_path):
+                self.copy_file(
+                    os.path.join(helpers_root, lib),
+                    os.path.join(helpers_root, os.path.basename(path)),
+                    link='sym')
 
 setup(
     app=APP,
