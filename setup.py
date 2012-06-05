@@ -26,7 +26,7 @@ DATA_FILES = ['mvc/widgets/osx/Resources-Widgets/MainMenu.nib']
 OPTIONS = {
     'excludes': ['mvc.widgets.gtk'],
     'includes': ['mvc.widgets.osx.fasttypes'],
-    'packages': ['mvc'],
+    'packages': ['mvc', 'mvc.widgets', 'mvc.widgets.osx', 'mvc.ui', 'mvc.resources']
 }
 
 class py2app_mvc(py2app_cmd):
