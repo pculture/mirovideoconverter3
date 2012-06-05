@@ -3,8 +3,6 @@ python:
   - 2.7
 before_install:
   - virtualenv /home/vagrant/virtualenv/python$TRAVIS_PYTHON_VERSION --system-site-packages
-  - sudo apt-add-repository -y ppa:jon-severinsson/ffmpeg
-  - sudo apt-get update
 install:
   - sudo ./helperscripts/debian_ubuntu.sh
 script:
