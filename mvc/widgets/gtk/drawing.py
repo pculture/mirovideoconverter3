@@ -39,8 +39,6 @@ import wrappermap
 from .base import Widget, Bin
 from .layoutmanager import LayoutManager
 
-# XXX - clagged from miro.frontends.widgets.style due to circular import
-# issue
 def css_to_color(css_string):
     parts = (css_string[1:3], css_string[3:5], css_string[5:7])
     return tuple((int(value, 16) / 255.0) for value in parts)

@@ -33,8 +33,6 @@ the GTK Widgets.  These are shared between the windows port and the x11 port.
 
 import gtk
 
-from miro import app
-
 # Just use the GDK Rectangle class
 class Rect(gtk.gdk.Rectangle):
     @classmethod

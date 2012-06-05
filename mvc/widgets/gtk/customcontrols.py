@@ -43,7 +43,7 @@ from .base import Widget
 from .simple import Label, Image
 from .drawing import (CustomDrawingMixin, Drawable,
     ImageSurface)
-from miro.frontends.widgets import widgetconst
+from mvc.widgets import widgetconst
 
 class CustomControlMixin(CustomDrawingMixin):
     def do_expose_event(self, event):

@@ -33,7 +33,7 @@ import gtk
 import gobject
 import pango
 
-from miro.frontends.widgets import widgetconst
+from mvc.widgets import widgetconst
 from .base import Widget, Bin
 
 class Image(object):

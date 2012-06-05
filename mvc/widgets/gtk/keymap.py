@@ -32,7 +32,7 @@
 
 import gtk
 
-from miro.frontends.widgets import keyboard
+from mvc.widgets import keyboard
 
 menubar_mod_map = {
     keyboard.MOD: '<Ctrl>',

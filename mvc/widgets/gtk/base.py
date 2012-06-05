@@ -31,7 +31,7 @@
 
 import gtk
 
-from miro import signals
+from mvc.widgets import signals
 import wrappermap
 from .weakconnect import weak_connect
 import keymap

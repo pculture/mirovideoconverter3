@@ -32,7 +32,7 @@
 import gtk
 import pango
 
-from miro.frontends.widgets import widgetconst
+from mvc.widgets import widgetconst
 import layout
 from .base import Widget
 from .simple import Label
