@@ -10,6 +10,8 @@ import logging
 
 from mvc.utils import line_reader
 
+logger = logging.getLogger(__name__)
+
 class Conversion(object):
 
     def __init__(self, video, converter, manager, output_dir=None):
@@ -30,6 +32,7 @@ class Conversion(object):
         self.eta = None
         self.listeners = set()
         self.set_converter(converter)
+        logger.info('created %r', self)
 
     def set_converter(self, converter):
         if self.status != 'initialized':
@@ -38,6 +41,9 @@ class Conversion(object):
         self.output = os.path.join(self.output_dir,
                                    converter.get_output_filename(self.video))
 
+
+    def __repr__(self):
+        return unicode(self)
 
     def __str__(self):
         return unicode(self).encode('utf8')
@@ -56,8 +62,11 @@ class Conversion(object):
         self.manager.notify_queue.add(self)
 
     def run(self):
+        logger.info('starting %r', self)
         self.temp_fd, self.temp_output = tempfile.mkstemp(
             dir=os.path.dirname(self.output))
+        logger.info('commandline: %r', ' '.join(
+                self.get_subprocess_arguments(self.temp_output)))
         self.thread = threading.Thread(target=self._thread,
                                        name="Thread:%s" % (self,))
         self.thread.setDaemon(True)
@@ -66,12 +75,13 @@ class Conversion(object):
     def stop(self):
         if not self.popen:
             return
+        logger.info('stopping %r', self)
         self.error = 'manually stopped'
         try:
             self.popen.kill()
             self.popen.wait()
         except EnvironmentError, e:
-            logging.exception('while stopping %s' % (self,))
+            logger.exception('while stopping %s' % (self,))
             self.error = str(e)
         self.popen = None
 
@@ -92,10 +102,10 @@ class Conversion(object):
                 self.error = '%r does not exist' % (
                     self.converter.get_executable(),)
             else:
-                logging.exception('OSError in %s' % (self.thread.name,))
+                logger.exception('OSError in %s' % (self.thread.name,))
                 self.error = str(e)
         except Exception, e:
-            logging.exception('in %s' % (self.thread.name,))
+            logger.exception('in %s' % (self.thread.name,))
             self.error = str(e)
 
         self.finalize()
@@ -149,14 +159,13 @@ class Conversion(object):
         self.progress = self.duration
         self.progress_percent = 1.0
         self.eta = 0
-
         if self.error is None:
             self.status = 'staging'
             self.notify_listeners()
             try:
                 shutil.move(self.temp_output, self.output)
             except EnvironmentError, e:
-                logging.exception('while trying to move %r to %r after %s',
+                logger.exception('while trying to move %r to %r after %s',
                                   self.temp_output, self.output, self)
                 self.error = str(e)
                 self.status = 'failed'
@@ -170,6 +179,7 @@ class Conversion(object):
                      # been created
             self.status = 'failed'
         self.notify_listeners()
+        logger.info('finished %r; status: %s', self, self.status)
 
     def get_subprocess_arguments(self, output):
         return ([self.converter.get_executable()] +

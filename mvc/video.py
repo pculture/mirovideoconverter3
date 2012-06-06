@@ -6,6 +6,8 @@ import tempfile
 from mvc.settings import get_ffmpeg_executable_path
 from mvc.utils import hms_to_seconds
 
+logger = logging.getLogger(__name__)
+
 class VideoFile(object):
     def __init__(self, filename):
         self.filename = filename
@@ -223,7 +225,7 @@ def get_ffmpeg_output(filepath):
                                          stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, e:
         if e.returncode != 1:
-            logging.exception("error calling %r\noutput:%s", commandline,
+            logger.exception("error calling %r\noutput:%s", commandline,
                               e.output)
         else:
             # ffmpeg -i generally returns 1, so we ignore the exception and
@@ -241,10 +243,12 @@ def get_media_info(filepath):
     :returns: dict of media info possibly containing: height, width,
     container, audio_codec, video_codec
     """
+    logger.info('get_media_info: %r', filepath)
     output = get_ffmpeg_output(filepath)
     ast = parse_ffmpeg_output(output.splitlines())
-
-    return extract_info(ast)
+    info = extract_info(ast)
+    logger.info('get_media_info: %r', info)
+    return info
 
 def get_thumbnail(filename, width, height, output, skip=0):
     executable = get_ffmpeg_executable_path()
@@ -260,7 +264,7 @@ def get_thumbnail(filename, width, height, output, skip=0):
         subprocess.check_output(commandline,
                                 stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, e:
-        logging.exception('error calling %r\ncode:%s\noutput:%s',
+        logger.exception('error calling %r\ncode:%s\noutput:%s',
                           commandline, e.returncode, e.output)
         return None
 

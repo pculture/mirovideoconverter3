@@ -1,3 +1,4 @@
+import logging
 from glob import glob
 import json
 import re
@@ -5,6 +6,8 @@ import os.path
 
 from mvc import settings, utils
 from mvc.utils import hms_to_seconds
+
+logger = logging.getLogger(__name__)
 
 NON_WORD_CHARS = re.compile(r"[^a-zA-Z0-9]+")
 
@@ -189,6 +192,9 @@ class ConverterManager(object):
             if 'converters' in global_dict:
                 [self.add_converter(converter) for converter in
                  global_dict['converters']]
+                logger.info('load_converters: loaded %i from %r',
+                            len(global_dict['converters']),
+                            converter_file)
 
     def list_converters(self):
         return self.converters.values()
