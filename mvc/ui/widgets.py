@@ -328,9 +328,9 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
                 image = self.delete_on
             else:
                 image = self.delete_off
-            return cellpack.Hotspot('cancel',
-                                    cellpack.Alignment(image,
-                                                       **alignment_kwargs))
+            return cellpack.Alignment(cellpack.Hotspot('cancel',
+                                                       image),
+                                      **alignment_kwargs)
 
     def layout_bottom(self, layout_manager, hotspot):
         layout_manager.set_text_color(TEXT_COLOR)
