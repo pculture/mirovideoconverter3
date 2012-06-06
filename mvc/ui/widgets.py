@@ -100,8 +100,9 @@ class FileDropTarget(widgetset.SolidBackground):
         self.small = False
 
     def build_large_widgets(self):
+        height = 40
         normal = widgetset.VBox(spacing=20)
-        normal.pack_start(widgetutil.align_center(self.dropoff_on,
+        normal.pack_start(widgetutil.align_center(self.dropoff_off,
                                                   top_pad=60))
         hbox = widgetset.HBox(spacing=4)
         hbox.pack_start(widgetutil.align_center(widgetset.Label(
@@ -110,19 +111,23 @@ class FileDropTarget(widgetset.SolidBackground):
         cfb = ChooseFileButton()
         cfb.connect('clicked', self.choose_file)
         hbox.pack_start(cfb)
+        hbox.set_size_request(-1, height)
         normal.pack_start(hbox)
 
         drag = widgetset.VBox(spacing=20)
-        drag.pack_start(widgetutil.align_center(self.dropoff_off,
+        drag.pack_start(widgetutil.align_center(self.dropoff_on,
                                                 top_pad=60))
-        drag.pack_start(widgetutil.align_center(
+        hbox = widgetset.HBox(spacing=4)
+        hbox.pack_start(widgetutil.align_center(
                 widgetset.Label("Release button to drop off",
                       color=TEXT_COLOR)))
+        hbox.set_size_request(-1, height)
+        drag.pack_start(hbox)
         return normal, drag
 
     def build_small_widgets(self):
         normal = widgetset.HBox(spacing=3)
-        normal.pack_start(widgetutil.align_middle(self.dropoff_small_on,
+        normal.pack_start(widgetutil.align_middle(self.dropoff_small_off,
                                                   right_pad=7))
         normal.pack_start(widgetutil.align_middle(widgetset.Label(
                     "Drag more videos here or",
@@ -132,7 +137,7 @@ class FileDropTarget(widgetset.SolidBackground):
         normal.pack_start(cfb)
 
         drag = widgetset.HBox(spacing=10)
-        drag.pack_start(widgetutil.align_middle(self.dropoff_small_off))
+        drag.pack_start(widgetutil.align_middle(self.dropoff_small_on))
         drag.pack_start(widgetutil.align_middle(
                 widgetset.Label("Release button to drop off",
                       color=TEXT_COLOR)))
