@@ -96,7 +96,10 @@ class Conversion(object):
                                           stdout=subprocess.PIPE,
                                           stderr=subprocess.STDOUT)
             self.process_output()
-            self.popen.wait()
+            if self.popen:
+                # if we stop the thread, we can get here after `.stop()`
+                # finishes.
+                self.popen.wait()
         except OSError, e:
             if e.errno == errno.ENOENT:
                 self.error = '%r does not exist' % (
