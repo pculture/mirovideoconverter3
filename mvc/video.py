@@ -182,7 +182,7 @@ def extract_info(ast):
 
         if extra_container_types:
             if not isinstance(info['container'], list):
-                info['container'] = list(info['container'])
+                info['container'] = [info['container']]
             info['container'].extend(extra_container_types)
 
     duration = input0.get_by_key("Duration:")
