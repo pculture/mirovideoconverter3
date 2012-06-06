@@ -41,6 +41,8 @@ TEXT_CLICKED = widgetutil.css_to_color('#cccccc')
 TEXT_INFO = widgetutil.css_to_color('#808080')
 TEXT_COLOR = widgetutil.css_to_color('#ffffff')
 
+TABLE_WIDTH, TABLE_HEIGHT = 450, 87
+
 class ChooseFileButton(widgetset.CustomButton):
 
     def __init__(self):
@@ -235,6 +237,8 @@ class IconHotspot(cellpack.Hotspot):
 
 class ConversionCellRenderer(widgetset.CustomCellRenderer):
 
+    IGNORE_PADDING = True
+
     clear = widgetset.ImageSurface(widgetset.Image(
             image_path("clear-icon.png")))
     converted_to = widgetset.ImageSurface(widgetset.Image(
@@ -259,7 +263,7 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
         self.alignment = None
 
     def get_size(self, style, layout_manager):
-        return 450, 90
+        return TABLE_WIDTH, TABLE_HEIGHT
 
     def render(self, context, layout_manager, selected, hotspot, hover):
         left_right = cellpack.HBox()
@@ -451,7 +455,9 @@ class Application(mvc.Application):
         # # table on top
         self.model = ConversionModel()
         self.table = widgetset.TableView(self.model)
+        self.table.draws_selection = False
         self.table.set_row_spacing(0)
+        self.table.enable_album_view_focus_hack()
         self.table.set_fixed_height(True)
         self.table.set_grid_lines(False, False)
         self.table.set_show_headers(False)
@@ -624,7 +630,7 @@ class Application(mvc.Application):
             self.drop_target.set_small(False)
             self.drop_target.set_size_request(-1, total_height)
         else:
-            height = min(94 * conversions, 320)
+            height = min((TABLE_HEIGHT + 2) * conversions, 320)
             self.scroller.set_size_request(-1, height)
             self.drop_target.set_small(True)
             self.drop_target.set_size_request(-1, total_height - height)

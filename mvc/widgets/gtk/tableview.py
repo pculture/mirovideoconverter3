@@ -59,6 +59,30 @@ from .tableviewcells import GTKCustomCellRenderer
 
 PathInfo = namedtuple('PathInfo', 'path column x y')
 Rect = namedtuple('Rect', 'x y width height')
+_album_view_gtkrc_installed = False
+
+def _install_album_view_gtkrc():
+    """Hack for styling GTKTreeView for the album view widget.
+
+    We do a couple things:
+      - Remove the focus ring
+      - Remove any separator space.
+
+    We do this so that we don't draw a box through the album view column for
+    selected rows.
+    """
+    global _album_view_gtkrc_installed
+    if _album_view_gtkrc_installed:
+        return
+    rc_string = ('style "album-view-style"\n'
+                 '{ \n'
+                 '  GtkTreeView::vertical-separator = 0\n'
+                 '  GtkTreeView::horizontal-separator = 0\n'
+                 '  GtkWidget::focus-line-width = 0 \n'
+                 '}\n'
+                 'widget "*.miro-album-view" style "album-view-style"\n')
+    gtk.rc_parse_string(rc_string)
+    _album_view_gtkrc_installed = True
 
 def rect_contains_point(rect, x, y):
     return ((rect.x <= x < rect.x + rect.width) and
