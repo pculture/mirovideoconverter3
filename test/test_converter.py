@@ -100,7 +100,7 @@ class FFmpegConverterInfoTest(ConverterInfoTestMixin, base.Test):
         base.Test.setUp(self)
         ConverterInfoTestMixin.setUp(self)
         self.converter_info = converter.FFmpegConverterInfo('FFmpeg Test',
-                                                            (1024, 768))
+                                                            1024, 768)
         self.converter_info.parameters = '{ssize}'
 
     def test_get_extra_arguments(self):

@@ -99,7 +99,7 @@ class FFmpegConverterInfo(FFmpegConverterInfoBase):
 
     parameters = None
 
-    def __init__(self, name, (width, height)):
+    def __init__(self, name, width=None, height=None):
         self.width, self.height = width, height
         ConverterInfo.__init__(self, name)
 
@@ -123,18 +123,26 @@ class FFmpeg2TheoraConverterInfo(ConverterInfo):
     video_quality = 8
     audio_quality = 6
 
-    def __init__(self, name):
+    def __init__(self, name, width=None, height=None):
         ConverterInfo.__init__(self, name)
+        self.width, self.height = width, height
         self.line_progress = {}
 
     def get_executable(self):
         return settings.get_ffmpeg2theora_executable_path()
 
     def get_arguments(self, video, output):
-        return ('--videoquality', str(self.video_quality),
-                '--audioquality', str(self.audio_quality),
-                '--frontend',
-                '-o', output, video.filename)
+        arguments = ('--videoquality', str(self.video_quality),
+                     '--audioquality', str(self.audio_quality),
+                     '--frontend',
+                     '-o', output, video.filename)
+        if self.width and self.height:
+            width, height = utils.rescale_video((video.width, video.height),
+                                                (self.width, self.height))
+            arguments = arguments + (
+                '--width', str(width),
+                '--height', str(height))
+        return arguments
 
     def process_status_line(self, video, line):
         # line_progress is a hack because sometimes FFmpeg2theora sends us a
