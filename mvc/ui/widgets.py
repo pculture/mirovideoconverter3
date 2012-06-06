@@ -357,7 +357,7 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             return box
         elif self.status == 'initialized': # queued
             box = cellpack.HBox(spacing=5)
-            box.pack(cellpack.Alignment(self.queued))
+            box.pack(cellpack.Alignment(self.queued, xscale=0, yscale=0))
             box.pack(layout_manager.textbox("Queued"))
             return box
         elif self.status in ('finished', 'failed'):
