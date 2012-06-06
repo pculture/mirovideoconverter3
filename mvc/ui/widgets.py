@@ -26,6 +26,7 @@ from mvc.video import VideoFile
 from mvc.resources import image_path
 from mvc.utils import size_string
 
+BUTTON_FONT = 15.0 / 13.0
 LARGE_FONT = 13.0 / 13.0
 SMALL_FONT = 10.0 / 13.0
 
@@ -40,6 +41,7 @@ TEXT_ACTIVE = widgetutil.css_to_color('#ffffff')
 TEXT_CLICKED = widgetutil.css_to_color('#cccccc')
 TEXT_INFO = widgetutil.css_to_color('#808080')
 TEXT_COLOR = widgetutil.css_to_color('#ffffff')
+TEXT_SHADOW = widgetutil.css_to_color('#000000')
 
 TABLE_WIDTH, TABLE_HEIGHT = 450, 87
 
@@ -429,8 +431,14 @@ class ConvertButton(widgetset.CustomButton):
         y = (context.height - self.image.height) // 2
         self.image.draw(context, x, y, self.image.width, self.image.height)
         if self.image == self.off:
+            layout_manager.set_font(BUTTON_FONT)
+            layout_manager.set_text_shadow(widgetutil.Shadow(TEXT_SHADOW,
+                                                             0.5, (-1, -1), 0))
             layout_manager.set_text_color(TEXT_DISABLED)
         else:
+            layout_manager.set_font(BUTTON_FONT, bold=True)
+            layout_manager.set_text_shadow(widgetutil.Shadow(TEXT_SHADOW,
+                                                             0.5, (1, 1), 0))
             layout_manager.set_text_color(TEXT_ACTIVE)
         textbox = layout_manager.textbox(self.label)
         alignment = cellpack.Alignment(textbox, xalign=0.5, xscale=0.0,

@@ -83,3 +83,12 @@ def circular_rect_negative(context, x, y, width, height):
     context.rel_line_to(inner_width, 0)
     context.arc_negative(inner_x2, inner_y, radius, PI/2, -PI/2)
     context.rel_line_to(-inner_width, 0)
+
+class Shadow(object):
+    """Encapsulates all parameters required to draw shadows.
+    """
+    def __init__(self, color, opacity, offset, blur_radius):
+        self.color = color
+        self.opacity = opacity
+        self.offset = offset
+        self.blur_radius = blur_radius
