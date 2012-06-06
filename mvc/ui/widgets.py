@@ -100,7 +100,7 @@ class FileDropTarget(widgetset.SolidBackground):
         self.small = False
 
     def build_large_widgets(self):
-        height = 40
+        height = 40 # arbitrary, but the same for both
         normal = widgetset.VBox(spacing=20)
         normal.pack_start(widgetutil.align_center(self.dropoff_off,
                                                   top_pad=60))
@@ -126,6 +126,7 @@ class FileDropTarget(widgetset.SolidBackground):
         return normal, drag
 
     def build_small_widgets(self):
+        height = 40 # arbitrary, but the same for both
         normal = widgetset.HBox(spacing=3)
         normal.pack_start(widgetutil.align_middle(self.dropoff_small_off,
                                                   right_pad=7))
@@ -135,12 +136,15 @@ class FileDropTarget(widgetset.SolidBackground):
         cfb = ChooseFileButton()
         cfb.connect('clicked', self.choose_file)
         normal.pack_start(cfb)
+        normal.set_size_request(-1, height)
 
         drag = widgetset.HBox(spacing=10)
         drag.pack_start(widgetutil.align_middle(self.dropoff_small_on))
         drag.pack_start(widgetutil.align_middle(
                 widgetset.Label("Release button to drop off",
                       color=TEXT_COLOR)))
+        drag.set_size_request(-1, height)
+
         return normal, drag
 
     def set_small(self, small):
@@ -501,7 +505,7 @@ class Application(mvc.Application):
             options.sort()
             options.insert(0, (type_.title(), None))
             menu = widgetset.OptionMenu(options)
-            menu.set_size_request(460 / len(converter_types), -1)
+            menu.set_size_request(420 / len(converter_types), -1)
             menu.connect('changed', self.change_conversion)
             self.menus.append(menu)
             buttons.pack_start(menu)
@@ -521,6 +525,10 @@ class Application(mvc.Application):
 
         bottom = BottomBackground()
         bottom_box = widgetset.VBox()
+        self.convert_label = widgetset.Label('Convert to...', color=TEXT_COLOR)
+        bottom_box.pack_start(widgetutil.align_left(self.convert_label,
+                                                    top_pad=10,
+                                                    bottom_pad=10))
         bottom_box.pack_start(buttons)
 
 
@@ -530,7 +538,7 @@ class Application(mvc.Application):
         bottom_box.pack_start(widgetutil.align(self.convert_button,
                                          xalign=0.5, yalign=0.5,
                                          top_pad=50, bottom_pad=50))
-        bottom.set_child(bottom_box)
+        bottom.set_child(widgetutil.pad(bottom_box, left=20, right=20))
         vbox.pack_start(bottom)
         self.window.set_content_widget(vbox)
 
@@ -603,8 +611,11 @@ class Application(mvc.Application):
         if identifier is not None:
             self.current_converter = self.converter_manager.get_by_id(
                 identifier)
+            self.convert_label.set_text(
+                'Convert to %s' % self.current_converter.name)
         else:
             self.current_converter = EMPTY_CONVERTER
+            self.convert_label.set_text('Convert to...')
 
         for c in self.model.conversions():
             if c.status == 'initialized':
