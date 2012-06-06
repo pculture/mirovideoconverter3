@@ -4,6 +4,7 @@ import json
 import re
 import os.path
 
+from mvc.widgets.osx import resource_path
 from mvc import settings, utils
 from mvc.utils import hms_to_seconds
 
@@ -188,13 +189,13 @@ class ConverterManager(object):
         self.converters[converter.identifier] = converter
 
     def startup(self):
-        resources_path = os.path.join(os.path.dirname(__file__), 'resources',
-                                      '*.py')
+        resources_path = os.path.join(resource_path(), '*.py')
         self.load_converters(resources_path)
 
     def load_converters(self, path):
-        converters = glob(path)
+        converters = ['android', 'apple', 'basic', 'others']
         for converter_file in converters:
+            converter_file = os.path.join(resource_path(), converter_file + '.py')
             global_dict = {}
             execfile(converter_file, global_dict)
             if 'converters' in global_dict:

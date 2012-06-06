@@ -1,9 +1,13 @@
 from AppKit import NSApplication, NSApplicationMain, NSWorkspace
+from Foundation import NSBundle
 from objc import nil
 
 from PyObjCTools import AppHelper
 
 size_request_manager = None
+
+def resource_path():
+    return NSBundle.mainBundle().resourcePath()
 
 def initialize():
     global size_request_manager

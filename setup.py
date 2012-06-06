@@ -23,10 +23,16 @@ ROOT = os.path.dirname(__file__)
 
 APP = ['mvc/ui/widgets.py']
 DATA_FILES = ['mvc/widgets/osx/Resources-Widgets/MainMenu.nib']
+resources = []
+resources.extend(glob.glob(os.path.join('mvc', 'resources', 'images', '*.png')))
+
+# XXX temporary: we want to place this in resource - but make sure that it is
+# in its own directory probably.  Make in that case we will need our own build
+# rule.  Currently warns when it tries to byte-compile at runtime
+resources.extend(glob.glob(os.path.join('mvc', 'resources', '*.py')))
+
 OPTIONS = {
-    'excludes': ['mvc.widgets.gtk'],
-    'includes': ['mvc.widgets.osx.fasttypes'],
-    'packages': ['mvc', 'mvc.widgets', 'mvc.widgets.osx', 'mvc.ui', 'mvc.resources']
+    'resources': resources
 }
 
 class py2app_mvc(py2app_cmd):

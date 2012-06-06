@@ -1,4 +1,4 @@
-from mvc.resources.basic import SimpleFFmpegConverterInfo
+from basic import SimpleFFmpegConverterInfo
 
 class PlaystationPortable(SimpleFFmpegConverterInfo):
     media_type = 'other'
