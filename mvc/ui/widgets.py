@@ -226,13 +226,13 @@ class ConversionModel(widgetset.TableModel):
             del self.thumbnail_to_image[thumbnail_path]
         super(ConversionModel, self).remove(iter_)
 
-class IconHotspot(cellpack.Hotspot):
 
-    def __init__(self, name, icon, textbox):
-        box = cellpack.HBox(spacing=5)
-        box.pack(cellpack.Alignment(icon, xscale=0, yscale=0))
-        box.pack(textbox)
-        super(IconHotspot, self).__init__(name, box)
+class IconWithText(cellpack.HBox):
+
+    def __init__(self, icon, textbox):
+        super(IconWithText, self).__init__(spacing=5)
+        self.pack(cellpack.Alignment(icon, yalign=0.5, xscale=0, yscale=0))
+        self.pack(textbox)
 
 
 class ConversionCellRenderer(widgetset.CustomCellRenderer):
@@ -342,6 +342,7 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             box = cellpack.HBox(spacing=5)
             stack = cellpack.Stack()
             stack.pack(cellpack.Alignment(self.progressbar_base,
+                                          yalign=0.5,
                                           xscale=0, yscale=0))
             percent = self.progress / self.duration
             width = max(int(percent * self.progressbar_base.width),
@@ -350,39 +351,37 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
                     width, self.progressbar_base.height,
                     self.draw_progressbar, width))
             box.pack(cellpack.Alignment(stack,
+                                        yalign=0.5,
                                         xscale=0, yscale=0))
             textbox = layout_manager.textbox("%d%%" % (
                         100 * percent))
             box.pack(textbox)
             return box
         elif self.status == 'initialized': # queued
-            box = cellpack.HBox(spacing=5)
-            box.pack(cellpack.Alignment(self.queued, xscale=0, yscale=0))
-            box.pack(layout_manager.textbox("Queued"))
-            return box
+            return IconWithText(self.queued, layout_manager.textbox("Queued"))
         elif self.status in ('finished', 'failed'):
-            vbox = cellpack.VBox(spacing=10)
+            vbox = cellpack.VBox(spacing=5)
             top = cellpack.HBox(spacing=5)
             if self.status == 'finished':
                 if hotspot == 'show-file':
                     layout_manager.set_text_color(TEXT_CLICKED)
-                top.pack(IconHotspot('show-file', self.showfile,
-                                     layout_manager.textbox('Show File')))
+                top.pack(cellpack.Hotspot('show-file', IconWithText(
+                            self.showfile,
+                            layout_manager.textbox('Show File'))))
             if hotspot == 'clear':
                 layout_manager.set_text_color(TEXT_CLICKED)
             else:
                 layout_manager.set_text_color(TEXT_COLOR)
-            top.pack(IconHotspot('clear', self.showfile,
-                                 layout_manager.textbox('Clear')))
+            top.pack(cellpack.Hotspot('clear', IconWithText(
+                        self.showfile,
+                        layout_manager.textbox('Clear'))))
             vbox.pack(top)
             if self.status == 'finished':
-                bottom = cellpack.HBox(spacing=5)
-                bottom.pack(cellpack.Alignment(self.converted_to,
-                                               xscale=0, yscale=0))
                 layout_manager.set_text_color(TEXT_INFO)
-                bottom.pack(layout_manager.textbox("Converted to %s" % (
-                            size_string(self.output_size))))
-                vbox.pack(bottom)
+                vbox.pack(IconWithText(
+                        self.converted_to,
+                        layout_manager.textbox("Converted to %s" % (
+                                size_string(self.output_size)))))
             return vbox
 
     def hotspot_test(self, style, layout_manager, x, y, width, height):
@@ -630,7 +629,7 @@ class Application(mvc.Application):
             self.drop_target.set_small(False)
             self.drop_target.set_size_request(-1, total_height)
         else:
-            height = min((TABLE_HEIGHT + 2) * conversions, 320)
+            height = min(TABLE_HEIGHT * conversions, 320)
             self.scroller.set_size_request(-1, height)
             self.drop_target.set_small(True)
             self.drop_target.set_size_request(-1, total_height - height)
