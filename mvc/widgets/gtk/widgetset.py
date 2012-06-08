@@ -42,6 +42,7 @@ try:
         VolumeSlider, VolumeMuter)
 except ImportError:
     pass
+from .contextmenu import ContextMenu
 from .drawing import ImageSurface, DrawingContext, \
      DrawingArea, Background, Gradient
 from .layout import HBox, VBox, Alignment, \

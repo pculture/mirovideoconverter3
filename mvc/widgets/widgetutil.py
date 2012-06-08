@@ -1,5 +1,10 @@
 from math import pi as PI
 from mvc.widgets import widgetset
+from mvc.resources import image_path
+
+def make_surface(image_name):
+    path = image_path(image_name + '.png')
+    return widgetset.ImageSurface(widgetset.Image(path))
 
 def css_to_color(css_string):
     parts = (css_string[1:3], css_string[3:5], css_string[5:7])
@@ -54,6 +59,50 @@ def pad(widget, top=0, bottom=0, left=0, right=0):
     alignment.add(widget)
     return alignment
 
+def round_rect(context, x, y, width, height, edge_radius):
+    """Specifies path of a rectangle with rounded corners.
+    """
+    edge_radius = min(edge_radius, min(width, height)/2.0)
+    inner_width = width - edge_radius*2
+    inner_height = height - edge_radius*2
+    x_inner1 = x + edge_radius
+    x_inner2 = x + width - edge_radius
+    y_inner1 = y + edge_radius
+    y_inner2 = y + height - edge_radius
+
+    context.move_to(x+edge_radius, y)
+    context.rel_line_to(inner_width, 0)
+    context.arc(x_inner2, y_inner1, edge_radius, -PI/2, 0)
+    context.rel_line_to(0, inner_height)
+    context.arc(x_inner2, y_inner2, edge_radius, 0, PI/2)
+    context.rel_line_to(-inner_width, 0)
+    context.arc(x_inner1, y_inner2, edge_radius, PI/2, PI)
+    context.rel_line_to(0, -inner_height)
+    context.arc(x_inner1, y_inner1, edge_radius, PI, PI*3/2)
+
+def round_rect_reverse(context, x, y, width, height, edge_radius):
+    """Specifies path of a rectangle with rounded corners.
+
+    This specifies the rectangle in a counter-clockwise fashion.
+    """
+    edge_radius = min(edge_radius, min(width, height)/2.0)
+    inner_width = width - edge_radius*2
+    inner_height = height - edge_radius*2
+    x_inner1 = x + edge_radius
+    x_inner2 = x + width - edge_radius
+    y_inner1 = y + edge_radius
+    y_inner2 = y + height - edge_radius
+
+    context.move_to(x+edge_radius, y)
+    context.arc_negative(x_inner1, y_inner1, edge_radius, PI*3/2, PI)
+    context.rel_line_to(0, inner_height)
+    context.arc_negative(x_inner1, y_inner2, edge_radius, PI, PI/2)
+    context.rel_line_to(inner_width, 0)
+    context.arc_negative(x_inner2, y_inner2, edge_radius, PI/2, 0)
+    context.rel_line_to(0, -inner_height)
+    context.arc_negative(x_inner2, y_inner1, edge_radius, 0, -PI/2)
+    context.rel_line_to(-inner_width, 0)
+
 def circular_rect(context, x, y, width, height):
     """Make a path for a rectangle with the left/right side being circles.
     """
@@ -92,3 +141,73 @@ class Shadow(object):
         self.opacity = opacity
         self.offset = offset
         self.blur_radius = blur_radius
+
+class ThreeImageSurface(object):
+    """Takes a left, center and right image and draws them to an arbitrary
+    width.  If the width is greater than the combined width of the 3 images,
+    then the center image will be tiled to compensate.
+
+    Example:
+
+    >>> timelinebar = ThreeImageSurface("timelinebar")
+
+    This creates a ``ThreeImageSurface`` using the images
+    ``images/timelinebar_left.png``, ``images/timelinebar_center.png``, and
+    ``images/timelinebar_right.png``.
+
+    Example:
+
+    >>> timelinebar = ThreeImageSurface()
+    >>> img_left = make_surface("timelinebar_left")
+    >>> img_center = make_surface("timelinebar_center")
+    >>> img_right = make_surface("timelinebar_right")
+    >>> timelinebar.set_images(img_left, img_center, img_right)
+
+    This does the same thing, but allows you to explicitly set which images
+    get used.
+    """
+    def __init__(self, basename=None):
+        self.left = self.center = self.right = None
+        self.height = 0
+        self.width = None
+        if basename is not None:
+            left = make_surface(basename + '_left')
+            center = make_surface(basename + '_center')
+            right = make_surface(basename + '_right')
+            self.set_images(left, center, right)
+
+    def set_images(self, left, center, right):
+        """Sets the left, center and right images to use.
+        """
+        self.left = left
+        self.center = center
+        self.right = right
+        if not (self.left.height == self.center.height == self.right.height):
+            raise ValueError("Images aren't the same height")
+        self.height = self.left.height
+
+    def set_width(self, width):
+        """Manually set a width.
+
+        When ThreeImageSurface have a width, then they have pretty much the
+        same API as ImageSurface does.  In particular, they can now be nested
+        in another ThreeImageSurface.
+        """
+        self.width = width
+
+    def get_size(self):
+        return self.width, self.height
+
+    def draw(self, context, x, y, width, fraction=1.0):
+        left_width = min(self.left.width, width)
+        self.left.draw(context, x, y, left_width, self.height, fraction)
+        self.draw_right(context, x + left_width, y, width - left_width, fraction)
+
+    def draw_right(self, context, x, y, width, fraction=1.0):
+        # draws only the right two images
+
+        right_width = min(self.right.width, width)
+        center_width = int(width - right_width)
+
+        self.center.draw(context, x, y, center_width, self.height, fraction)
+        self.right.draw(context, x + center_width, y, right_width, self.height, fraction)
