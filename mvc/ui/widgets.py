@@ -169,20 +169,22 @@ class FileDropTarget(widgetset.SolidBackground):
                 self.emit('file-activated', filename)
         dialog.destroy()
 
+BUTTON_BACKGROUND = widgetutil.ThreeImageSurface('settings-base')
 
-class CustomOptionMenu(widgetset.CustomButton):
+class SettingsButton(widgetset.CustomButton):
 
-    background = widgetutil.ThreeImageSurface('settings-base')
     arrow_on = widgetset.ImageSurface(widgetset.Image(
             image_path('arrow-down-on.png')))
     arrow_off = widgetset.ImageSurface(widgetset.Image(
             image_path('arrow-down-off.png')))
 
-    def __init__(self, name, options):
-        super(CustomOptionMenu, self).__init__()
-        self.name = name.title()
-        self.options = options
-        self.selected = None
+    def __init__(self, name):
+        super(SettingsButton, self).__init__()
+        if name != 'settings':
+            self.name = name.title()
+        else:
+            self.name = None
+        self.selected = False
         if name != 'format':
             self.surface_on = widgetset.ImageSurface(widgetset.Image(
                     image_path('%s-icon-on.png' % name)))
@@ -190,14 +192,6 @@ class CustomOptionMenu(widgetset.CustomButton):
                     image_path('%s-icon-off.png' % name)))
         else:
             self.surface_on = self.surface_off = None
-        self.create_signal('changed')
-        self.connect('clicked', self.on_clicked)
-
-    def on_clicked(self, widget):
-        menu = widgetset.ContextMenu([
-                (option[0], lambda x: self.on_changed(i))
-                for i, option in enumerate(self.options)])
-        menu.popup()
 
     def textbox(self, layout_manager):
         layout_manager.set_font(LARGE_FONT)
@@ -220,27 +214,24 @@ class CustomOptionMenu(widgetset.CustomButton):
         if image:
             hbox.pack(cellpack.Alignment(image, xscale=0, yscale=0,
                                          yalign=0.5))
-        textbox = self.textbox(layout_manager)
-        hbox.pack(cellpack.Alignment(textbox, yscale=0, yalign=0.5),
-                  expand=True)
+        if self.name:
+            textbox = self.textbox(layout_manager)
+            hbox.pack(cellpack.Alignment(textbox, yscale=0, yalign=0.5),
+                      expand=True)
         hbox.pack(cellpack.Padding(
                 cellpack.Alignment(arrow, xscale=0, yscale=0,
                                    yalign=0.5),
-                right=15))
+                right=8))
         alignment = cellpack.Padding(hbox, left=5)
         return alignment
 
     def draw(self, context, layout_manager):
-        self.background.draw(context, 0, 0, context.width)
+        BUTTON_BACKGROUND.draw(context, 0, 0, context.width)
         alignment = self.build_hbox(layout_manager)
         alignment.render_layout(context)
 
-    def on_changed(self, index):
-        self.set_selected(index)
-        self.emit('changed', index)
-
-    def set_selected(self, index):
-        self.selected = index
+    def set_selected(self, selected):
+        self.selected = selected
         self.queue_redraw()
 
 
@@ -583,18 +574,26 @@ class Application(mvc.Application):
             converters.setdefault(media_type, []).append(c)
 
         self.menus = []
-        buttons = widgetset.HBox(spacing=1)
+
+        button_bar = widgetset.HBox()
+        buttons = widgetset.HBox()
 
         for type_ in converter_types:
             options = [(c.name, c.identifier) for c in
                        converters[type_]]
             options.sort()
-            menu = CustomOptionMenu(type_, options)
-            menu.connect('changed', self.change_conversion)
+            menu = SettingsButton(type_)
+            menu.connect('clicked', self.show_options_menu, options)
             self.menus.append(menu)
             buttons.pack_start(menu)
         omb = OptionMenuBackground()
         omb.set_child(widgetutil.pad(buttons, 1, 1, 1, 1))
+        button_bar.pack_start(omb)
+
+        omb = OptionMenuBackground()
+        omb.set_child(widgetutil.pad(SettingsButton('settings'),
+                                     1, 1, 1, 1))
+        button_bar.pack_end(omb)
 
         self.drop_target = FileDropTarget()
         self.drop_target.connect('file-activated', self.file_activated)
@@ -614,7 +613,7 @@ class Application(mvc.Application):
         bottom_box.pack_start(widgetutil.align_left(self.convert_label,
                                                     top_pad=10,
                                                     bottom_pad=10))
-        bottom_box.pack_start(omb)
+        bottom_box.pack_start(button_bar)
 
 
         self.convert_button = ConvertButton()
@@ -658,6 +657,12 @@ class Application(mvc.Application):
     def run(self):
         mainloop_start()
 
+    def show_options_menu(self, widget, options):
+        menu = widgetset.ContextMenu([
+                (option, lambda x: self.change_conversion(widget, id_))
+                for i, (option, id_), in enumerate(options)])
+        menu.popup()
+
     def update_convert_button(self):
         can_cancel = False
         can_start = False
@@ -687,12 +692,11 @@ class Application(mvc.Application):
         self.update_conversion(c)
         self.update_table_size()
 
-    def change_conversion(self, widget, index):
+    def change_conversion(self, widget, identifier):
         if hasattr(self, '_doing_conversion_change'):
             return
         self._doing_conversion_change = True
 
-        identifier = widget.options[index][1]
         if identifier is not None:
             self.current_converter = self.converter_manager.get_by_id(
                 identifier)
@@ -709,9 +713,10 @@ class Application(mvc.Application):
 
         self.update_convert_button()
 
+        widget.set_selected(True)
         for menu in self.menus:
             if menu is not widget:
-                menu.set_selected(None)
+                menu.set_selected(False)
 
         del self._doing_conversion_change
 
