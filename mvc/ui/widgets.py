@@ -11,6 +11,7 @@ except ImportError:
     sys.path.append(mvc_path)
     import mvc
 
+import copy
 import urllib
 import urlparse
 
@@ -24,7 +25,7 @@ from mvc.widgets import widgetutil
 from mvc.converter import ConverterInfo
 from mvc.video import VideoFile
 from mvc.resources import image_path
-from mvc.utils import size_string
+from mvc.utils import size_string, round_even
 
 BUTTON_FONT = 15.0 / 13.0
 LARGE_FONT = 13.0 / 13.0
@@ -274,6 +275,9 @@ class LabeledNumberEntry(widgetset.HBox):
     def get_text(self):
         return self.entry.get_text()
 
+    def set_text(self, text):
+        self.entry.set_text(text)
+
 
 class CustomOptions(widgetset.Background):
 
@@ -283,6 +287,9 @@ class CustomOptions(widgetset.Background):
     def __init__(self):
         super(CustomOptions, self).__init__()
         self.create_signal('setting-changed')
+        self.reset()
+
+    def reset(self):
         self.top = self.create_top()
         self.top.set_size_request(390, 50)
         self.left = self.create_left()
@@ -295,16 +302,19 @@ class CustomOptions(widgetset.Background):
         hbox.pack_start(self.left)
         hbox.pack_start(self.right)
         vbox.pack_start(hbox)
+
         self.box = widgetutil.align_left(vbox)
 
         self.options = {
-            'custom_size': False,
-            'dont_upsize': False,
+            'custom-size': False,
+            'dont-upsize': False,
             'width': None,
             'height': None,
-            'custom_aspect': False,
-            'aspect_ratio': None
+            'custom-aspect': False,
+            'aspect-ratio': None
             }
+        if self.child:
+            self.set_child(self.box)
 
     def create_top(self):
         hbox = widgetset.HBox(spacing=5)
@@ -327,6 +337,7 @@ class CustomOptions(widgetset.Background):
         bottom = widgetset.HBox(spacing=5)
         self.width_widget = LabeledNumberEntry('Width')
         self.width_widget.connect('focus-out', self.on_width_height_changed)
+        self.width_widget.disable()
         self.height_widget = LabeledNumberEntry('Height')
         self.height_widget.connect('focus-out', self.on_width_height_changed)
         self.height_widget.disable()
@@ -362,9 +373,27 @@ class CustomOptions(widgetset.Background):
         self.background.draw(context, 0, 0, self.background.width,
                              self.background.height)
 
-    def change_setting(self, setting, value):
+    def update_setting(self, setting, value):
+        self.options[setting] = value
+        if setting == 'width':
+            self.width_widget.set_text(str(value))
+        elif setting == 'height':
+            self.height_widget.set_text(str(value))
+
+    def _change_setting(self, setting, value):
         self.options[setting] = value
         self.emit('setting-changed', setting, value)
+        if setting == 'aspect-ratio' and self.options['custom-aspect']:
+            width = self.width_widget.get_text()
+            height = self.height_widget.get_text()
+            if not (width and height):
+                return
+            if float(width) / float(height) != value:
+                new_height = round_even(float(width) / value)
+                if new_height != height:
+                    self.update_setting('width', int(width))
+                    self.update_setting('height', new_height)
+                    self.emit('setting-changed', 'height', new_height)
 
     def show(self):
         self.set_child(self.box)
@@ -385,20 +414,16 @@ class CustomOptions(widgetset.Background):
 
     # signal handlers
     def on_custom_size_changed(self, widget):
-        self.change_setting('custom-size', widget.get_checked())
+        self._change_setting('custom-size', widget.get_checked())
         if widget.get_checked():
             self.width_widget.enable()
             self.height_widget.enable()
         else:
-            if self.width_widget.get_text():
-                self.change_setting('width', None)
-            if self.height_widget.get_text():
-                self.change_setting('height', None)
             self.width_widget.disable()
             self.height_widget.disable()
 
     def on_dont_upsize_changed(self, widget):
-        self.change_setting('dont-upsize', widget.get_checked())
+        self._change_setting('dont-upsize', widget.get_checked())
 
     def on_width_height_changed(self, widget):
         if widget.get_text():
@@ -409,10 +434,10 @@ class CustomOptions(widgetset.Background):
             setting = 'width'
         else:
             setting = 'height'
-        self.change_setting(setting, value)
+        self._change_setting(setting, value)
 
     def on_aspect_changed(self, widget):
-        self.change_setting('custom-aspect', widget.get_checked())
+        self._change_setting('custom-aspect', widget.get_checked())
         if widget.get_checked():
             for button in self.button_group.get_buttons():
                 button.enable()
@@ -422,8 +447,10 @@ class CustomOptions(widgetset.Background):
 
     def on_aspect_size_changed(self, widget):
         if widget.get_selected():
-            self.change_setting('aspect-ratio', widget.label.get_text())
-
+            width_ratio, height_ratio = [float(v) for v in
+                                         widget.label.get_text().split(':')]
+            ratio = width_ratio / height_ratio
+            self._change_setting('aspect-ratio', ratio)
 
 EMPTY_CONVERTER = ConverterInfo("")
 
@@ -783,10 +810,11 @@ class Application(mvc.Application):
                                                     bottom_pad=10))
         bottom_box.pack_start(button_bar)
 
-        options = CustomOptions()
-        options.connect('setting-changed', self.on_setting_changed)
-        self.settings_button.connect('clicked', lambda x: options.toggle())
-        bottom_box.pack_start(widgetutil.align_right(options,
+        self.options = CustomOptions()
+        self.options.connect('setting-changed', self.on_setting_changed)
+        self.settings_button.connect('clicked',
+                                     lambda x: self.options.toggle())
+        bottom_box.pack_start(widgetutil.align_right(self.options,
                                                      right_pad=5))
 
         self.convert_button = ConvertButton()
@@ -832,8 +860,8 @@ class Application(mvc.Application):
 
     def show_options_menu(self, widget, options):
         menu = widgetset.ContextMenu([
-                (option, lambda x, i: self.on_select_conversion(widget,
-                                                                options[i][1]))
+                (option, lambda x, i: self.on_select_converter(widget,
+                                                               options[i][1]))
                 for option, id_ in options])
         menu.popup()
 
@@ -866,13 +894,14 @@ class Application(mvc.Application):
         self.update_conversion(c)
         self.update_table_size()
 
-    def on_select_conversion(self, widget, identifier):
+    def on_select_converter(self, widget, identifier):
         self.current_converter = self.converter_manager.get_by_id(
             identifier)
+        self.options.reset()
 
-        self.conversion_changed(widget)
+        self.converter_changed(widget)
 
-    def conversion_changed(self, widget):
+    def converter_changed(self, widget):
         if hasattr(self, '_doing_conversion_change'):
             return
         self._doing_conversion_change = True
@@ -882,6 +911,12 @@ class Application(mvc.Application):
                 'Convert to %s' % self.current_converter.name)
         else:
             self.convert_label.set_text('Convert to...')
+
+        if hasattr(self.current_converter, 'width'):
+            self.options.update_setting('width',
+                                        self.current_converter.width)
+            self.options.update_setting('height',
+                                        self.current_converter.height)
 
         for c in self.model.conversions():
             if c.status == 'initialized':
@@ -941,7 +976,29 @@ class Application(mvc.Application):
                 conversion.stop()
 
     def on_setting_changed(self, widget, setting, value):
-        print 'SETTING CHANGED', setting, value
+        if self.current_converter.identifier != 'custom':
+            if hasattr(self.current_converter, 'simple'):
+                self.current_converter = self.current_converter.simple(
+                    self.current_converter.name)
+            else:
+                self.current_converter = copy.copy(self.current_converter)
+            self.current_converter.name = 'Custom'
+            self.current_converter.width = self.options.options['width']
+            self.current_converter.height = self.options.options['height']
+            self.converter_changed(self.menus[-1]) # formats menu
+        if setting in ('width', 'height'):
+            setattr(self.current_converter, setting, value)
+        elif setting == 'custom-size':
+            if not value:
+                self.current_converter.old_size = (
+                    self.current_converter.width,
+                    self.current_converter.height)
+                self.current_converter.width = None
+                self.current_converter.height = None
+            elif hasattr(self.current_converter, 'old_size'):
+                old_size = self.current_converter.old_size
+                (self.current_converter.width,
+                 self.current_converter.height) = old_size
 
 
 if __name__ == "__main__":
