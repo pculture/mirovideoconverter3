@@ -307,7 +307,6 @@ class CustomOptions(widgetset.Background):
 
         self.options = {
             'custom-size': False,
-            'dont-upsize': False,
             'width': None,
             'height': None,
             'custom-aspect': False,
@@ -327,12 +326,6 @@ class CustomOptions(widgetset.Background):
         custom_size = widgetset.Checkbox('Custom Size', color=TEXT_COLOR)
         custom_size.set_size(widgetconst.SIZE_SMALL)
         custom_size.connect('toggled', self.on_custom_size_changed)
-        dont_upsize = widgetset.Checkbox("Don't Upsize", color=TEXT_COLOR)
-        dont_upsize.connect('toggled', self.on_dont_upsize_changed)
-        dont_upsize.set_size(widgetconst.SIZE_SMALL)
-        top = widgetset.HBox(spacing=5)
-        top.pack_start(custom_size)
-        top.pack_start(dont_upsize)
 
         bottom = widgetset.HBox(spacing=5)
         self.width_widget = LabeledNumberEntry('Width')
@@ -344,8 +337,8 @@ class CustomOptions(widgetset.Background):
         bottom.pack_start(self.width_widget)
         bottom.pack_start(self.height_widget)
 
-        vbox = widgetset.VBox()
-        vbox.pack_start(widgetutil.align_center(top))
+        vbox = widgetset.VBox(spacing=5)
+        vbox.pack_start(widgetutil.align_left(custom_size, left_pad=10))
         vbox.pack_start(widgetutil.align_center(bottom))
         return widgetutil.align_middle(vbox)
 
@@ -421,9 +414,6 @@ class CustomOptions(widgetset.Background):
         else:
             self.width_widget.disable()
             self.height_widget.disable()
-
-    def on_dont_upsize_changed(self, widget):
-        self._change_setting('dont-upsize', widget.get_checked())
 
     def on_width_height_changed(self, widget):
         if widget.get_text():
