@@ -199,7 +199,8 @@ class SettingsButton(widgetset.CustomButton):
 
     def size_request(self, layout_manager):
         hbox = self.build_hbox(layout_manager)
-        return hbox.get_size()
+        size = hbox.get_size()
+        return size[0] + 2, size[1] + 2 # padding
 
     def build_hbox(self, layout_manager):
         hbox = cellpack.HBox(spacing=5)
@@ -226,9 +227,10 @@ class SettingsButton(widgetset.CustomButton):
         return alignment
 
     def draw(self, context, layout_manager):
-        BUTTON_BACKGROUND.draw(context, 0, 0, context.width)
+        BUTTON_BACKGROUND.draw(context, 1, 1, context.width - 2)
         alignment = self.build_hbox(layout_manager)
-        alignment.render_layout(context)
+        padding = cellpack.Padding(alignment, 1, 1, 1, 1)
+        padding.render_layout(context)
 
     def set_selected(self, selected):
         self.selected = selected
@@ -255,6 +257,150 @@ class BottomBackground(widgetset.Background):
         gradient.set_end_color(GRADIENT_BOTTOM)
         context.rectangle(0, 0, context.width, context.height)
         context.gradient_fill(gradient)
+
+
+class LabeledNumberEntry(widgetset.HBox):
+
+    def __init__(self, label):
+        super(LabeledNumberEntry, self).__init__(spacing=5)
+        self.label = widgetset.Label(label, color=TEXT_COLOR)
+        self.label.set_size(widgetconst.SIZE_SMALL)
+        self.entry = widgetset.NumberEntry()
+        self.entry.set_size_request(50, 20)
+        self.pack_start(self.label)
+        self.pack_start(self.entry)
+        self.entry.connect('focus-out', lambda x: self.emit('focus-out'))
+
+    def get_text(self):
+        return self.entry.get_text()
+
+
+class CustomOptions(widgetset.Background):
+
+    background = widgetset.ImageSurface(widgetset.Image(
+            image_path('settings-dropdown-bottom-bg.png')))
+
+    def __init__(self):
+        super(CustomOptions, self).__init__()
+        self.create_signal('setting-changed')
+        self.top = self.create_top()
+        self.top.set_size_request(390, 50)
+        self.left = self.create_left()
+        self.left.set_size_request(212, 70)
+        self.right = self.create_right()
+        self.right.set_size_request(178, 70)
+        vbox = widgetset.VBox()
+        vbox.pack_start(self.top)
+        hbox = widgetset.HBox()
+        hbox.pack_start(self.left)
+        hbox.pack_start(self.right)
+        vbox.pack_start(hbox)
+        self.box = widgetutil.align_left(vbox)
+
+        self.options = {
+            'custom_size': False,
+            'dont_upsize': False,
+            'width': None,
+            'height': None,
+            'custom_aspect': False,
+            'aspect_ratio': None
+            }
+
+    def create_top(self):
+        hbox = widgetset.HBox(spacing=5)
+        hbox.pack_start(widgetset.Label('Save to', color=TEXT_COLOR))
+        button = widgetset.Button('Current Video Location')
+        hbox.pack_start(button)
+        return widgetutil.align_center(hbox, top_pad=10, bottom_pad=10)
+
+    def create_left(self):
+        custom_size = widgetset.Checkbox('Custom Size', color=TEXT_COLOR)
+        custom_size.set_size(widgetconst.SIZE_SMALL)
+        custom_size.connect('toggled', self.on_custom_size_changed)
+        dont_upsize = widgetset.Checkbox("Don't Upsize", color=TEXT_COLOR)
+        dont_upsize.connect('toggled', self.on_dont_upsize_changed)
+        dont_upsize.set_size(widgetconst.SIZE_SMALL)
+        top = widgetset.HBox(spacing=5)
+        top.pack_start(custom_size)
+        top.pack_start(dont_upsize)
+
+        bottom = widgetset.HBox(spacing=5)
+        width = LabeledNumberEntry('Width')
+        width.connect('focus-out', self.on_width_height_changed)
+        height = LabeledNumberEntry('Height')
+        height.connect('focus-out', self.on_width_height_changed)
+        bottom.pack_start(width)
+        bottom.pack_start(height)
+
+        vbox = widgetset.VBox()
+        vbox.pack_start(widgetutil.align_center(top))
+        vbox.pack_start(widgetutil.align_center(bottom))
+        return widgetutil.align_middle(vbox)
+
+    def create_right(self):
+        aspect = widgetset.Checkbox('Custom Aspect Ratio', color=TEXT_COLOR)
+        aspect.set_size(widgetconst.SIZE_SMALL)
+        aspect.connect('toggled', self.on_aspect_changed)
+        rbg = widgetset.RadioButtonGroup()
+        widgetset.RadioButton('4:3', rbg, color=TEXT_COLOR)
+        widgetset.RadioButton('3:2', rbg, color=TEXT_COLOR)
+        widgetset.RadioButton('16:9', rbg, color=TEXT_COLOR)
+        hbox = widgetset.HBox(spacing=5)
+        for button in rbg.get_buttons():
+            button.set_size(widgetconst.SIZE_SMALL)
+            hbox.pack_start(button)
+            button.connect('clicked', self.on_aspect_size_changed)
+
+        vbox = widgetset.VBox()
+        vbox.pack_start(widgetutil.align_center(aspect))
+        vbox.pack_start(widgetutil.align_center(hbox))
+        return widgetutil.align_middle(vbox)
+
+    def draw(self, context, layout_manager):
+        self.background.draw(context, 0, 0, self.background.width,
+                             self.background.height)
+
+    def change_setting(self, setting, value):
+        self.options[setting] = value
+        self.emit('setting-changed', setting, value)
+
+    def show(self):
+        self.set_child(self.box)
+        self.set_size_request(self.background.width,
+                              self.background.height)
+        self.queue_redraw()
+
+    def hide(self):
+        self.remove()
+        self.set_size_request(0, 0)
+        self.queue_redraw()
+
+    def toggle(self):
+        if self.child:
+            self.hide()
+        else:
+            self.show()
+
+    # signal handlers
+    def on_custom_size_changed(self, widget):
+        self.change_setting('custom-size', widget.get_checked())
+
+    def on_dont_upsize_changed(self, widget):
+        self.change_setting('dont-upsize', widget.get_checked())
+
+    def on_width_height_changed(self, widget):
+        if widget.label.get_text() == 'Width':
+            setting = 'width'
+        else:
+            setting = 'height'
+        self.change_setting(setting, int(widget.get_text()))
+
+    def on_aspect_changed(self, widget):
+        self.change_setting('custom-aspect', widget.get_checked())
+
+    def on_aspect_size_changed(self, widget):
+        if widget.get_selected():
+            self.change_setting('aspect-ratio', widget.label.get_text())
 
 
 EMPTY_CONVERTER = ConverterInfo("")
@@ -590,9 +736,9 @@ class Application(mvc.Application):
         omb.set_child(widgetutil.pad(buttons, 1, 1, 1, 1))
         button_bar.pack_start(omb)
 
+        self.settings_button = SettingsButton('settings')
         omb = OptionMenuBackground()
-        omb.set_child(widgetutil.pad(SettingsButton('settings'),
-                                     1, 1, 1, 1))
+        omb.set_child(self.settings_button)
         button_bar.pack_end(omb)
 
         self.drop_target = FileDropTarget()
@@ -615,6 +761,10 @@ class Application(mvc.Application):
                                                     bottom_pad=10))
         bottom_box.pack_start(button_bar)
 
+        options = CustomOptions()
+        self.settings_button.connect('clicked', lambda x: options.toggle())
+        bottom_box.pack_start(widgetutil.align_right(options,
+                                                     right_pad=5))
 
         self.convert_button = ConvertButton()
         self.convert_button.connect('clicked', self.convert)

@@ -97,6 +97,7 @@ class TextEntry(Widget):
         metrics = pango_context.get_metrics(self._widget.style.font_desc)
         return pango.PIXELS(metrics.get_descent()) + ypad
 
+
 class NumberEntry(TextEntry):
     def __init__(self, initial_text=None):
         TextEntry.__init__(self, initial_text)
@@ -150,13 +151,13 @@ class MultilineTextEntry(Widget):
 class Checkbox(Widget, BinBaselineCalculator):
     """Widget that the user can toggle on or off."""
 
-    def __init__(self, text=None, bold=False):
+    def __init__(self, text=None, bold=False, color=None):
         Widget.__init__(self)
         BinBaselineCalculator.__init__(self)
         if text is None:
             text = ''
         self.set_widget(gtk.CheckButton())
-        self.label = Label(text)
+        self.label = Label(text, color=color)
         self._widget.add(self.label._widget)
         self.label._widget.show()
         self.create_signal('toggled')
@@ -222,19 +223,24 @@ class RadioButtonGroup(Widget, BinBaselineCalculator):
 
 class RadioButton(Widget, BinBaselineCalculator):
     """RadioButton."""
-    def __init__(self, label, group=None):
+    def __init__(self, label, group=None, color=None):
         Widget.__init__(self)
         BinBaselineCalculator.__init__(self)
         if group:
             self.group = group
         else:
             self.group = RadioButtonGroup()
-
-        self.set_widget(gtk.RadioButton(group=self.group._widget, label=label))
+        self.set_widget(gtk.RadioButton(group=self.group._widget))
+        self.label = Label(label, color=color)
+        self._widget.add(self.label._widget)
+        self.label._widget.show()
         self.create_signal('clicked')
         self.forward_signal('clicked')
 
         group.add_button(self)
+
+    def set_size(self, size):
+        self.label.set_size(size)
 
     def get_group(self):
         return self.group
