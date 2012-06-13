@@ -557,7 +557,7 @@ class DirectorySelectDialog(FileDialogBase):
     def __init__(self, title):
         FileDialogBase.__init__(self)
         self._files = None
-        choose_str =_('Choose').encode('utf-8')
+        choose_str = 'Choose'
         fcd = gtk.FileChooserDialog(
             title,
             action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,

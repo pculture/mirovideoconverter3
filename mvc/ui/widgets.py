@@ -306,6 +306,7 @@ class CustomOptions(widgetset.Background):
         self.box = widgetutil.align_left(vbox)
 
         self.options = {
+            'destination': None,
             'custom-size': False,
             'width': None,
             'height': None,
@@ -319,6 +320,7 @@ class CustomOptions(widgetset.Background):
         hbox = widgetset.HBox(spacing=5)
         hbox.pack_start(widgetset.Label('Save to', color=TEXT_COLOR))
         button = widgetset.Button('Current Video Location')
+        button.connect('clicked', self.on_destination_clicked)
         hbox.pack_start(button)
         return widgetutil.align_center(hbox, top_pad=10, bottom_pad=10)
 
@@ -406,6 +408,16 @@ class CustomOptions(widgetset.Background):
             self.show()
 
     # signal handlers
+    def on_destination_clicked(self, widget):
+        dialog = widgetset.DirectorySelectDialog('Destination Directory')
+        r = dialog.run()
+        if r == 0: # picked a directory
+            self._change_setting('destination', dialog.get_directory())
+            widget.set_text(os.path.basename(dialog.get_directory()))
+        else: # cancel
+            self._change_setting('destination', None)
+            widget.set_text('Current Video Location')
+
     def on_custom_size_changed(self, widget):
         self._change_setting('custom-size', widget.get_checked())
         if widget.get_checked():
@@ -874,8 +886,10 @@ class Application(mvc.Application):
 
     def file_activated(self, widget, filename):
         vf = VideoFile(filename)
-        c = self.conversion_manager.get_conversion(vf,
-                                                   self.current_converter)
+        c = self.conversion_manager.get_conversion(
+            vf,
+            self.current_converter,
+            output_dir=self.options.options['destination'])
         c.listen(self.update_conversion)
         if self.conversion_manager.running:
             # start running automatically if a conversion is already in
@@ -966,6 +980,16 @@ class Application(mvc.Application):
                 conversion.stop()
 
     def on_setting_changed(self, widget, setting, value):
+        if setting == 'destination':
+            for c in self.model.conversions():
+                if c.status == 'initialized':
+                    if value is None:
+                        c.output_dir = os.path.dirname(c.video.filename)
+                    else:
+                        c.output_dir = value
+                    # update final path
+                    c.set_converter(self.current_converter)
+            return
         if self.current_converter.identifier != 'custom':
             if hasattr(self.current_converter, 'simple'):
                 self.current_converter = self.current_converter.simple(

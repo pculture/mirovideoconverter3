@@ -197,8 +197,8 @@ class ConversionManager(object):
         self.simultaneous = simultaneous
         self.running = False
 
-    def get_conversion(self, video, converter):
-        return Conversion(video, converter, self)
+    def get_conversion(self, video, converter, **kwargs):
+        return Conversion(video, converter, self, **kwargs)
 
     def start_conversion(self, video, converter):
         return self.run_conversion(self.get_conversion(video, converter))
