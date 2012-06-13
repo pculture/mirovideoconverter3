@@ -832,8 +832,9 @@ class Application(mvc.Application):
 
     def show_options_menu(self, widget, options):
         menu = widgetset.ContextMenu([
-                (option, lambda x: self.change_conversion(widget, id_))
-                for i, (option, id_), in enumerate(options)])
+                (option, lambda x, i: self.on_select_conversion(widget,
+                                                                options[i][1]))
+                for option, id_ in options])
         menu.popup()
 
     def update_convert_button(self):
@@ -865,18 +866,21 @@ class Application(mvc.Application):
         self.update_conversion(c)
         self.update_table_size()
 
-    def change_conversion(self, widget, identifier):
+    def on_select_conversion(self, widget, identifier):
+        self.current_converter = self.converter_manager.get_by_id(
+            identifier)
+
+        self.conversion_changed(widget)
+
+    def conversion_changed(self, widget):
         if hasattr(self, '_doing_conversion_change'):
             return
         self._doing_conversion_change = True
 
-        if identifier is not None:
-            self.current_converter = self.converter_manager.get_by_id(
-                identifier)
+        if self.current_converter is not EMPTY_CONVERTER:
             self.convert_label.set_text(
                 'Convert to %s' % self.current_converter.name)
         else:
-            self.current_converter = EMPTY_CONVERTER
             self.convert_label.set_text('Convert to...')
 
         for c in self.model.conversions():
