@@ -325,12 +325,13 @@ class CustomOptions(widgetset.Background):
         top.pack_start(dont_upsize)
 
         bottom = widgetset.HBox(spacing=5)
-        width = LabeledNumberEntry('Width')
-        width.connect('focus-out', self.on_width_height_changed)
-        height = LabeledNumberEntry('Height')
-        height.connect('focus-out', self.on_width_height_changed)
-        bottom.pack_start(width)
-        bottom.pack_start(height)
+        self.width_widget = LabeledNumberEntry('Width')
+        self.width_widget.connect('focus-out', self.on_width_height_changed)
+        self.height_widget = LabeledNumberEntry('Height')
+        self.height_widget.connect('focus-out', self.on_width_height_changed)
+        self.height_widget.disable()
+        bottom.pack_start(self.width_widget)
+        bottom.pack_start(self.height_widget)
 
         vbox = widgetset.VBox()
         vbox.pack_start(widgetutil.align_center(top))
@@ -341,12 +342,13 @@ class CustomOptions(widgetset.Background):
         aspect = widgetset.Checkbox('Custom Aspect Ratio', color=TEXT_COLOR)
         aspect.set_size(widgetconst.SIZE_SMALL)
         aspect.connect('toggled', self.on_aspect_changed)
-        rbg = widgetset.RadioButtonGroup()
-        widgetset.RadioButton('4:3', rbg, color=TEXT_COLOR)
-        widgetset.RadioButton('3:2', rbg, color=TEXT_COLOR)
-        widgetset.RadioButton('16:9', rbg, color=TEXT_COLOR)
+        self.button_group = widgetset.RadioButtonGroup()
+        widgetset.RadioButton('4:3', self.button_group, color=TEXT_COLOR)
+        widgetset.RadioButton('3:2', self.button_group, color=TEXT_COLOR)
+        widgetset.RadioButton('16:9', self.button_group, color=TEXT_COLOR)
         hbox = widgetset.HBox(spacing=5)
-        for button in rbg.get_buttons():
+        for button in self.button_group.get_buttons():
+            button.disable()
             button.set_size(widgetconst.SIZE_SMALL)
             hbox.pack_start(button)
             button.connect('clicked', self.on_aspect_size_changed)
@@ -384,19 +386,39 @@ class CustomOptions(widgetset.Background):
     # signal handlers
     def on_custom_size_changed(self, widget):
         self.change_setting('custom-size', widget.get_checked())
+        if widget.get_checked():
+            self.width_widget.enable()
+            self.height_widget.enable()
+        else:
+            if self.width_widget.get_text():
+                self.change_setting('width', None)
+            if self.height_widget.get_text():
+                self.change_setting('height', None)
+            self.width_widget.disable()
+            self.height_widget.disable()
 
     def on_dont_upsize_changed(self, widget):
         self.change_setting('dont-upsize', widget.get_checked())
 
     def on_width_height_changed(self, widget):
+        if widget.get_text():
+            value = int(widget.get_text())
+        else:
+            value = None
         if widget.label.get_text() == 'Width':
             setting = 'width'
         else:
             setting = 'height'
-        self.change_setting(setting, int(widget.get_text()))
+        self.change_setting(setting, value)
 
     def on_aspect_changed(self, widget):
         self.change_setting('custom-aspect', widget.get_checked())
+        if widget.get_checked():
+            for button in self.button_group.get_buttons():
+                button.enable()
+        else:
+            for button in self.button_group.get_buttons():
+                button.disable()
 
     def on_aspect_size_changed(self, widget):
         if widget.get_selected():
@@ -762,6 +784,7 @@ class Application(mvc.Application):
         bottom_box.pack_start(button_bar)
 
         options = CustomOptions()
+        options.connect('setting-changed', self.on_setting_changed)
         self.settings_button.connect('clicked', lambda x: options.toggle())
         bottom_box.pack_start(widgetutil.align_right(options,
                                                      right_pad=5))
@@ -912,6 +935,9 @@ class Application(mvc.Application):
                 self.update_table_size()
             else:
                 conversion.stop()
+
+    def on_setting_changed(self, widget, setting, value):
+        print 'SETTING CHANGED', setting, value
 
 
 if __name__ == "__main__":
