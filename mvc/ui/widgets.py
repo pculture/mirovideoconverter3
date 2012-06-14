@@ -1,5 +1,6 @@
 import logging
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 import os.path
 
@@ -885,6 +886,11 @@ class Application(mvc.Application):
             self.convert_button.set_stop()
 
     def file_activated(self, widget, filename):
+        filename = os.path.realpath(filename)
+        for c in self.model.conversions():
+            if c.video.filename == filename:
+                logger.info('ignoring duplicate: %r', filename)
+                return
         vf = VideoFile(filename)
         c = self.conversion_manager.get_conversion(
             vf,
