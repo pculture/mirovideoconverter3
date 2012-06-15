@@ -67,10 +67,9 @@ class py2app_mvc(py2app_cmd):
             glob_path = os.path.join(ffmpeg_lib_dir,
                                      lib.replace('.dylib', '.*.dylib'))
             for path in glob.iglob(glob_path):
-                self.copy_file(
-                    os.path.join(helpers_root, lib),
-                    os.path.join(helpers_root, os.path.basename(path)),
-                    link='sym')
+                os.symlink(
+                    os.path.join('.', lib),
+                    os.path.join(helpers_root, os.path.basename(path)))
 
 setup(
     app=APP,
