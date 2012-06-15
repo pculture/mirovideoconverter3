@@ -38,6 +38,7 @@ from .control import (TextEntry, NumberEntry,
 from .control import Checkbox, Button, OptionMenu, RadioButtonGroup, RadioButton
 from .customcontrol import (CustomButton,
         ContinuousCustomButton, CustomSlider, DragableCustomButton)
+from .contextmenu import ContextMenu
 from .drawing import DrawingContext, ImageSurface, Gradient
 from .drawingwidgets import DrawingArea, Background
 from .rect import Rect

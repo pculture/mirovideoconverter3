@@ -257,7 +257,7 @@ class MiroButton(NSButton):
 
 class Checkbox(SizedControl):
     """See https://develop.participatoryculture.org/index.php/WidgetAPI for a description of the API for this class."""
-    def __init__(self, text="", bold=False):
+    def __init__(self, text="", bold=False, color=None):
         SizedControl.__init__(self)
         self.create_signal('toggled')
         self.view = MiroButton.alloc().initWithSignal_('toggled')
@@ -265,6 +265,8 @@ class Checkbox(SizedControl):
         self.view.setTitle_(text)
         if bold:
             self.view.setFont_(NSFont.boldSystemFontOfSize_(0))
+        if color is not None:
+            pass
 
     def calc_size_request(self):
         if self.manual_size_request:
@@ -450,7 +452,7 @@ class RadioButtonGroup:
                 mem.view.setState_(NSOffState)
 
 class RadioButton(SizedControl):
-    def __init__(self, label, group=None):
+    def __init__(self, label, group=None, color=None):
         SizedControl.__init__(self)
         self.create_signal('clicked')
         self.view = MiroButton.alloc().initWithSignal_('clicked')
