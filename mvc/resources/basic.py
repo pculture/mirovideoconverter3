@@ -48,11 +48,15 @@ class OggVorbis(SimpleFFmpegConverterInfo):
     extension = 'ogg'
     parameters = '-f ogg -vn -acodec libvorbis -aq 60'.split()
 
+class OggTheora(FFmpeg2TheoraConverterInfo):
+    media_type = 'format'
+    extension = 'ogv'
+
 
 webm = WebM('WebM (VP8)')
 mp4 = MP4('MP4')
 mp3 = MP3('MP3')
 ogg_vorbis = OggVorbis('Ogg Vorbis')
-theora = FFmpeg2TheoraConverterInfo('Ogg Theora')
+theora = OggTheora('Ogg Theora')
 
 converters = [mp4, mp3, ogg_vorbis, theora, webm]
