@@ -13,6 +13,7 @@ except ImportError:
     import mvc
 
 import copy
+import tempfile
 import urllib
 import urlparse
 
@@ -891,6 +892,12 @@ class Application(mvc.Application):
             if c.video.filename == filename:
                 logger.info('ignoring duplicate: %r', filename)
                 return
+        if self.options.options['destination'] is None:
+            try:
+                tempfile.TemporaryFile(dir=os.path.dirname(filename))
+            except EnvironmentError:
+                # can't write to the destination directory; ask for a new one
+                self.options.on_destination_clicked(None)
         vf = VideoFile(filename)
         c = self.conversion_manager.get_conversion(
             vf,
