@@ -981,6 +981,10 @@ class Application(mvc.Application):
         elif name == 'cancel':
             if conversion.status == 'initialized':
                 self.model.remove(iter_)
+                try:
+                    self.conversion_manager.remove(conversion)
+                except ValueError:
+                    pass
                 self.update_table_size()
             else:
                 conversion.stop()

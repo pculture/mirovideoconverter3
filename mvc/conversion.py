@@ -209,6 +209,9 @@ class ConversionManager(object):
     def get_conversion(self, video, converter, **kwargs):
         return Conversion(video, converter, self, **kwargs)
 
+    def remove(self, conversion):
+        self.waiting.remove(conversion)
+
     def start_conversion(self, video, converter):
         return self.run_conversion(self.get_conversion(video, converter))
 
