@@ -24,6 +24,7 @@ class Conversion(object):
         self.thread = None
         self.popen = None
         self.status = 'initialized'
+        self.temp_output = None
         self.error = None
         self.started_at = None
         self.duration = None
@@ -63,8 +64,15 @@ class Conversion(object):
 
     def run(self):
         logger.info('starting %r', self)
-        self.temp_fd, self.temp_output = tempfile.mkstemp(
-            dir=os.path.dirname(self.output))
+        try:
+            self.temp_fd, self.temp_output = tempfile.mkstemp(
+                dir=os.path.dirname(self.output))
+        except EnvironmentError,e :
+            logger.exception('while creating temp file for %r',
+                             self.output)
+            self.error = str(e)
+            self.finalize()
+            return
         logger.info('commandline: %r', ' '.join(
                 self.get_subprocess_arguments(self.temp_output)))
         self.thread = threading.Thread(target=self._thread,
@@ -175,11 +183,12 @@ class Conversion(object):
             else:
                 self.status = 'finished'
         else:
-            try:
-                os.unlink(self.temp_output)
-            except EnvironmentError:
-                pass # ignore errors removing temp files; they may not have
-                     # been created
+            if self.temp_output is not None:
+                try:
+                    os.unlink(self.temp_output)
+                except EnvironmentError:
+                    pass # ignore errors removing temp files; they may not have
+                         # been created
             self.status = 'failed'
         self.notify_listeners()
         logger.info('finished %r; status: %s', self, self.status)
