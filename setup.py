@@ -45,6 +45,8 @@ class py2app_mvc(py2app_cmd):
             shutil.rmtree(helpers_root)
         print 'Copying FFmpeg to', helpers_root
         os.mkdir(helpers_root)
+        self.copy_file('ffmpeg', helpers_root)
+        return # the below does not work for me
         self.copy_file(get_ffmpeg_executable_path(), helpers_root)
         self.copy_file(get_ffmpeg2theora_executable_path(), helpers_root)
 

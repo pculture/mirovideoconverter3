@@ -1,6 +1,8 @@
 from mvc.converter import FFmpegConverterInfo
 
-from mvc.resources.basic import MP4
+# XXX FIXME:
+from basic import MP4
+#from mvc.resources.basic import MP4
 
 class AppleConversion(FFmpegConverterInfo):
     media_type = 'apple'
