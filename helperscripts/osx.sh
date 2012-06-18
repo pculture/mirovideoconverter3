@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # This script installs dependencies for building and running MVC on
@@ -11,7 +12,14 @@
 # Last updated:    2012-04-30
 # Last updated by: Paul Swartz
 
-port install python27 py27-pyobjc py27-pyobj-cocoa py27-py2app ffmpeg-devel
+port install python27 py27-pyobjc py27-pyobj-cocoa py27-py2app
+if ! test -x /usr/local/bin/ffmpeg; then
+    git clone git://github.com/stvs/ffmpeg-static.git
+    cd ffmpeg-static
+    ./build.sh
+    cp target/bin/ffmpeg /usr/local/bin/ffmpeg
+    cd ..
+fi
 curl -o ffmpeg2theora-0.28.pkg http://v2v.cc/~j/ffmpeg2theora/ffmpeg2theora-0.28.pkg
 installer -pkg ffmpeg2theora-0.28.pkg -target /
 rm ffmpeg2theora-0.28.pkg

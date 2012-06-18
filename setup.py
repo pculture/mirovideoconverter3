@@ -41,38 +41,6 @@ class py2app_mvc(py2app_cmd):
         os.mkdir(helpers_root)
         self.copy_file(get_ffmpeg_executable_path(), helpers_root)
         self.copy_file(get_ffmpeg2theora_executable_path(), helpers_root)
-        os.system(
-            'install_name_tool -add_rpath @executable_path "%s/ffmpeg"' % (
-                helpers_root))
-        ffmpeg_lib_dir = os.path.join(
-            os.path.dirname(get_ffmpeg_executable_path()),
-            '..', 'lib')
-        libs = [
-            'libavcodec.dylib',
-            'libavdevice.dylib',
-            'libavfilter.dylib',
-            'libavformat.dylib',
-            'libavutil.dylib',
-            'libmp3lame.dylib',
-            'libogg.dylib',
-            'libpostproc.dylib',
-            'libspeex.dylib',
-            'libspeexdsp.dylib',
-            'libswresample.dylib',
-            'libswscale.dylib',
-            'libvorbis.dylib',
-            'libvorbisenc.dylib',
-            'libvorbisfile.dylib',
-            'libx264.dylib',
-            'libxvidcore.dylib']
-        for lib in libs:
-            self.copy_file(os.path.join(ffmpeg_lib_dir, lib), helpers_root)
-            glob_path = os.path.join(ffmpeg_lib_dir,
-                                     lib.replace('.dylib', '.*.dylib'))
-            for path in glob.iglob(glob_path):
-                os.symlink(
-                    os.path.join('.', lib),
-                    os.path.join(helpers_root, os.path.basename(path)))
 
 setup(
     app=APP,

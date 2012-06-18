@@ -1,7 +1,9 @@
 *.py[co]
+*.so
 *~
 nosetests.xml
 dist
 build
 *_flymake.py
 Slicing
+ffmpeg-static
