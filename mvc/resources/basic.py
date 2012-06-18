@@ -17,7 +17,7 @@ class SimpleFFmpegConverterInfoWithSize(SimpleFFmpegConverterInfo):
         arguments = super(SimpleFFmpegConverterInfoWithSize,
                           self).get_extra_arguments(video, output)
         if self.width and self.height:
-            width, height = rescale_video((video.width. video.height),
+            width, height = rescale_video((video.width, video.height),
                                           (self.width, self.height))
             arguments.extend(('-s', '%ix%i' % (self.width, self.height)))
         return arguments
