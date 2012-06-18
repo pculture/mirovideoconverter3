@@ -108,12 +108,12 @@ class FileDropTarget(widgetset.SolidBackground):
         normal.pack_start(widgetutil.align_center(self.dropoff_off,
                                                   top_pad=60))
         hbox = widgetset.HBox(spacing=4)
-        hbox.pack_start(widgetutil.align_center(widgetset.Label(
+        hbox.pack_start(widgetutil.align_middle(widgetset.Label(
                     "Drag videos here or",
                     color=TEXT_COLOR)))
         cfb = ChooseFileButton()
         cfb.connect('clicked', self.choose_file)
-        hbox.pack_start(cfb)
+        hbox.pack_start(widgetutil.align_middle(cfb))
         hbox.set_size_request(-1, height)
         normal.pack_start(hbox)
 
@@ -966,7 +966,7 @@ class Application(mvc.Application):
 
     def update_table_size(self):
         conversions = len(self.model)
-        total_height = 385
+        total_height = 380
         if not conversions:
             self.scroller.set_size_request(-1, 0)
             self.drop_target.set_small(False)
