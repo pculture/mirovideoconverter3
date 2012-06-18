@@ -227,10 +227,9 @@ def get_ffmpeg_output(filepath):
         if e.returncode != 1:
             logger.exception("error calling %r\noutput:%s", commandline,
                               e.output)
-        else:
-            # ffmpeg -i generally returns 1, so we ignore the exception and
-            # just get the output.
-            output = e.output
+        # ffmpeg -i generally returns 1, so we ignore the exception and
+        # just get the output.
+        output = e.output
 
     return output
 
