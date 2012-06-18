@@ -1,0 +1,35 @@
+* Links
+** Mockup: https://projects.invisionapp.com/share/Q42Z5W8E#/1261309
+** Assets: http://cl.threee.us/GooD
+** Roadmap: http://bugzilla.pculture.org/roadmap.cgi?product=Miro+Video+Converter&target=3.0&person=
+* Feature TODOs
+** TODO clear and start over
+*** https://projects.invisionapp.com/share/Q42Z5W8E#/1261300
+** TODO allow resetting conversion after completion
+*** http://bugzilla.pculture.org/show_bug.cgi?id=13365
+** TODO Send to iTunes (Windows/OSX)
+** TODO Show FFmpeg output
+*** available as `mvc.conversion.Conversion.lines` (list of lines)
+
+* UI TODOs
+** TODO disable conversion settings during active conversions
+** TODO Settings dropdown doesn't flow out of the button correctly
+*** https://projects.invisionapp.com/share/Q42Z5W8E#/1261304
+** TODO don't allow window resizing
+** TODO probably other tweaks (npr/janet/dave?)
+* Package TODOs
+** TODO Windows installer
+*** Should we use NSIS again? OpenInstall?
+** TODO Ubuntu packages
+*** can probably piggyback on http://git.participatoryculture.org/miro-packaging/
+*** scripts should live on GitHub, not g.p.o
+** TODO OS X packages
+*** DONE static FFmpeg build
+*** correct the name (widgets -> Miro Video Converter)
+*** sandboxing (glee)
+*** does it work on 10.7? z3p has been developing on 10.6.
+* Testing TODOs
+** TODO UI tests
+*** Janet's been working on these, IIRC
+** TODO high-contrast mode for testing
+
