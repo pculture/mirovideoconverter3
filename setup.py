@@ -41,6 +41,9 @@ class py2app_mvc(py2app_cmd):
         os.mkdir(helpers_root)
         self.copy_file(get_ffmpeg_executable_path(), helpers_root)
         self.copy_file(get_ffmpeg2theora_executable_path(), helpers_root)
+        os.system(
+            'install_name_tool -add_rpath @executable_path "%s/ffmpeg"' % (
+                helpers_root))
         ffmpeg_lib_dir = os.path.join(
             os.path.dirname(get_ffmpeg_executable_path()),
             '..', 'lib')
