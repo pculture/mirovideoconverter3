@@ -2,6 +2,11 @@
 ** Mockup: https://projects.invisionapp.com/share/Q42Z5W8E#/1261309
 ** Assets: http://cl.threee.us/GooD
 ** Roadmap: http://bugzilla.pculture.org/roadmap.cgi?product=Miro+Video+Converter&target=3.0&person=
+* Builds
+** OS X
+*** sudo ./helperscripts/osx.sh
+*** python2.7 setup.py py2app
+*** ./make_disk_image.sh # makes dist/mvc-YYYY-MM-DD.dmg
 * Feature TODOs
 ** TODO clear and start over
 *** https://projects.invisionapp.com/share/Q42Z5W8E#/1261300
