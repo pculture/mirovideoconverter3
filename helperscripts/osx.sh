@@ -14,7 +14,7 @@
 
 port install python27 py27-pyobjc py27-pyobjc-cocoa py27-py2app
 if ! test -x /usr/local/bin/ffmpeg; then
-    git clone git://github.com/stvs/ffmpeg-static.git
+    git clone git://github.com/pculture/ffmpeg-static.git
     cd ffmpeg-static
     ./build.sh
     cp target/bin/ffmpeg /usr/local/bin/ffmpeg
