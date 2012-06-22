@@ -395,7 +395,7 @@ class CustomOptions(widgetset.Background):
     def show(self):
         self.set_child(self.box)
         self.set_size_request(self.background.width,
-                              self.background.height)
+                              self.background.height + 29)
         self.queue_redraw()
 
     def hide(self):
@@ -688,6 +688,7 @@ class ConvertButton(widgetset.CustomButton):
 
     def __init__(self):
         super(ConvertButton, self).__init__()
+        self.hidden = False
         self.set_off()
 
     def set_on(self):
@@ -708,12 +709,26 @@ class ConvertButton(widgetset.CustomButton):
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
 
+    def hide(self):
+        self.hidden = True
+        self.invalidate_size_request()
+        self.queue_redraw()
+
+    def show(self):
+        self.hidden = False
+        self.invalidate_size_request()
+        self.queue_redraw()
+
     def size_request(self, layout_manager):
-        return self.off.width, self.off.height
+        if self.hidden:
+            return 0, 0
+        return self.off.width, self.off.height + 100 # padding
 
     def draw(self, context, layout_manager):
+        if self.hidden:
+            return
         x = (context.width - self.image.width) // 2
-        y = (context.height - self.image.height) // 2
+        y = (context.height - self.image.height - 100) // 2 + 50
         self.image.draw(context, x, y, self.image.width, self.image.height)
         if self.image == self.off:
             layout_manager.set_font(BUTTON_FONT)
@@ -816,8 +831,7 @@ class Application(mvc.Application):
 
         self.options = CustomOptions()
         self.options.connect('setting-changed', self.on_setting_changed)
-        self.settings_button.connect('clicked',
-                                     lambda x: self.options.toggle())
+        self.settings_button.connect('clicked', self.on_settings_toggle)
         bottom_box.pack_start(widgetutil.align_right(self.options,
                                                      right_pad=5))
 
@@ -825,8 +839,7 @@ class Application(mvc.Application):
         self.convert_button.connect('clicked', self.convert)
 
         bottom_box.pack_start(widgetutil.align(self.convert_button,
-                                         xalign=0.5, yalign=0.5,
-                                         top_pad=50, bottom_pad=50))
+                                         xalign=0.5, yalign=0.5))
         bottom.set_child(widgetutil.pad(bottom_box, left=20, right=20))
         vbox.pack_start(bottom)
         self.window.set_content_widget(vbox)
@@ -995,6 +1008,15 @@ class Application(mvc.Application):
                 self.update_table_size()
             else:
                 conversion.stop()
+
+    def on_settings_toggle(self, widget):
+        if not self.options.child:
+            # hidden, going to show
+            self.convert_button.hide()
+        self.options.toggle()
+        if not self.options.child:
+            # was shown, not hidden
+            self.convert_button.show()
 
     def on_setting_changed(self, widget, setting, value):
         if setting == 'destination':
