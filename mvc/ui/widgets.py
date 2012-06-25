@@ -420,10 +420,12 @@ class CustomOptions(widgetset.Background):
         r = dialog.run()
         if r == 0: # picked a directory
             self._change_setting('destination', dialog.get_directory())
-            widget.set_text(os.path.basename(dialog.get_directory()))
+            if widget:
+                widget.set_text(os.path.basename(dialog.get_directory()))
         else: # cancel
             self._change_setting('destination', None)
-            widget.set_text('Current Video Location')
+            if widget:
+                widget.set_text('Current Video Location')
 
     def on_custom_size_changed(self, widget):
         self._change_setting('custom-size', widget.get_checked())
