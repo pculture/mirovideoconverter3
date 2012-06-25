@@ -10,16 +10,18 @@
 * Feature TODOs
 ** TODO clear and start over
 *** https://projects.invisionapp.com/share/Q42Z5W8E#/1261300
-** TODO allow resetting conversion after completion
+** TODO allow resetting conversion after completion 
 *** http://bugzilla.pculture.org/show_bug.cgi?id=13365
 ** TODO Send to iTunes (Windows/OSX)
 ** TODO Show FFmpeg output
 *** available as `mvc.conversion.Conversion.lines` (list of lines)
 
 * UI TODOs
-** TODO disable conversion settings during active conversions
+** TODO disable conversion settings during active conversions 
+*** http://bugzilla.pculture.org/show_bug.cgi?id=19281
 ** TODO Settings dropdown doesn't flow out of the button correctly
 *** https://projects.invisionapp.com/share/Q42Z5W8E#/1261304
+*** http://bugzilla.pculture.org/show_bug.cgi?id=19282
 ** TODO don't allow window resizing
 ** TODO probably other tweaks (npr/janet/dave?)
 * Package TODOs
@@ -32,7 +34,7 @@
 *** DONE static FFmpeg build
 *** correct the name (widgets -> Miro Video Converter)
 *** sandboxing (glee)
-*** does it work on 10.7? z3p has been developing on 10.6.
+*** does it work on 10.7? z3p has been developing on 10.6. 
 * Testing TODOs
 ** TODO UI tests
 *** Janet's been working on these, IIRC
