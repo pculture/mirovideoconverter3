@@ -4,8 +4,9 @@
 ** Roadmap: http://bugzilla.pculture.org/roadmap.cgi?product=Miro+Video+Converter&target=3.0&person=
 * Builds
 ** OS X
-*** sudo ./helperscripts/osx.sh
-*** python2.7 setup.py py2app
+*** export SANDBOX_PATH=/path/to/installed/sandbox
+*** export BKIT_PATH=/path/to/bkit
+*** sh build.sh
 *** ./make_disk_image.sh # makes dist/mvc-YYYY-MM-DD.dmg
 * Feature TODOs
 ** TODO clear and start over
