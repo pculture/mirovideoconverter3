@@ -39,7 +39,6 @@
 ** TODO OS X packages
 *** DONE static FFmpeg build
 *** sandboxing (glee)
-*** does it work on 10.7? z3p has been developing on 10.6. (works on 10.7)
 * Testing TODOs
 ** TODO UI tests
 *** Janet's been working on these, IIRC
