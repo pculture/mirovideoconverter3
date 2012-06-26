@@ -351,9 +351,13 @@ class CustomOptions(widgetset.Background):
         aspect.set_size(widgetconst.SIZE_SMALL)
         aspect.connect('toggled', self.on_aspect_changed)
         self.button_group = widgetset.RadioButtonGroup()
-        widgetset.RadioButton('4:3', self.button_group, color=TEXT_COLOR)
-        widgetset.RadioButton('3:2', self.button_group, color=TEXT_COLOR)
-        widgetset.RadioButton('16:9', self.button_group, color=TEXT_COLOR)
+        b1 = widgetset.RadioButton('4:3', self.button_group, color=TEXT_COLOR)
+        b2 = widgetset.RadioButton('3:2', self.button_group, color=TEXT_COLOR)
+        b3 = widgetset.RadioButton('16:9', self.button_group, color=TEXT_COLOR)
+        self.aspect_map = dict()
+        self.aspect_map[b1] = (4, 3)
+        self.aspect_map[b2] = (3, 2)
+        self.aspect_map[b3] = (16, 9)
         hbox = widgetset.HBox(spacing=5)
         for button in self.button_group.get_buttons():
             button.disable()
@@ -452,7 +456,7 @@ class CustomOptions(widgetset.Background):
     def on_aspect_size_changed(self, widget):
         if widget.get_selected():
             width_ratio, height_ratio = [float(v) for v in
-                                         widget.label.get_text().split(':')]
+                                         self.aspect_map[widget]]
             ratio = width_ratio / height_ratio
             self._change_setting('aspect-ratio', ratio)
 
