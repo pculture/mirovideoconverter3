@@ -164,6 +164,8 @@ class Window(WindowBase):
         alive_windows.add(self)
 
         self._window.connect('delete-event', self.on_delete_window)
+        # XXX: Define MVCWindow/MiroWindow style not hard code this
+        self._window.set_resizable(False)
 
     def accept_file_drag(self, val):
         if not val:

@@ -239,9 +239,10 @@ class Window(signals.SignalEmitter):
         """
         return None
 
+    # XXX Use MainWindow not Window for MVCStyle/MiroStyle
     def get_style_mask(self):
         return (NSTitledWindowMask | NSClosableWindowMask |
-                NSMiniaturizableWindowMask | NSResizableWindowMask)
+                NSMiniaturizableWindowMask)
 
     def set_title(self, title):
         self.nswindow.setTitle_(title)
