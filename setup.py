@@ -33,7 +33,8 @@ class py2app_mvc(py2app_cmd):
 
     def run(self):
         py2app_cmd.run(self)
-        bundle_root = os.path.join(self.dist_dir, 'widgets.app/Contents')
+        bundle_root = os.path.join(self.dist_dir,
+                                   'Miro Video Converter.app/Contents')
         helpers_root = os.path.join(bundle_root, 'Helpers')
         if os.path.exists(helpers_root):
             shutil.rmtree(helpers_root)
@@ -43,6 +44,7 @@ class py2app_mvc(py2app_cmd):
         self.copy_file(get_ffmpeg2theora_executable_path(), helpers_root)
 
 setup(
+    name="Miro Video Converter",
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},

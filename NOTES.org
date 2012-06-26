@@ -38,7 +38,6 @@
 *** http://bugzilla.pculture.org/show_bug.cgi?id=19288
 ** TODO OS X packages
 *** DONE static FFmpeg build
-*** correct the name (widgets -> Miro Video Converter)
 *** sandboxing (glee)
 *** does it work on 10.7? z3p has been developing on 10.6. (works on 10.7)
 * Testing TODOs
