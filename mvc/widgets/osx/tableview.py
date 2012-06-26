@@ -48,6 +48,7 @@ from mvc.widgets.tablescroll import ScrollbarOwnerMixin
 from .utils import filename_to_unicode
 import wrappermap
 import tablemodel
+import osxmenus
 from .base import Widget
 from .simple import Image
 from .drawing import DrawingContext, DrawingStyle, Gradient, ImageSurface

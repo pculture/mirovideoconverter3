@@ -40,9 +40,9 @@ class py2app_mvc(py2app_cmd):
             shutil.rmtree(helpers_root)
         print 'Copying FFmpeg to', helpers_root
         os.mkdir(helpers_root)
-        #self.copy_file('/opt/local/bin/ffmpeg', helpers_root)
-        self.copy_file(get_ffmpeg_executable_path(), helpers_root)
-        self.copy_file(get_ffmpeg2theora_executable_path(), helpers_root)
+        self.copy_file('/opt/local/bin/ffmpeg', helpers_root)
+        #self.copy_file(get_ffmpeg_executable_path(), helpers_root)
+        #self.copy_file(get_ffmpeg2theora_executable_path(), helpers_root)
 
 setup(
     name="Miro Video Converter",

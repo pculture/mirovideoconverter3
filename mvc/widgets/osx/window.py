@@ -39,6 +39,7 @@ from PyObjCTools import AppHelper
 from mvc.widgets import signals
 from mvc.widgets import widgetconst
 import wrappermap
+import osxmenus
 from .helpers import NotificationForwarder
 from .base import Widget, FlippedView
 from .layout import VBox, HBox, Alignment
