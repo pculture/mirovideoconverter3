@@ -167,6 +167,7 @@ class FileDropTarget(widgetset.SolidBackground):
 
     def choose_file(self, widget):
         dialog = widgetset.FileOpenDialog('Choose File...')
+        dialog.set_select_multiple(True)
         if dialog.run() == 0: # success
             for filename in dialog.get_filenames():
                 self.emit('file-activated', filename)
