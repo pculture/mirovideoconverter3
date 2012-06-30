@@ -21,8 +21,6 @@
 *** http://bugzilla.pculture.org/show_bug.cgi?id=19286
 
 * UI TODOs
-** TODO disable conversion settings during active conversions 
-*** http://bugzilla.pculture.org/show_bug.cgi?id=19281
 ** TODO Settings dropdown doesn't flow out of the button correctly
 *** https://projects.invisionapp.com/share/Q42Z5W8E#/1261304
 *** http://bugzilla.pculture.org/show_bug.cgi?id=19257
@@ -36,7 +34,6 @@
 *** scripts should live on GitHub, not g.p.o
 *** http://bugzilla.pculture.org/show_bug.cgi?id=19288
 ** TODO OS X packages
-*** DONE static FFmpeg build
 *** sandboxing (glee)
 * Testing TODOs
 ** TODO UI tests
