@@ -357,18 +357,20 @@ class Window(signals.SignalEmitter):
             self.drag_dest = None
         else:
             self.drag_dest = NSDragOperationCopy
-            self.nswindow.registerForDraggedTypes_([NSURLPboardType])
+            self.nswindow.registerForDraggedTypes_([NSFilenamesPboardType])
 
     def prepareForDragOperation_(self, info):
         return NO if self.drag_dest is None else YES
 
     def performDragOperation_(self, info):
         pb = info.draggingPasteboard()
-        available_types = set(pb.types()) & set([NSURLPboardType])
+        available_types = set(pb.types()) & set([NSFilenamesPboardType])
         if available_types:
             type_ = available_types.pop()
-            values = [v.encode('utf-8') for v in
-                      list(pb.propertyListForType_(type_))]
+            # DANCE!  Everybody dance for portable Python code!
+            values = [unicode(
+                      NSURL.fileURLWithPath_(v).filePathURL()).encode('utf-8')
+                      for v in list(pb.propertyListForType_(type_))]
             self.emit('file-drag-received', values)
         self.draggingExited_(info)
 
