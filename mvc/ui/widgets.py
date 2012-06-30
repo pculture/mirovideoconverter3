@@ -996,6 +996,7 @@ class Application(mvc.Application):
             self.scroller.set_size_request(-1, height)
             self.drop_target.set_small(True)
             self.drop_target.set_size_request(-1, total_height - height)
+        self.update_convert_button()
         self.table.model_changed()
 
     def hotspot_clicked(self, widget, name, iter_):
