@@ -367,7 +367,8 @@ class Window(signals.SignalEmitter):
         available_types = set(pb.types()) & set([NSURLPboardType])
         if available_types:
             type_ = available_types.pop()
-            values = list(pb.propertyListForType_(type_))
+            values = [v.encode('utf-8') for v in
+                      list(pb.propertyListForType_(type_))]
             self.emit('file-drag-received', values)
         self.draggingExited_(info)
 
