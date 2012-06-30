@@ -796,7 +796,7 @@ class Application(mvc.Application):
 
         self.menus = []
 
-        button_bar = widgetset.HBox()
+        self.button_bar = widgetset.HBox()
         buttons = widgetset.HBox()
 
         for type_ in converter_types:
@@ -809,12 +809,12 @@ class Application(mvc.Application):
             buttons.pack_start(menu)
         omb = OptionMenuBackground()
         omb.set_child(widgetutil.pad(buttons, 1, 1, 1, 1))
-        button_bar.pack_start(omb)
+        self.button_bar.pack_start(omb)
 
         self.settings_button = SettingsButton('settings')
         omb = OptionMenuBackground()
         omb.set_child(self.settings_button)
-        button_bar.pack_end(omb)
+        self.button_bar.pack_end(omb)
 
         self.drop_target = FileDropTarget()
         self.drop_target.connect('file-activated', self.file_activated)
@@ -834,7 +834,7 @@ class Application(mvc.Application):
         bottom_box.pack_start(widgetutil.align_left(self.convert_label,
                                                     top_pad=10,
                                                     bottom_pad=10))
-        bottom_box.pack_start(button_bar)
+        bottom_box.pack_start(self.button_bar)
 
         self.options = CustomOptions()
         self.options.connect('setting-changed', self.on_setting_changed)
@@ -905,6 +905,9 @@ class Application(mvc.Application):
             self.convert_button.set_on()
         if can_cancel:
             self.convert_button.set_stop()
+            self.button_bar.disable()
+        else:
+            self.button_bar.enable()
 
     def file_activated(self, widget, filename):
         filename = os.path.realpath(filename)
@@ -974,10 +977,11 @@ class Application(mvc.Application):
             for conversion in self.model.conversions():
                 if conversion.status == 'initialized':
                     self.conversion_manager.run_conversion(conversion)
-            self.update_convert_button()
+            self.button_bar.disable()
         else:
             for conversion in self.model.conversions():
                 conversion.stop()
+        self.update_convert_button()
 
     def update_conversion(self, conversion):
         self.model.update_conversion(conversion)
