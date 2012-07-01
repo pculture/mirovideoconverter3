@@ -60,7 +60,6 @@ class py2app_mvc(py2app_cmd):
         lib_paths = glob.glob(os.path.join(BKIT_DIR, "ffmpeg", "bin", "*.dylib")) 
         ffmpeg_files.extend(os.path.basename(p) for p in lib_paths)
         copy_binaries('ffmpeg/bin/', helpers_root, ffmpeg_files)
-        copy_binaries('ffmpeg2theora/bin/', helpers_root, ["ffmpeg2theora"])
 
 setup(
     name="Miro Video Converter",
