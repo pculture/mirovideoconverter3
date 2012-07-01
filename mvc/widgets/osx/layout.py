@@ -492,6 +492,9 @@ class Scroller(Bin):
         self.view.setHasVerticalScroller_(vertical)
         self.document_view = FlippedView.alloc().init()
         self.view.setDocumentView_(self.document_view)
+        # XXX HACK: if nothing else works, enable this for bz19248
+        #self.set_background_color((0.05, 0.10, 0.15))
+        #self.prepare_for_dark_content()
 
     def prepare_for_dark_content(self):
         try:
