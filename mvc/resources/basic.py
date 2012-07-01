@@ -1,4 +1,4 @@
-from mvc.converter import FFmpegConverterInfoBase, FFmpeg2TheoraConverterInfo
+from mvc.converter import FFmpegConverterInfoBase
 from mvc.utils import rescale_video
 
 class SimpleFFmpegConverterInfo(FFmpegConverterInfoBase):
@@ -48,9 +48,10 @@ class OggVorbis(SimpleFFmpegConverterInfo):
     extension = 'ogg'
     parameters = '-f ogg -vn -acodec libvorbis -aq 60'.split()
 
-class OggTheora(FFmpeg2TheoraConverterInfo):
+class OggTheora(SimpleFFmpegConverterInfo):
     media_type = 'format'
     extension = 'ogv'
+    parameters = '-f ogg -vcodec libtheora -acodec libvorbis -aq 60'.split()
 
 
 webm = WebM('WebM (VP8)')

@@ -30,7 +30,3 @@ def get_ffmpeg_executable_path():
     if avconv is not None:
        return avconv
     return which("ffmpeg")
-
-@memoize
-def get_ffmpeg2theora_executable_path():
-    return which("ffmpeg2theora")
