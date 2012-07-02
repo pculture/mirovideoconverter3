@@ -662,13 +662,18 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
                 top.pack(cellpack.Hotspot('show-file', IconWithText(
                             self.showfile,
                             layout_manager.textbox('Show File'))))
-            if hotspot == 'clear':
-                layout_manager.set_text_color(TEXT_CLICKED)
-            else:
-                layout_manager.set_text_color(TEXT_COLOR)
+            elif self.status == 'failed':
+                color = TEXT_CLICKED if hotspot == 'show-log' else TEXT_COLOR
+                layout_manager.set_text_color(color)
+                # XXX Missing grey error icon
+                top.pack(cellpack.Hotspot('show-log', IconWithText(
+                         self.showfile,
+                         layout_manager.textbox('Error - Show FFmpeg Output'))))
+            color = TEXT_CLICKED if hotspot == 'clear' else TEXT_COLOR
+            layout_manager.set_text_color(color)
             top.pack(cellpack.Hotspot('clear', IconWithText(
-                        self.showfile,
-                        layout_manager.textbox('Clear'))))
+                     self.showfile,
+                     layout_manager.textbox('Clear'))))
             vbox.pack(top)
             if self.status == 'finished':
                 layout_manager.set_text_color(TEXT_INFO)
@@ -752,6 +757,22 @@ class ConvertButton(widgetset.CustomButton):
                                        yalign=0.5, yscale=0)
         alignment.render_layout(context)
 
+# XXX do we want to export this for general purpose use?
+class TextDialog(widgetset.Dialog):
+    def __init__(self, title, description, window):
+        widgetset.Dialog.__init__(self, title, description)
+        self.set_transient_for(window)
+        self.add_button('OK')
+        self.textbox = widgetset.MultilineTextEntry()
+        self.textbox.set_editable(False)
+        scroller = widgetset.Scroller(False, True)
+        scroller.set_has_borders(True)
+        scroller.add(self.textbox)
+        scroller.set_size_request(400, 500)
+        self.set_extra_widget(scroller)
+
+    def set_text(self, text):
+        self.textbox.set_text(text)
 
 class Application(mvc.Application):
 
@@ -1010,6 +1031,14 @@ class Application(mvc.Application):
         elif name == 'clear':
             self.model.remove(iter_)
             self.update_table_size()
+        elif name == 'show-log':
+            lines = ''.join(conversion.lines)
+            d = TextDialog('Log', '', self.window)
+            d.set_text(lines)
+            try:
+                d.run()
+            finally:
+                d.destroy()
         elif name == 'cancel':
             if conversion.status == 'initialized':
                 self.model.remove(iter_)
