@@ -400,7 +400,7 @@ class CustomOptions(widgetset.Background):
     def show(self):
         self.set_child(self.box)
         self.set_size_request(self.background.width,
-                              self.background.height + 29)
+                              self.background.height + 28)
         self.queue_redraw()
 
     def hide(self):
