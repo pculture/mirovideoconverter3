@@ -91,4 +91,4 @@ class NotificationForwarder(NSObject):
             callback(notification)
         except:
             logging.warn("Callback for %s raised exception:%s\n", name,
-                    traceback.format_exc())
+                    traceback.format_exc().encode('utf-8'))
