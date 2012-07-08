@@ -541,6 +541,8 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             image_path("queued-icon.png")))
     showfile = widgetset.ImageSurface(widgetset.Image(
             image_path("showfile-icon.png")))
+    show_ffmpeg = widgetset.ImageSurface(widgetset.Image(
+            image_path("error-icon".png")))
     progressbar_base = widgetset.ImageSurface(widgetset.Image(
             image_path("progressbar-base.png")))
     delete_on = widgetset.ImageSurface(widgetset.Image(
@@ -667,7 +669,7 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
                 layout_manager.set_text_color(color)
                 # XXX Missing grey error icon
                 top.pack(cellpack.Hotspot('show-log', IconWithText(
-                         self.showfile,
+                         self.show_ffmpeg,
                          layout_manager.textbox('Error - Show FFmpeg Output'))))
             color = TEXT_CLICKED if hotspot == 'clear' else TEXT_COLOR
             layout_manager.set_text_color(color)
