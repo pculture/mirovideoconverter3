@@ -11,12 +11,15 @@ def mainloop_start():
 def mainloop_stop():
     gtk.main_quit()
 
-def idle_add(callback):
+def idle_add(callback, periodic=None):
+    if periodic is not None and periodic < 0:
+        raise ValueError('periodic cannot be negative')
     def wrapper():
         callback()
-        return True
-
-    return gobject.idle_add(wrapper)
+        return periodic is not None
+    periodic *= 1000    # milliseconds
+    return gobject.timeout_add(periodic, wrapper,
+                               priority=gobject.PRIORITY_DEFAULT_IDLE)
 
 def idle_remove(id_):
     gobject.source_remove(id_)

@@ -17,11 +17,14 @@ def mainloop_start():
 def mainloop_stop():
     NSApplication.sharedApplication().terminate_(nil)
 
-def idle_add(callback):
+def idle_add(callback, periodic=None):
     def wrapper():
         callback()
-        AppHelper.callLater(1, wrapper)
-    AppHelper.callLater(1, wrapper)
+        if periodic is not None:
+            AppHelper.callLater(periodic, wrapper)
+    if periodic is not None and periodic < 0:
+        raise ValueError('periodic cannot be negative')
+    AppHelper.callLater(periodic, wrapper)
 
 def idle_remove(id_):
     pass

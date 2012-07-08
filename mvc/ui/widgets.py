@@ -872,7 +872,7 @@ class Application(mvc.Application):
         vbox.pack_start(bottom)
         self.window.set_content_widget(vbox)
 
-        idle_add(self.conversion_manager.check_notifications)
+        idle_add(self.conversion_manager.check_notifications, 1)
 
         self.window.connect('file-drag-motion', self.drag_motion)
         self.window.connect('file-drag-received', self.drag_data_received)
