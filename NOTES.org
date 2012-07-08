@@ -16,9 +16,6 @@
 *** http://bugzilla.pculture.org/show_bug.cgi?id=13365
 ** TODO Send to iTunes (Windows/OSX)
 *** http://bugzilla.pculture.org/show_bug.cgi?id=19285
-** TODO Show FFmpeg output
-*** available as `mvc.conversion.Conversion.lines` (list of lines)
-*** http://bugzilla.pculture.org/show_bug.cgi?id=19286
 
 * UI TODOs
 ** TODO Settings dropdown doesn't flow out of the button correctly
