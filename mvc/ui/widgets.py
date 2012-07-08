@@ -542,7 +542,7 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
     showfile = widgetset.ImageSurface(widgetset.Image(
             image_path("showfile-icon.png")))
     show_ffmpeg = widgetset.ImageSurface(widgetset.Image(
-            image_path("error-icon".png")))
+            image_path("error-icon.png")))
     progressbar_base = widgetset.ImageSurface(widgetset.Image(
             image_path("progressbar-base.png")))
     delete_on = widgetset.ImageSurface(widgetset.Image(
