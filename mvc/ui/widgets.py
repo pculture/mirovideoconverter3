@@ -233,7 +233,7 @@ class SettingsButton(widgetset.CustomButton):
     def draw(self, context, layout_manager):
         BUTTON_BACKGROUND.draw(context, 1, 1, context.width - 2)
         alignment = self.build_hbox(layout_manager)
-        padding = cellpack.Padding(alignment, 1, 1, 1, 1)
+        padding = cellpack.Padding(alignment, top=1, right=3, bottom=1, left=3)
         padding.render_layout(context)
 
     def set_selected(self, selected):
