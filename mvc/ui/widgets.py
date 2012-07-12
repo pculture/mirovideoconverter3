@@ -831,12 +831,14 @@ class Application(mvc.Application):
             self.menus.append(menu)
             buttons.pack_start(menu)
         omb = OptionMenuBackground()
-        omb.set_child(widgetutil.pad(buttons, 1, 1, 1, 1))
+        omb.set_child(widgetutil.pad(buttons, top=2, bottom=2,
+                                     left=2, right=2))
         self.button_bar.pack_start(omb)
 
         self.settings_button = SettingsButton('settings')
         omb = OptionMenuBackground()
-        omb.set_child(self.settings_button)
+        omb.set_child(widgetutil.pad(self.settings_button, top=2,
+                                     bottom=2, left=2, right=2))
         self.button_bar.pack_end(omb)
 
         self.drop_target = FileDropTarget()
