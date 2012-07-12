@@ -15,13 +15,14 @@ class AppleConversion(FFmpegConverterInfo):
 DEFAULT_SIZE = (480, 320)
 
 ipod = AppleConversion('iPod Nano/Classic', *DEFAULT_SIZE)
-iphone_ipod = AppleConversion('iPhone/iPod Touch', 640, 480)
-iphone_ipod_retina = AppleConversion('iPhone/iPod Touch (with retina display)',
-                                     960, 640)
+ipod_touch = AppleConversion('iPod Touch', 640, 480)
+ipod_retina = AppleConversion('iPod Touch 4+', 960, 640)
+iphone = AppleConversion('iPhone', 640, 480)
+iphone_retina = AppleConversion('iPhone 4+', 960, 640)
 ipad = AppleConversion('iPad', 1024, 768)
-ipad_retina = AppleConversion('iPad (with retina display)', 1920, 1080)
+ipad_retina = AppleConversion('iPad 3', 1920, 1080)
 apple_tv = AppleConversion('Apple TV', 1280, 720)
 universal = AppleConversion('Apple Universal', 1280, 720)
 
-converters = [ipod, iphone_ipod, iphone_ipod_retina, ipad,
+converters = [ipod, ipod_touch, ipod_retina, iphone, iphone_retina, ipad,
               ipad_retina, apple_tv, universal]
