@@ -23,12 +23,21 @@ class SimpleFFmpegConverterInfoWithSize(SimpleFFmpegConverterInfo):
         return arguments
 
 
-class WebM(SimpleFFmpegConverterInfoWithSize):
+class WebM_HD(SimpleFFmpegConverterInfoWithSize):
     media_type = 'format'
     extension = 'webm'
-    parameters = ('-f webm -vcodec libvpx '
-                  '-acodec libvorbis -ab 160000 -sameq').split()
+    parameters = ('-f webm -s hd720 -vcodec libvpx -g 120 -lag-in-frames 16 '
+                  '-deadline good -cpu-used 0 -vprofile 0 -qmax 51 -qmin 11 '
+                  '-slices 4 -b:v 2M -acodec libvorbis -ab 112k '
+                  '-ar 44100').split()
 
+class WebM_SD(SimpleFFmpegConverterInfoWithSize):
+    media_type = 'format'
+    extension = 'webm'
+    parameters = ('-f webm -s hd480 -vcodec libvpx -g 120 -lag-in-frames 16 '
+                  '-deadline good -cpu-used 0 -vprofile 0 -qmax 53 -qmin 0 '
+                  '-b:v 768k -acodec libvorbis -ab 112k '
+                  '-ar 44100').split()
 
 class MP4(SimpleFFmpegConverterInfoWithSize):
     media_type = 'format'
@@ -54,10 +63,11 @@ class OggTheora(SimpleFFmpegConverterInfo):
     parameters = '-f ogg -vcodec libtheora -acodec libvorbis -aq 60'.split()
 
 
-webm = WebM('WebM (VP8)')
+webm_hd = WebM_HD('WebM HD')
+webm_sd = WebM_SD('WebM SD')
 mp4 = MP4('MP4')
 mp3 = MP3('MP3')
 ogg_vorbis = OggVorbis('Ogg Vorbis')
 theora = OggTheora('Ogg Theora')
 
-converters = [mp4, mp3, ogg_vorbis, theora, webm]
+converters = [mp4, mp3, ogg_vorbis, theora, webm_hd, webm_sd]
