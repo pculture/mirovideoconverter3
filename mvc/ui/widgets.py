@@ -33,6 +33,7 @@ BUTTON_FONT = 15.0 / 13.0
 LARGE_FONT = 13.0 / 13.0
 SMALL_FONT = 10.0 / 13.0
 
+DEFAULT_FONT="Helvetica"
 
 GRADIENT_TOP = widgetutil.css_to_color('#585f63')
 GRADIENT_BOTTOM = widgetutil.css_to_color('#383d40')
@@ -63,6 +64,7 @@ class ChooseFileButton(widgetset.CustomButton):
 
     def draw(self, context, layout_manager):
         layout_manager.set_text_color(TEXT_COLOR)
+        layout_manager.set_font(LARGE_FONT, family=DEFAULT_FONT)
         textbox = self.textbox(layout_manager)
         size = textbox.get_size()
         textbox.draw(context, 0, (context.height - size[1]) // 2,
@@ -107,10 +109,12 @@ class FileDropTarget(widgetset.SolidBackground):
         normal = widgetset.VBox(spacing=20)
         normal.pack_start(widgetutil.align_center(self.dropoff_off,
                                                   top_pad=60))
+        label = widgetset.Label("Drag videos here or",
+                    color=TEXT_COLOR)
+        #label.set_font(DEFAULT_FONT)
         hbox = widgetset.HBox(spacing=4)
-        hbox.pack_start(widgetutil.align_middle(widgetset.Label(
-                    "Drag videos here or",
-                    color=TEXT_COLOR)))
+        hbox.pack_start(widgetutil.align_middle(label))
+
         cfb = ChooseFileButton()
         cfb.connect('clicked', self.choose_file)
         hbox.pack_start(widgetutil.align_middle(cfb))
@@ -198,7 +202,7 @@ class SettingsButton(widgetset.CustomButton):
             self.surface_on = self.surface_off = None
 
     def textbox(self, layout_manager):
-        layout_manager.set_font(LARGE_FONT)
+        layout_manager.set_font(LARGE_FONT, family=DEFAULT_FONT)
         return layout_manager.textbox(self.name)
 
     def size_request(self, layout_manager):
@@ -223,10 +227,8 @@ class SettingsButton(widgetset.CustomButton):
             textbox = self.textbox(layout_manager)
             hbox.pack(cellpack.Alignment(textbox, yscale=0, yalign=0.5),
                       expand=True)
-        hbox.pack(cellpack.Padding(
-                cellpack.Alignment(arrow, xscale=0, yscale=0,
-                                   yalign=0.5),
-                right=8))
+        a = cellpack.Alignment(arrow, xscale=0, yscale=0, yalign=0.5)
+        hbox.pack(cellpack.Padding(a, left=5, right=12))
         alignment = cellpack.Padding(hbox, left=5)
         return alignment
 
@@ -567,13 +569,13 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
         left_right.pack(self.layout_left(layout_manager))
         left_right.pack(top_bottom, expand=True)
         layout_manager.set_text_color(TEXT_COLOR)
-        layout_manager.set_font(LARGE_FONT, bold=True)
+        layout_manager.set_font(LARGE_FONT, bold=True, family=DEFAULT_FONT)
         title = layout_manager.textbox(os.path.basename(self.input))
         title.set_wrap_style('truncated-char')
         alignment = cellpack.Padding(cellpack.TruncatedTextLine(title),
                                      top=25)
         top_bottom.pack(alignment)
-        layout_manager.set_font(SMALL_FONT)
+        layout_manager.set_font(SMALL_FONT, family=DEFAULT_FONT)
 
         bottom = self.layout_bottom(layout_manager, hotspot)
         if bottom is not None:
@@ -745,12 +747,13 @@ class ConvertButton(widgetset.CustomButton):
         y = (context.height - self.image.height - 100) // 2 + 50
         self.image.draw(context, x, y, self.image.width, self.image.height)
         if self.image == self.off:
-            layout_manager.set_font(BUTTON_FONT)
+            layout_manager.set_font(BUTTON_FONT, family=DEFAULT_FONT)
             layout_manager.set_text_shadow(widgetutil.Shadow(TEXT_SHADOW,
                                                              0.5, (-1, -1), 0))
             layout_manager.set_text_color(TEXT_DISABLED)
         else:
-            layout_manager.set_font(BUTTON_FONT, bold=True)
+            layout_manager.set_font(BUTTON_FONT, bold=True,
+                                    family=DEFAULT_FONT)
             layout_manager.set_text_shadow(widgetutil.Shadow(TEXT_SHADOW,
                                                              0.5, (1, 1), 0))
             layout_manager.set_text_color(TEXT_ACTIVE)
@@ -856,6 +859,7 @@ class Application(mvc.Application):
         bottom = BottomBackground()
         bottom_box = widgetset.VBox()
         self.convert_label = widgetset.Label('Convert to...', color=TEXT_COLOR)
+        #self.convert_label.set_font(DEFAULT_FONT)
         bottom_box.pack_start(widgetutil.align_left(self.convert_label,
                                                     top_pad=10,
                                                     bottom_pad=10))
