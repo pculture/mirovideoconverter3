@@ -692,7 +692,7 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
         if hotspot_info:
             return hotspot_info[0]
 
-class ConvertButtonBase(widgetset.CustomButton):
+class ConvertButton(widgetset.CustomButton):
     off = widgetset.ImageSurface(widgetset.Image(
             image_path("convert-button-off.png")))
     on = widgetset.ImageSurface(widgetset.Image(
@@ -701,36 +701,24 @@ class ConvertButtonBase(widgetset.CustomButton):
             image_path("convert-button-stop.png")))
 
     def __init__(self):
-       super(ConvertButtonBase, self).__init__()
-       self.hidden = False
-       self.set_off()
-
-    def on_label(self):
-        return ''
-
-    def off_label(self):
-        return ''
-
-    def stop_label(self):
-        return ''
+        super(ConvertButton, self).__init__()
+        self.hidden = False
+        self.set_off()
 
     def set_on(self):
-        self.state = 'on'
-        self.label = self.on_label()
+        self.label = 'Start Conversions!'
         self.image = self.on
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
 
     def set_off(self):
-        self.state = 'off'
-        self.label = self.off_label()
+        self.label = 'Start Conversions!'
         self.image = self.off
         self.set_cursor(widgetconst.CURSOR_NORMAL)
         self.queue_redraw()
 
     def set_stop(self):
-        self.state = 'stop'
-        self.label = self.stop_label()
+        self.label = 'Stop Conversions'
         self.image = self.stop
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
@@ -770,75 +758,6 @@ class ConvertButtonBase(widgetset.CustomButton):
         alignment = cellpack.Alignment(textbox, xalign=0.5, xscale=0.0,
                                        yalign=0.5, yscale=0)
         alignment.render_layout(context)
-
-class ConvertButton(ConvertButtonBase):
-    def on_label(self):
-        return 'Start Conversions!'
-
-    def off_label(self):
-        return 'Start Conversions!'
-
-    def stop_label(self):
-        return 'Stop Conversions'
-
-class ConvertXtrasButton(ConvertButtonBase):
-    def static_label(self):
-        return '...'
-
-    def on_label(self):
-        return self.static_label()
-
-    def off_label(self):
-        return self.static_label()
-
-    def stop_label(self):
-        return self.static_label()
-
-    # XXX - until we can get new 3-way image assets
-    def size_request(self, layout_manager):
-        if self.hidden:
-            return 0, 0
-        return 30, self.off.height + 100 # padding
-
-class ConvertPanel(widgetset.HBox):
-    def __init__(self):
-        widgetset.HBox.__init__(self)
-        for sig in ('convert-clicked', 'convert-xtras-clicked'):
-            self.create_signal(sig)
-        self.convert_button = ConvertButton()
-        self.convert_xtras_button = ConvertXtrasButton()
-        self.convert_button.connect('clicked', self.on_clicked)
-        self.convert_xtras_button.connect('clicked', self.on_clicked)
-        self.pack_start(self.convert_button)
-        self.pack_start(self.convert_xtras_button)
-
-    def on_clicked(self, widget):
-        if (widget == self.convert_button and
-            self.convert_button.state != 'off'):
-            self.emit('convert-clicked')
-        elif (widget == self.convert_xtras_button and
-              self.convert_xtras_button.state != 'off'):
-            self.emit('convert-xtras-clicked')
-
-    def set_on(self):
-        self.convert_button.set_on()
-        self.convert_xtras_button.set_on()
-
-    def set_off(self):
-        self.convert_button.set_off()
-        self.convert_xtras_button.set_off()
-
-    def set_stop(self):
-        self.convert_button.set_stop()
-        self.convert_xtras_button.set_stop()
-
-    def hide(self):
-        self.convert_button.hide()
-        self.convert_xtras_button.hide()
-
-    def show(self):
-        self.convert_button.show()
-        self.convert_xtras_button.show()
 
 # XXX do we want to export this for general purpose use?
 class TextDialog(widgetset.Dialog):
@@ -946,14 +865,11 @@ class Application(mvc.Application):
         bottom_box.pack_start(widgetutil.align_right(self.options,
                                                      right_pad=5))
 
-        self.convert_panel = ConvertPanel()
-        self.convert_panel.connect('convert-clicked', self.convert)
-        self.convert_panel.connect('convert-xtras-clicked',
-                                    self.convert_xtras)
+        self.convert_button = ConvertButton()
+        self.convert_button.connect('clicked', self.convert)
 
-        bottom_box.pack_start(widgetutil.align(self.convert_panel,
+        bottom_box.pack_start(widgetutil.align(self.convert_button,
                                          xalign=0.5, yalign=0.5))
-
         bottom.set_child(widgetutil.pad(bottom_box, left=20, right=20))
         vbox.pack_start(bottom)
         self.window.set_content_widget(vbox)
@@ -1007,11 +923,11 @@ class Application(mvc.Application):
                 can_start = True
         if (self.current_converter is EMPTY_CONVERTER or not
             (can_cancel or can_start)):
-            self.convert_panel.set_off()
+            self.convert_button.set_off()
         else:
-            self.convert_panel.set_on()
+            self.convert_button.set_on()
         if can_cancel:
-            self.convert_panel.set_stop()
+            self.convert_button.set_stop()
             self.button_bar.disable()
         else:
             self.button_bar.enable()
@@ -1079,34 +995,6 @@ class Application(mvc.Application):
 
         del self._doing_conversion_change
 
-    def on_convert_xtras(self, widget, tag):
-        if tag == 'Reset':
-            iter_ = self.model.first_iter()
-            while iter_ is not None:
-                conversion = self.model[iter_][-1]
-                conversion.status = 'initialized'
-                self.update_conversion(conversion)
-        elif tag == 'Clear':
-            iter_ = self.model.first_iter()
-            while iter_ is not None:
-                conversion = self.model[iter_][-1]
-                if conversion.status in ('finished', 'failed', 'initialized'):
-                    try:
-                        self.conversion_manager.remove(conversion)
-                    except ValueError:
-                        pass
-                iter_ = self.model.remove(iter_)
-        self.update_table_size()
-
-    def convert_xtras(self, widget):
-        #options = ['Clear', 'Reset']
-        options = ['Clear']
-        menu = widgetset.ContextMenu([
-                (option, lambda x, i: self.on_convert_xtras(widget,
-                                                            options[i]))
-                for id_, option in enumerate(options)])
-        menu.popup()
-
     def convert(self, widget):
         if not self.conversion_manager.running:
             for conversion in self.model.conversions():
@@ -1167,11 +1055,11 @@ class Application(mvc.Application):
     def on_settings_toggle(self, widget):
         if not self.options.child:
             # hidden, going to show
-            self.convert_panel.hide()
+            self.convert_button.hide()
         self.options.toggle()
         if not self.options.child:
             # was shown, not hidden
-            self.convert_panel.show()
+            self.convert_button.show()
 
     def on_setting_changed(self, widget, setting, value):
         if setting == 'destination':
