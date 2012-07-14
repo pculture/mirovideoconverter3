@@ -18,9 +18,6 @@
 *** http://bugzilla.pculture.org/show_bug.cgi?id=19285
 
 * UI TODOs
-** TODO Settings dropdown doesn't flow out of the button correctly
-*** https://projects.invisionapp.com/share/Q42Z5W8E#/1261304
-*** http://bugzilla.pculture.org/show_bug.cgi?id=19257
 ** TODO probably other tweaks (npr/janet/dave?)
 * Package TODOs
 ** TODO Windows installer
