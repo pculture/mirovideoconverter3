@@ -142,9 +142,9 @@ class FileDropTarget(widgetset.SolidBackground):
         normal = widgetset.VBox(spacing=20)
         normal.pack_start(widgetutil.align_center(self.dropoff_off,
                                                   top_pad=60))
-        label = widgetset.Label("Drag videos here or",
-                    color=TEXT_COLOR)
-        #label.set_font(DEFAULT_FONT)
+        label = CustomLabel("Drag videos here or")
+        label.set_color(TEXT_COLOR)
+        label.set_font(DEFAULT_FONT)
         hbox = widgetset.HBox(spacing=4)
         hbox.pack_start(widgetutil.align_middle(label))
 
@@ -893,7 +893,7 @@ class Application(mvc.Application):
 
         bottom = BottomBackground()
         bottom_box = widgetset.VBox()
-        self.convert_label = CustomLabel('Convert to...')
+        self.convert_label = CustomLabel('Convert to')
         self.convert_label.set_font(DEFAULT_FONT)
         self.convert_label.set_color(TEXT_COLOR)
         bottom_box.pack_start(widgetutil.align_left(self.convert_label,
@@ -964,6 +964,14 @@ class Application(mvc.Application):
                 break
             elif c.status == 'initialized':
                 can_start = True
+        if self.current_converter is EMPTY_CONVERTER:
+            self.convert_label.set_text('Convert to')
+        elif can_cancel:
+            target = self.current_converter.name
+            self.convert_label.set_text('Converting to %s' % target)
+        elif can_start:
+            target = self.current_converter.name
+            self.convert_label.set_text('Will convert to %s' % target)
         if (self.current_converter is EMPTY_CONVERTER or not
             (can_cancel or can_start)):
             self.convert_button.set_off()
@@ -1019,7 +1027,7 @@ class Application(mvc.Application):
             self.convert_label.set_text(
                 'Will convert to %s' % self.current_converter.name)
         else:
-            self.convert_label.set_text('Convert to...')
+            self.convert_label.set_text('Convert to')
 
         if hasattr(self.current_converter, 'width'):
             self.options.update_setting('width',
