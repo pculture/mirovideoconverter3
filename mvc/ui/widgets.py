@@ -758,7 +758,7 @@ class ConvertButton(widgetset.CustomButton):
         self.queue_redraw()
 
     def set_stop(self):
-        self.label = 'Stop Conversions'
+        self.label = 'Stop All Conversions'
         self.image = self.stop
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
