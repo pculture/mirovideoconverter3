@@ -49,6 +49,37 @@ TEXT_SHADOW = widgetutil.css_to_color('#000000')
 
 TABLE_WIDTH, TABLE_HEIGHT = 450, 87
 
+class CustomLabel(widgetset.Background):
+    def __init__(self, text=''):
+        widgetset.Background.__init__(self)
+        self.text = text
+        self.font = None
+        self.color = TEXT_COLOR
+
+    def set_text(self, text):
+        self.text = text
+        self.queue_redraw()
+
+    def set_color(self, color):
+        self.color = color
+
+    def set_font(self, font):
+        self.font = font
+
+    def textbox(self, layout_manager):
+        return layout_manager.textbox(self.text)
+
+    def draw(self, context, layout_manager):
+        layout_manager.set_text_color(self.color)
+        layout_manager.set_font(LARGE_FONT, family=self.font)
+        textbox = self.textbox(layout_manager)
+        size = textbox.get_size()
+        textbox.draw(context, 0, (context.height - size[1]) // 2,
+                     context.width, context.height)
+
+    def size_request(self, layout_manager):
+        return self.textbox(layout_manager).get_size()
+
 class ChooseFileButton(widgetset.CustomButton):
 
     def __init__(self):
@@ -137,19 +168,21 @@ class FileDropTarget(widgetset.SolidBackground):
         normal = widgetset.HBox(spacing=3)
         normal.pack_start(widgetutil.align_middle(self.dropoff_small_off,
                                                   right_pad=7))
-        normal.pack_start(widgetutil.align_middle(widgetset.Label(
-                    "Drag more videos here or",
-                    color=TEXT_COLOR)))
+        drag_label = CustomLabel('Drag more videos here or')
+        drag_label.set_font(DEFAULT_FONT)
+        drag_label.set_color(TEXT_COLOR)
+        normal.pack_start(widgetutil.align_middle(drag_label))
         cfb = ChooseFileButton()
         cfb.connect('clicked', self.choose_file)
         normal.pack_start(cfb)
         normal.set_size_request(-1, height)
 
+        drop_label = CustomLabel('Release button to drop off')
+        drop_label.set_font(DEFAULT_FONT)
+        drop_label.set_color(TEXT_COLOR)
         drag = widgetset.HBox(spacing=10)
         drag.pack_start(widgetutil.align_middle(self.dropoff_small_on))
-        drag.pack_start(widgetutil.align_middle(
-                widgetset.Label("Release button to drop off",
-                      color=TEXT_COLOR)))
+        drag.pack_start(widgetutil.align_middle(drop_label))
         drag.set_size_request(-1, height)
 
         return normal, drag
@@ -858,8 +891,9 @@ class Application(mvc.Application):
 
         bottom = BottomBackground()
         bottom_box = widgetset.VBox()
-        self.convert_label = widgetset.Label('Convert to...', color=TEXT_COLOR)
-        #self.convert_label.set_font(DEFAULT_FONT)
+        self.convert_label = CustomLabel('Convert to...')
+        self.convert_label.set_font(DEFAULT_FONT)
+        self.convert_label.set_color(TEXT_COLOR)
         bottom_box.pack_start(widgetutil.align_left(self.convert_label,
                                                     top_pad=10,
                                                     bottom_pad=10))
