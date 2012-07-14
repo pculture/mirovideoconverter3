@@ -955,6 +955,7 @@ class Application(mvc.Application):
     def update_convert_button(self):
         can_cancel = False
         can_start = False
+        has_conversions = any(self.model.conversions())
         for c in self.model.conversions():
             if c.status == 'converting':
                 can_cancel = True
@@ -970,7 +971,10 @@ class Application(mvc.Application):
             self.convert_button.set_stop()
             self.button_bar.disable()
         else:
-            self.button_bar.enable()
+            if has_conversions:
+                self.button_bar.enable()
+            else:
+                self.button_bar.disable()
 
     def file_activated(self, widget, filename):
         filename = os.path.realpath(filename)
