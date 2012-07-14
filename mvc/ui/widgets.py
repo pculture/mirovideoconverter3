@@ -1017,7 +1017,7 @@ class Application(mvc.Application):
 
         if self.current_converter is not EMPTY_CONVERTER:
             self.convert_label.set_text(
-                'Convert to %s' % self.current_converter.name)
+                'Will convert to %s' % self.current_converter.name)
         else:
             self.convert_label.set_text('Convert to...')
 
