@@ -741,13 +741,13 @@ class ConvertButton(widgetset.CustomButton):
         self.set_off()
 
     def set_on(self):
-        self.label = 'Start Conversions!'
+        self.label = 'Convert Now'
         self.image = self.on
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
 
     def set_off(self):
-        self.label = 'Start Conversions!'
+        self.label = 'Convert Now'
         self.image = self.off
         self.set_cursor(widgetconst.CURSOR_NORMAL)
         self.queue_redraw()
