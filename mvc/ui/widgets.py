@@ -49,6 +49,9 @@ TEXT_SHADOW = widgetutil.css_to_color('#000000')
 
 TABLE_WIDTH, TABLE_HEIGHT = 450, 87
 
+# app singleton
+app = None
+
 class CustomLabel(widgetset.Background):
     def __init__(self, text=''):
         widgetset.Background.__init__(self)
@@ -743,7 +746,7 @@ class ConvertButton(widgetset.CustomButton):
         self.set_off()
 
     def set_on(self):
-        self.label = 'Convert Now'
+        self.label = 'Convert to %s' % app.current_converter.name
         self.image = self.on
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
@@ -1156,7 +1159,3 @@ if __name__ == "__main__":
     app = Application()
     app.startup()
     app.run()
-
-
-
-
