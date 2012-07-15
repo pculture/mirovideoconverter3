@@ -967,6 +967,7 @@ class Application(mvc.Application):
                 break
             elif c.status == 'initialized':
                 can_start = True
+        self.convert_label.set_color(TEXT_DISABLED)
         if self.current_converter is EMPTY_CONVERTER:
             self.convert_label.set_text('Convert to')
         elif can_cancel:
@@ -975,6 +976,7 @@ class Application(mvc.Application):
         elif can_start:
             target = self.current_converter.name
             self.convert_label.set_text('Will convert to %s' % target)
+            self.convert_label.set_color(TEXT_ACTIVE)
         if (self.current_converter is EMPTY_CONVERTER or not
             (can_cancel or can_start)):
             self.convert_button.set_off()
