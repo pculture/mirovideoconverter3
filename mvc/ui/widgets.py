@@ -961,6 +961,8 @@ class Application(mvc.Application):
         can_cancel = False
         can_start = False
         has_conversions = any(self.model.conversions())
+        all_done = any([c for c in self.model.conversions()
+                        if c.status in ('finished', 'failed')])
         for c in self.model.conversions():
             if c.status == 'converting':
                 can_cancel = True
@@ -968,6 +970,15 @@ class Application(mvc.Application):
             elif c.status == 'initialized':
                 can_start = True
         self.convert_label.set_color(TEXT_DISABLED)
+        # Set the colors - all are enabled if all conversions complete, or
+        # if we have conversions conversions but the converter has not yet
+        # been set.
+        # the converter has not been set.
+        if ((self.current_converter is EMPTY_CONVERTER and has_conversions) or
+          all_done):
+            for m in self.menus:
+                m.set_selected(True)
+            self.settings_button.set_selected(True)
         if self.current_converter is EMPTY_CONVERTER:
             self.convert_label.set_text('Convert to')
         elif can_cancel:
@@ -1028,6 +1039,16 @@ class Application(mvc.Application):
             return
         self._doing_conversion_change = True
 
+        # If all conversions are done, then change the status of them back
+        # to 'initialized'.
+        #
+        # XXX TODO: what happens if the state is 'failed'?  Should we reset?
+        all_done = any([c for c in self.model.conversions()
+                        if c.status in ('finished', 'failed')])
+        if all_done:
+            for c in self.model.conversions():
+                c.status = 'initialized'
+
         if self.current_converter is not EMPTY_CONVERTER:
             self.convert_label.set_text(
                 'Will convert to %s' % self.current_converter.name)
@@ -1044,6 +1065,10 @@ class Application(mvc.Application):
             if c.status == 'initialized':
                 c.set_converter(self.current_converter)
                 self.model.update_conversion(c)
+
+        # We likely either reset the status or we've changed the conversion
+        # output so let's just reload the table model.
+        self.table.model_changed()
 
         self.update_convert_button()
 
