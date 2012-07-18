@@ -526,6 +526,12 @@ class ConversionModel(widgetset.TableModel):
     def conversions(self):
         return iter(self.conversion_to_iter)
 
+    def all_conversions_done(self):
+        has_conversions = any(self.conversions())
+        all_done = ((set(c.status for c in self.conversions()) -
+                     set(['finished', 'failed'])) == set())
+        return all_done and has_conversions
+
     def get_image(self, path):
         if path not in self.thumbnail_to_image:
             self.thumbnail_to_image[path] = widgetset.Image(path)
@@ -558,7 +564,7 @@ class ConversionModel(widgetset.TableModel):
         thumbnail_path = conversion.video.get_thumbnail(90, 70)
         if thumbnail_path:
             del self.thumbnail_to_image[thumbnail_path]
-        super(ConversionModel, self).remove(iter_)
+        return super(ConversionModel, self).remove(iter_)
 
 
 class IconWithText(cellpack.HBox):
@@ -735,6 +741,8 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
 class ConvertButton(widgetset.CustomButton):
     off = widgetset.ImageSurface(widgetset.Image(
             image_path("convert-button-off.png")))
+    clear = widgetset.ImageSurface(widgetset.Image(
+            image_path("convert-button-off.png")))
     on = widgetset.ImageSurface(widgetset.Image(
             image_path("convert-button-on.png")))
     stop = widgetset.ImageSurface(widgetset.Image(
@@ -748,6 +756,12 @@ class ConvertButton(widgetset.CustomButton):
     def set_on(self):
         self.label = 'Convert to %s' % app.current_converter.name
         self.image = self.on
+        self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
+        self.queue_redraw()
+
+    def set_clear(self):
+        self.label = 'Clear and Start Over'
+        self.image = self.clear
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
 
@@ -961,8 +975,7 @@ class Application(mvc.Application):
         can_cancel = False
         can_start = False
         has_conversions = any(self.model.conversions())
-        all_done = any([c for c in self.model.conversions()
-                        if c.status in ('finished', 'failed')])
+        all_done = self.model.all_conversions_done()
         for c in self.model.conversions():
             if c.status == 'converting':
                 can_cancel = True
@@ -988,7 +1001,9 @@ class Application(mvc.Application):
             target = self.current_converter.name
             self.convert_label.set_text('Will convert to %s' % target)
             self.convert_label.set_color(TEXT_ACTIVE)
-        if (self.current_converter is EMPTY_CONVERTER or not
+        if all_done:
+            self.convert_button.set_clear()
+        elif (self.current_converter is EMPTY_CONVERTER or not
             (can_cancel or can_start)):
             self.convert_button.set_off()
         else:
@@ -1043,8 +1058,7 @@ class Application(mvc.Application):
         # to 'initialized'.
         #
         # XXX TODO: what happens if the state is 'failed'?  Should we reset?
-        all_done = any([c for c in self.model.conversions()
-                        if c.status in ('finished', 'failed')])
+        all_done = self.model.all_conversions_done()
         if all_done:
             for c in self.model.conversions():
                 c.status = 'initialized'
@@ -1085,6 +1099,23 @@ class Application(mvc.Application):
                 if conversion.status == 'initialized':
                     self.conversion_manager.run_conversion(conversion)
             self.button_bar.disable()
+            # all done: no conversion job should be running at this point
+            all_done = self.model.all_conversions_done()
+            if all_done:
+                # take stuff off one by one from the list until we have none!
+                # might not be very efficient.
+                iter_ = self.model.first_iter()
+                while iter_ is not None:
+                    conversion = self.model[iter_][-1]
+                    if conversion.status in ('finished',
+                                             'failed',
+                                             'initialized'):
+                        try:
+                            self.conversion_manager.remove(conversion)
+                        except ValueError:
+                            pass
+                    iter_ = self.model.remove(iter_)
+                self.update_table_size()
         else:
             for conversion in self.model.conversions():
                 conversion.stop()
