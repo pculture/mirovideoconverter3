@@ -204,6 +204,7 @@ class Window(signals.SignalEmitter):
         self.create_signal('file-drag-motion')
         self.create_signal('file-drag-received')
         self.create_signal('file-drag-leave')
+        self.is_closing = False
         if rect is None:
             rect = Rect(0, 0, 470, 600)
         self.nswindow = MainMiroWindow.alloc().initWithContentRect_styleMask_backing_defer_(
@@ -265,9 +266,14 @@ class Window(signals.SignalEmitter):
     def on_will_close(self, notification):
         # unset the first responder.  This allows text entry widgets to get
         # the NSControlTextDidEndEditingNotification
+        if self.is_closing:
+            logging.info('on_will_close: already closing')
+            return
+        self.is_closing = True
         self.nswindow.makeFirstResponder_(nil)
         self.emit('will-close')
         self.emit('hide')
+        self.is_closing = False
 
     def is_active(self):
         return self.nswindow.isMainWindow()
