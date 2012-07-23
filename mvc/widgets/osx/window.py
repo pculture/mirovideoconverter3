@@ -390,6 +390,8 @@ class Window(signals.SignalEmitter):
     def draggingExited_(self, info):
         self.emit('file-drag-leave')
 
+    def center(self):
+        self.nswindow.center()
 
 class MainWindow(Window):
     def __init__(self, title, rect):

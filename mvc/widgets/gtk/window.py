@@ -214,6 +214,9 @@ class Window(WindowBase):
     def get_title(self):
         self._window.get_title()
 
+    def center(self):
+        self._window.set_position(gtk.WIN_POS_CENTER)
+
     def show(self):
         if self not in alive_windows:
             raise ValueError("Window destroyed")

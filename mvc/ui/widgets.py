@@ -940,6 +940,7 @@ class Application(mvc.Application):
         self.window.connect('file-drag-leave', self.drag_finished)
         self.window.accept_file_drag(True)
 
+        self.window.center()
         self.window.show()
         self.update_table_size()
 
