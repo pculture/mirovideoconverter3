@@ -40,7 +40,7 @@ difference is that all of the dialogs run modally.
 """
 
 from mvc.widgets import widgetset
-from mvc.widgetset import widgetutil
+from mvc.widgets import widgetutil
 
 class DialogButton(object):
     def __init__(self, text):
