@@ -12,10 +12,12 @@ env_dir = build_dir = site_packages_dir = scripts_dir = python_dir = None
 options = args = None
 
 def setup_global_dirs(parser_args):
-    global env_dir, build_dir, site_packages_dir, scripts_dir, python_dir
+    global env_dir, working_dir, build_dir, site_packages_dir, scripts_dir
+    global python_dir
 
     env_dir = os.path.abspath(parser_args[0])
-    build_dir = os.path.join('mvc-env-build')
+    working_dir = os.getcwd()
+    build_dir = os.path.abspath(os.path.join('mvc-env-build'))
     site_packages_dir = os.path.join(env_dir, "Lib", "site-packages")
     scripts_dir = os.path.join(env_dir, "Scripts")
     python_dir = os.path.join(env_dir, "Python")
@@ -111,7 +113,7 @@ def extract_zip(zip_path, dest_dir):
     archive = zipfile.ZipFile(zip_path, 'r')
     for name in archive.namelist():
         writeout("**  %s", name)
-        archive.extract(name, os.path.join(dest_dir))
+        archive.extract(name, dest_dir)
     archive.close()
 
 def run_pip_install(package_name, version):
@@ -126,7 +128,6 @@ def install_lessmsi():
     for filename in ('lessmsi.exe', 'wix.dll', 'wixcab.dll'):
         path = os.path.join(build_dir, 'lessmsi', filename)
         check_call("chmod", "+x", path)
-
 
 def run_lessmsi(msi_path, output_dir):
     writeout("* Extracting MSI %s", os.path.basename(msi_path))
@@ -149,6 +150,16 @@ def install_python():
     build_path = os.path.join(build_dir, 'Python')
     run_lessmsi(download_path, build_path)
     shutil.move(os.path.join(build_path, "SourceDir"), python_dir)
+
+def install_py2exe():
+    url = ("http://downloads.sourceforge.net"
+            "/project/py2exe/py2exe/0.6.9/py2exe-0.6.9.zip")
+    zip_path = download_url(url)
+    extract_zip(zip_path, os.path.join(build_dir, 'py2exe'))
+    writeout("* Installing py2exe")
+    os.chdir(os.path.join(build_dir, 'py2exe', 'py2exe-0.6.9'))
+    check_call(os.path.join(scripts_dir, "python.exe"), 'setup.py', 'install')
+    os.chdir(working_dir)
 
 def install_pygtk():
     url = ('http://ftp.gnome.org/pub/GNOME/binaries/win32/pygtk/2.24/'
@@ -192,6 +203,7 @@ def main():
         install_lessmsi()
         install_python()
         install_virtualenv()
+        install_py2exe()
         install_pygtk()
         install_ffmpeg()
         install_ffmpeg2theora()
