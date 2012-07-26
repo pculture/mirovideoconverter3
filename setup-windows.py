@@ -24,6 +24,7 @@ packages = [
     'mvc.widgets.gtk',
     'mvc.ui',
     'mvc.resources',
+    'mvc.windows',
 ]
 
 def resources_dir():
@@ -76,7 +77,7 @@ setup(
     packages=packages,
     version='3.0',
     windows=[
-        {'script': 'mvc/__main__.py',
+        {'script': 'mvc/windows/exe_main.py',
         'dest_base': 'mvc',
         },
     ],
