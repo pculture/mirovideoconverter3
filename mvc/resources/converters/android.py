@@ -1,5 +1,5 @@
 from mvc.converter import FFmpegConverterInfo
-from mvc.resources.basic import MP4
+from mvc.basicconverters import MP4
 
 class AndroidConversion(FFmpegConverterInfo):
     media_type = 'android'
