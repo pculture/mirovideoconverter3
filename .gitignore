@@ -7,3 +7,5 @@ build
 *_flymake.py
 Slicing
 ffmpeg-static
+mvc-env
+downloads
