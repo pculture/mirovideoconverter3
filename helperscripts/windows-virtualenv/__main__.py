@@ -3,6 +3,7 @@ import hashlib
 import os
 import sys
 import urllib
+import urlparse
 import shutil
 import subprocess
 import time
@@ -30,6 +31,9 @@ download_info = [
             'ffmpeg-20120426-git-a4b58fd-win32-static.7z')),
     ('b0c0ac9a47ba4de705849d88165cb440',
         'http://v2v.cc/~j/ffmpeg2theora/ffmpeg2theora-0.28.exe'),
+    ('d7e43beabc017a7d892a3d6663e988d4',
+        'http://sourceforge.net/projects/nsis/files/'
+        'NSIS%202/2.46/nsis-2.46.zip/download'),
 ]
 
 def get_download_hash(url):
@@ -56,7 +60,7 @@ def download_files():
         os.makedirs(downloads_dir)
     for md5hash, url in download_info:
         download_path = get_download_path(url)
-        if download_path:
+        if os.path.exists(download_path):
             download_hash = get_download_hash(url)
             if download_hash == md5hash:
                 continue
@@ -89,7 +93,14 @@ def get_download_path(url):
 
     :param url:
     """
-    return os.path.join(downloads_dir, os.path.basename(url))
+    parsed_url = urlparse.urlparse(url)
+    if parsed_url.netloc == 'sourceforge.net':
+        # sourceforge adds an extra "/download" at the end of the url
+        basename = os.path.basename(os.path.dirname(parsed_url.path))
+    else:
+        # default case
+        basename = os.path.basename(parsed_url.path)
+    return os.path.join(downloads_dir, basename)
 
 
 def setup_global_dirs(parser_args):
@@ -186,6 +197,14 @@ def run_pip_install(package_name, version):
     pip_path = os.path.join(scripts_dir, 'pip.exe')
     check_call(pip_path, 'install', "%s==%s" % (package_name, version))
 
+def install_nsis():
+    url = ('http://sourceforge.net/projects/nsis/files/'
+            'NSIS%202/2.46/nsis-2.46.zip/download')
+    zip_path = get_download_path(url)
+    # extract directory to the env directory since all files in the archive
+    # are inside nsis-2.46 directory
+    extract_zip(zip_path, env_dir)
+
 def install_lessmsi():
     url = "http://lessmsi.googlecode.com/files/lessmsi-v1.0.8.zip"
     zip_path = get_download_path(url)
@@ -274,6 +293,7 @@ def main():
         install_pygtk()
         install_ffmpeg()
         install_ffmpeg2theora()
+        install_nsis()
 
 if __name__ == '__main__':
     main()
