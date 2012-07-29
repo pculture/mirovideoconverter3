@@ -1,7 +1,9 @@
 import contextlib
+import hashlib
 import os
 import sys
 import urllib
+import urlparse
 import shutil
 import subprocess
 import time
@@ -9,13 +11,108 @@ import zipfile
 from optparse import OptionParser
 
 env_dir = build_dir = site_packages_dir = scripts_dir = python_dir = None
+working_dir = downloads_dir = None
 options = args = None
 
+# list of (md5 hash, url) tuples for all files that we download
+download_info = [
+    ('1694578c49e56eb1dce494408666e465',
+        'http://lessmsi.googlecode.com/files/lessmsi-v1.0.8.zip'),
+    ('c846d7a5ed186707d3675564a9838cc2', 
+        'http://python.org/ftp/python/2.7.3/python-2.7.3.msi'),
+    ('788df97c3ceb11368c3a938e5acef0b2', 
+        ('http://downloads.sourceforge.net'
+            '/project/py2exe/py2exe/0.6.9/py2exe-0.6.9.zip')),
+    ('4bddf847f81d8de2d73048b113da3dd5', 
+        ('http://ftp.gnome.org/pub/GNOME/binaries/win32/pygtk/2.24/'
+            'pygtk-all-in-one-2.24.2.win32-py2.7.msi')),
+    ('9633cf25444f41b2fb78b0bb3f509ec3',
+        ('http://ffmpeg.zeranoe.com/builds/win32/static/'
+            'ffmpeg-20120426-git-a4b58fd-win32-static.7z')),
+    ('b0c0ac9a47ba4de705849d88165cb440',
+        'http://v2v.cc/~j/ffmpeg2theora/ffmpeg2theora-0.28.exe'),
+    ('d7e43beabc017a7d892a3d6663e988d4',
+        'http://sourceforge.net/projects/nsis/files/'
+        'NSIS%202/2.46/nsis-2.46.zip/download'),
+]
+
+def get_download_hash(url):
+    """Get the md5 hash value for a downloaded file.
+
+    :param url: url for the download
+    :returns: md5 hash of the contents of the file, or None if no file found
+    """
+    download_path = get_download_path(url)
+    md5 = hashlib.md5()
+    block_size = 1024 * 10
+    if not os.path.exists(download_path):
+        return None
+    with open(download_path, 'rb') as f:
+        data = f.read(block_size)
+        while data:
+            md5.update(data)
+            data = f.read(block_size)
+    return md5.hexdigest()
+
+
+def download_files():
+    if not os.path.exists(downloads_dir):
+        os.makedirs(downloads_dir)
+    for md5hash, url in download_info:
+        download_path = get_download_path(url)
+        if os.path.exists(download_path):
+            download_hash = get_download_hash(url)
+            if download_hash == md5hash:
+                continue
+            else:
+                writeout("md5 hash verification failed")
+                writeout("  %s", url)
+                writeout("  correct: %s", md5hash)
+                writeout("  downloaded: %s", download_hash)
+        download_url(url)
+
+def download_url(url):
+    """Download a url to the build directory."""
+
+    download_path = get_download_path(url)
+    basename = os.path.basename(download_path)
+    writeout("* Downloading %s", basename)
+    time_info = { 'last': 0}
+    def reporthook(block_count, block_size, total_size):
+        now = time.time()
+        if total_size > 0 and now - time_info['last'] > 0.5:
+            percent_complete = (block_count * block_size * 100.0) / total_size
+            writeout_and_stay("  %0.1f complete", percent_complete)
+            time_info['last'] = now
+    urllib.urlretrieve(url, download_path, reporthook)
+    writeout_and_stay("  100.0%% complete")
+
+
+def get_download_path(url):
+    """Get the path to a downloaded file.
+
+    :param url:
+    """
+    parsed_url = urlparse.urlparse(url)
+    if parsed_url.netloc == 'sourceforge.net':
+        # sourceforge adds an extra "/download" at the end of the url
+        basename = os.path.basename(os.path.dirname(parsed_url.path))
+    else:
+        # default case
+        basename = os.path.basename(parsed_url.path)
+    return os.path.join(downloads_dir, basename)
+
+
 def setup_global_dirs(parser_args):
-    global env_dir, build_dir, site_packages_dir, scripts_dir, python_dir
+    global env_dir, working_dir, build_dir, site_packages_dir, scripts_dir
+    global python_dir, downloads_dir
 
     env_dir = os.path.abspath(parser_args[0])
-    build_dir = os.path.join('mvc-env-build')
+    working_dir = os.getcwd()
+    downloads_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', '..', 'downloads',
+                'windows-virtualenv'))
+    build_dir = os.path.abspath(os.path.join('mvc-env-build'))
     site_packages_dir = os.path.join(env_dir, "Lib", "site-packages")
     scripts_dir = os.path.join(env_dir, "Scripts")
     python_dir = os.path.join(env_dir, "Python")
@@ -77,24 +174,6 @@ def build_dir_context():
     yield
     shutil.rmtree(build_dir)
 
-def download_url(url):
-    """Download a url to the build directory."""
-
-    basename = os.path.basename(url)
-    download_path = os.path.join(build_dir, basename)
-    writeout("* Downloading %s", basename)
-    time_info = { 'last': 0}
-    def reporthook(block_count, block_size, total_size):
-        now = time.time()
-        if total_size > 0 and now - time_info['last'] > 0.5:
-            percent_complete = (block_count * block_size * 100.0) / total_size
-            writeout_and_stay("  %0.1f complete", percent_complete)
-            time_info['last'] = now
-    urllib.urlretrieve(url, download_path, reporthook)
-    writeout_and_stay("  100.0%% complete")
-
-    return download_path
-
 def movetree(source_dir, dest_dir):
     """Move the contents of source_dir into dest_dir
 
@@ -111,22 +190,29 @@ def extract_zip(zip_path, dest_dir):
     archive = zipfile.ZipFile(zip_path, 'r')
     for name in archive.namelist():
         writeout("**  %s", name)
-        archive.extract(name, os.path.join(dest_dir))
+        archive.extract(name, dest_dir)
     archive.close()
 
 def run_pip_install(package_name, version):
     pip_path = os.path.join(scripts_dir, 'pip.exe')
     check_call(pip_path, 'install', "%s==%s" % (package_name, version))
 
+def install_nsis():
+    url = ('http://sourceforge.net/projects/nsis/files/'
+            'NSIS%202/2.46/nsis-2.46.zip/download')
+    zip_path = get_download_path(url)
+    # extract directory to the env directory since all files in the archive
+    # are inside nsis-2.46 directory
+    extract_zip(zip_path, env_dir)
+
 def install_lessmsi():
     url = "http://lessmsi.googlecode.com/files/lessmsi-v1.0.8.zip"
-    zip_path = download_url(url)
+    zip_path = get_download_path(url)
     extract_zip(zip_path, os.path.join(build_dir, 'lessmsi'))
     # make all files executable
     for filename in ('lessmsi.exe', 'wix.dll', 'wixcab.dll'):
         path = os.path.join(build_dir, 'lessmsi', filename)
         check_call("chmod", "+x", path)
-
 
 def run_lessmsi(msi_path, output_dir):
     writeout("* Extracting MSI %s", os.path.basename(msi_path))
@@ -145,15 +231,25 @@ def install_virtualenv():
 
 def install_python():
     url = "http://python.org/ftp/python/2.7.3/python-2.7.3.msi"
-    download_path = download_url(url)
+    download_path = get_download_path(url)
     build_path = os.path.join(build_dir, 'Python')
     run_lessmsi(download_path, build_path)
     shutil.move(os.path.join(build_path, "SourceDir"), python_dir)
 
+def install_py2exe():
+    url = ("http://downloads.sourceforge.net"
+            "/project/py2exe/py2exe/0.6.9/py2exe-0.6.9.zip")
+    zip_path = get_download_path(url)
+    extract_zip(zip_path, os.path.join(build_dir, 'py2exe'))
+    writeout("* Installing py2exe")
+    os.chdir(os.path.join(build_dir, 'py2exe', 'py2exe-0.6.9'))
+    check_call(os.path.join(scripts_dir, "python.exe"), 'setup.py', 'install')
+    os.chdir(working_dir)
+
 def install_pygtk():
     url = ('http://ftp.gnome.org/pub/GNOME/binaries/win32/pygtk/2.24/'
             'pygtk-all-in-one-2.24.2.win32-py2.7.msi')
-    msi_path = download_url(url)
+    msi_path = get_download_path(url)
     build_path = os.path.join(build_dir, 'pygtk-all-in-one')
     run_lessmsi(msi_path, build_path)
 
@@ -165,7 +261,7 @@ def install_pygtk():
 def install_ffmpeg():
     url = ("http://ffmpeg.zeranoe.com/builds/win32/static/"
             "ffmpeg-20120426-git-a4b58fd-win32-static.7z")
-    download_path = download_url(url)
+    download_path = get_download_path(url)
     check_call(options.seven_zip_path, "x", download_path, '-o' + build_dir)
 
     ffmpeg_dir = os.path.join(build_dir,
@@ -181,20 +277,23 @@ def install_ffmpeg():
 def install_ffmpeg2theora():
     url = "http://v2v.cc/~j/ffmpeg2theora/ffmpeg2theora-0.28.exe"
     exe_name = os.path.basename(url)
-    download_path = download_url(url)
+    download_path = get_download_path(url)
     check_call("chmod", "+x", download_path)
     shutil.move(download_path, os.path.join(scripts_dir, exe_name))
 
 def main():
     parse_args()
     make_env_dir()
+    download_files()
     with build_dir_context():
         install_lessmsi()
         install_python()
         install_virtualenv()
+        install_py2exe()
         install_pygtk()
         install_ffmpeg()
         install_ffmpeg2theora()
+        install_nsis()
 
 if __name__ == '__main__':
     main()

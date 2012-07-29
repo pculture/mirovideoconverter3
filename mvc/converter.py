@@ -4,7 +4,7 @@ import json
 import re
 import os.path
 
-from mvc import settings, utils
+from mvc import resources, settings, utils
 from mvc.utils import hms_to_seconds
 
 logger = logging.getLogger(__name__)
@@ -122,12 +122,15 @@ class ConverterManager(object):
         self.converters[converter.identifier] = converter
 
     def startup(self):
-        resources_path = os.path.join(os.path.dirname(__file__), 'resources',
-                                      '*.py')
-        self.load_converters(resources_path)
+        self.load_simple_converters()
+        self.load_converters(resources.converter_scripts())
 
-    def load_converters(self, path):
-        converters = glob(path)
+    def load_simple_converters(self):
+        from mvc import basicconverters
+        for converter in basicconverters.converters:
+            self.add_converter(converter)
+
+    def load_converters(self, converters):
         for converter_file in converters:
             global_dict = {}
             execfile(converter_file, global_dict)
