@@ -534,7 +534,11 @@ class ConversionModel(widgetset.TableModel):
 
     def get_image(self, path):
         if path not in self.thumbnail_to_image:
-            self.thumbnail_to_image[path] = widgetset.Image(path)
+            try:
+                image = widgetset.Image(path)
+            except ValueError:
+                image = self.thumbnail_to_image[None]
+            self.thumbnail_to_image[path] = image
         return self.thumbnail_to_image[path]
 
     def update_conversion(self, conversion):
