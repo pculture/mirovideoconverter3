@@ -28,11 +28,11 @@ def rescale_video((source_width, source_height),
     within the target size.
     """
     if not source_width or not source_height:
-        return (target_width, target_height)
+        return (round_even(target_width), round_even(target_height))
 
     if (source_width <= target_width and
         source_height <= target_height):
-        return (source_width, source_height)
+        return (round_even(source_width), round_even(source_height))
 
     width_ratio = float(source_width) / float(target_width)
     height_ratio = float(source_height) / float(target_height)
