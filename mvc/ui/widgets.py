@@ -61,7 +61,7 @@ class CustomLabel(widgetset.Background):
 
     def set_text(self, text):
         self.text = text
-        self.invalidate_size_request()
+        self.queue_redraw()
 
     def set_color(self, color):
         self.color = color
@@ -69,9 +69,11 @@ class CustomLabel(widgetset.Background):
 
     def set_font(self, font):
         self.font = font
-        self.invalidate_size_request()
+        self.queue_redraw()
 
     def textbox(self, layout_manager):
+        layout_manager.set_text_color(self.color)
+        layout_manager.set_font(LARGE_FONT, family=self.font)
         return layout_manager.textbox(self.text)
 
     def draw(self, context, layout_manager):
@@ -170,7 +172,7 @@ class FileDropTarget(widgetset.SolidBackground):
 
     def build_small_widgets(self):
         height = 40 # arbitrary, but the same for both
-        normal = widgetset.HBox(spacing=3)
+        normal = widgetset.HBox(spacing=4)
         normal.pack_start(widgetutil.align_middle(self.dropoff_small_off,
                                                   right_pad=7))
         drag_label = CustomLabel('Drag more videos here or')
