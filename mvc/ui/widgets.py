@@ -92,7 +92,7 @@ class ChooseFileButton(widgetset.CustomButton):
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
 
     def textbox(self, layout_manager):
-        return layout_manager.textbox('Choose File...', underline=True)
+        return layout_manager.textbox('Choose Files...', underline=True)
 
     def size_request(self, layout_manager):
         textbox = self.textbox(layout_manager)
@@ -208,7 +208,7 @@ class FileDropTarget(widgetset.SolidBackground):
             self.queue_redraw()
 
     def choose_file(self, widget):
-        dialog = widgetset.FileOpenDialog('Choose File...')
+        dialog = widgetset.FileOpenDialog('Choose Files...')
         dialog.set_select_multiple(True)
         if dialog.run() == 0: # success
             for filename in dialog.get_filenames():
