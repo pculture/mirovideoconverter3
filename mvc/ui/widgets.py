@@ -1126,6 +1126,7 @@ class Application(mvc.Application):
         else:
             for conversion in self.model.conversions():
                 conversion.stop()
+                self.update_conversion(conversion)
         self.update_convert_button()
 
     def update_conversion(self, conversion):
