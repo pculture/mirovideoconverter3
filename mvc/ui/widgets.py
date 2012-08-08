@@ -61,7 +61,7 @@ class CustomLabel(widgetset.Background):
 
     def set_text(self, text):
         self.text = text
-        self.queue_redraw()
+        self.invalidate_size_request()
 
     def set_color(self, color):
         self.color = color
@@ -69,7 +69,7 @@ class CustomLabel(widgetset.Background):
 
     def set_font(self, font):
         self.font = font
-        self.queue_redraw()
+        self.invalidate_size_request()
 
     def textbox(self, layout_manager):
         layout_manager.set_text_color(self.color)
