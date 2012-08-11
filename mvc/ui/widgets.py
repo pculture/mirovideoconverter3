@@ -109,14 +109,25 @@ class CustomLabel(widgetset.Background):
     def size_request(self, layout_manager):
         return self.textbox(layout_manager).get_size()
 
-class ChooseFileButton(widgetset.CustomButton):
-
+class WebStyleButton(widgetset.CustomButton):
     def __init__(self):
-        super(ChooseFileButton, self).__init__()
+        super(WebStyleButton, self).__init__()
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
+        self.text = ''
+        self.font = DEFAULT_FONT
+        self.font_scale = LARGE_FONT
+
+    def set_text(self, text):
+        self.text = text
+        self.invalidate_size_request()
+
+    def set_font(self, font, font_scale):
+        self.font = font
+        self.font_scale = font_scale
+        self.invalidate_size_request()
 
     def textbox(self, layout_manager):
-        return layout_manager.textbox('Choose Files...', underline=True)
+        return layout_manager.textbox(self.text, underline=True)
 
     def size_request(self, layout_manager):
         textbox = self.textbox(layout_manager)
@@ -124,7 +135,7 @@ class ChooseFileButton(widgetset.CustomButton):
 
     def draw(self, context, layout_manager):
         layout_manager.set_text_color(TEXT_COLOR)
-        layout_manager.set_font(LARGE_FONT, family=DEFAULT_FONT)
+        layout_manager.set_font(self.font_scale, family=self.font)
         textbox = self.textbox(layout_manager)
         size = textbox.get_size()
         textbox.draw(context, 0, (context.height - size[1]) // 2,
@@ -175,7 +186,8 @@ class FileDropTarget(widgetset.SolidBackground):
         hbox = widgetset.HBox(spacing=4)
         hbox.pack_start(widgetutil.align_middle(label))
 
-        cfb = ChooseFileButton()
+        cfb = WebStyleButton()
+        cfb.set_text('Choose Files...')
         cfb.connect('clicked', self.choose_file)
         hbox.pack_start(widgetutil.align_middle(cfb))
         hbox.set_size_request(-1, height)
@@ -201,7 +213,8 @@ class FileDropTarget(widgetset.SolidBackground):
         drag_label.set_font(DND_FONT, DND_SMALL_FONTSIZE)
         drag_label.set_color(TEXT_COLOR)
         normal.pack_start(widgetutil.align_middle(drag_label))
-        cfb = ChooseFileButton()
+        cfb = WebStyleButton()
+        cfb.set_text('Choose Files...')
         cfb.connect('clicked', self.choose_file)
         normal.pack_start(cfb)
         normal.set_size_request(-1, height)
