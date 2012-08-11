@@ -2,12 +2,12 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-import os.path
+import os
+import sys
 
 try:
     import mvc
 except ImportError:
-    import os.path, sys
     mvc_path = os.path.join(os.path.dirname(__file__), '..', '..')
     sys.path.append(mvc_path)
     import mvc
