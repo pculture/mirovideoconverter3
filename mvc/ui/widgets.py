@@ -827,15 +827,12 @@ class ConvertButton(widgetset.CustomButton):
         x = (context.width - self.image.width) // 2
         y = (context.height - self.image.height - 100) // 2 + 50
         self.image.draw(context, x, y, self.image.width, self.image.height)
+        layout_manager.set_font(CONVERT_NOW_FONTSIZE, family=CONVERT_NOW_FONT)
         if self.image == self.off:
-            layout_manager.set_font(CONVERT_NOW_FONTSIZE,
-                                    family=CONVERT_NOW_FONT)
             layout_manager.set_text_shadow(widgetutil.Shadow(TEXT_SHADOW,
                                                              0.5, (-1, -1), 0))
             layout_manager.set_text_color(TEXT_DISABLED)
         else:
-            layout_manager.set_font(CONVERT_NOW_FONTSIZE, bold=True,
-                                    family=CONVERT_NOW_FONT)
             layout_manager.set_text_shadow(widgetutil.Shadow(TEXT_SHADOW,
                                                              0.5, (1, 1), 0))
             layout_manager.set_text_color(TEXT_ACTIVE)
