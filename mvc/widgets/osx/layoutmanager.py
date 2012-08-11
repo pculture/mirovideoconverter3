@@ -31,6 +31,7 @@
 buttons, getting font metrics and other tasks that are required to size
 things.
 """
+import logging
 import math
 
 from AppKit import *
@@ -129,16 +130,23 @@ class FontPool(object):
 
     def _create(self, scale_factor, bold, italic, family):
         size = round(scale_factor * NSFont.systemFontSize())
-        if family is None:
-            if bold:
-                nsfont = NSFont.boldSystemFontOfSize_(size)
-            else:
-                nsfont = NSFont.systemFontOfSize_(size)
-        else:
+        nsfont = None
+        if family is not None:
             if bold:
                 nsfont = NSFont.fontWithName_size_(family + " Bold", size)
             else:
                 nsfont = NSFont.fontWithName_size_(family, size)
+            if nsfont is None:
+                logging.error('FontPool: family %s scale %s bold %s '
+                              'italic %s not found',
+                              family, scale_factor, bold, italic)
+        # Att his point either we have requested a custom font that failed
+        # to load or the system font was requested.
+        if nsfont is None:
+            if bold:
+                nsfont = NSFont.boldSystemFontOfSize_(size)
+            else:
+                nsfont = NSFont.systemFontOfSize_(size)
         return Font(nsfont)
 
 class LayoutManager(object):

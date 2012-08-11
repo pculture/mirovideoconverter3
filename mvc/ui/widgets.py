@@ -29,11 +29,30 @@ from mvc.video import VideoFile
 from mvc.resources import image_path
 from mvc.utils import size_string, round_even
 
-BUTTON_FONT = 15.0 / 13.0
-LARGE_FONT = 13.0 / 13.0
-SMALL_FONT = 10.0 / 13.0
+BUTTON_FONT = widgetutil.font_scale_from_osx_points(15.0)
+LARGE_FONT = widgetutil.font_scale_from_osx_points(13.0)
+SMALL_FONT = widgetutil.font_scale_from_osx_points(10.0)
 
 DEFAULT_FONT="Helvetica"
+
+CONVERT_TO_FONT = "Gill Sans"
+CONVERT_TO_FONTSIZE = widgetutil.font_scale_from_osx_points(14.0)
+
+SETTINGS_FONT = "Gill Sans"
+SETTINGS_FONTSIZE = widgetutil.font_scale_from_osx_points(13.0)
+
+CONVERT_NOW_FONT = "Gill Sans"
+CONVERT_NOW_FONTSIZE = widgetutil.font_scale_from_osx_points(18.0)
+
+DND_FONT = "Century Gothic"
+DND_LARGE_FONTSIZE = widgetutil.font_scale_from_osx_points(13.0)
+DND_SMALL_FONTSIZE = widgetutil.font_scale_from_osx_points(12.0)
+
+ITEM_TITLE_FONT = "Futura Medium"
+ITEM_TITLE_FONTSIZE = widgetutil.font_scale_from_osx_points(13.0)
+
+ITEM_ICONS_FONT= "Century Gothic"
+ITEM_ICONS_FONTSIZE= widgetutil.font_scale_from_osx_points(10.0)
 
 GRADIENT_TOP = widgetutil.css_to_color('#585f63')
 GRADIENT_BOTTOM = widgetutil.css_to_color('#383d40')
@@ -56,7 +75,8 @@ class CustomLabel(widgetset.Background):
     def __init__(self, text=''):
         widgetset.Background.__init__(self)
         self.text = text
-        self.font = None
+        self.font = DEFAULT_FONT
+        self.font_scale = LARGE_FONT
         self.color = TEXT_COLOR
 
     def set_text(self, text):
@@ -67,13 +87,15 @@ class CustomLabel(widgetset.Background):
         self.color = color
         self.queue_redraw()
 
-    def set_font(self, font):
+    def set_font(self, font, font_scale):
         self.font = font
+        self.font_scale = font_scale
         self.invalidate_size_request()
 
     def textbox(self, layout_manager):
         layout_manager.set_text_color(self.color)
-        layout_manager.set_font(LARGE_FONT, family=self.font)
+        layout_manager.set_font(self.font_scale, family=self.font)
+        font = layout_manager.set_font(self.font_scale, family=self.font)
         return layout_manager.textbox(self.text)
 
     def draw(self, context, layout_manager):
@@ -149,7 +171,7 @@ class FileDropTarget(widgetset.SolidBackground):
                                                   top_pad=60))
         label = CustomLabel("Drag videos here or")
         label.set_color(TEXT_COLOR)
-        label.set_font(DEFAULT_FONT)
+        label.set_font(DND_FONT, DND_LARGE_FONTSIZE)
         hbox = widgetset.HBox(spacing=4)
         hbox.pack_start(widgetutil.align_middle(label))
 
@@ -176,7 +198,7 @@ class FileDropTarget(widgetset.SolidBackground):
         normal.pack_start(widgetutil.align_middle(self.dropoff_small_off,
                                                   right_pad=7))
         drag_label = CustomLabel('Drag more videos here or')
-        drag_label.set_font(DEFAULT_FONT)
+        drag_label.set_font(DND_FONT, DND_SMALL_FONTSIZE)
         drag_label.set_color(TEXT_COLOR)
         normal.pack_start(widgetutil.align_middle(drag_label))
         cfb = ChooseFileButton()
@@ -185,7 +207,7 @@ class FileDropTarget(widgetset.SolidBackground):
         normal.set_size_request(-1, height)
 
         drop_label = CustomLabel('Release button to drop off')
-        drop_label.set_font(DEFAULT_FONT)
+        drop_label.set_font(DND_FONT, DND_SMALL_FONTSIZE)
         drop_label.set_color(TEXT_COLOR)
         drag = widgetset.HBox(spacing=10)
         drag.pack_start(widgetutil.align_middle(self.dropoff_small_on))
@@ -242,7 +264,7 @@ class SettingsButton(widgetset.CustomButton):
             self.surface_on = self.surface_off = None
 
     def textbox(self, layout_manager):
-        layout_manager.set_font(LARGE_FONT, family=DEFAULT_FONT)
+        layout_manager.set_font(SETTINGS_FONTSIZE, family=SETTINGS_FONT)
         return layout_manager.textbox(self.name)
 
     def size_request(self, layout_manager):
@@ -619,13 +641,14 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
         left_right.pack(self.layout_left(layout_manager))
         left_right.pack(top_bottom, expand=True)
         layout_manager.set_text_color(TEXT_COLOR)
-        layout_manager.set_font(LARGE_FONT, bold=True, family=DEFAULT_FONT)
+        layout_manager.set_font(ITEM_TITLE_FONTSIZE, bold=True,
+                                family=ITEM_TITLE_FONT)
         title = layout_manager.textbox(os.path.basename(self.input))
         title.set_wrap_style('truncated-char')
         alignment = cellpack.Padding(cellpack.TruncatedTextLine(title),
                                      top=25)
         top_bottom.pack(alignment)
-        layout_manager.set_font(SMALL_FONT, family=DEFAULT_FONT)
+        layout_manager.set_font(ITEM_ICONS_FONTSIZE, family=ITEM_ICONS_FONT)
 
         bottom = self.layout_bottom(layout_manager, hotspot)
         if bottom is not None:
@@ -805,13 +828,14 @@ class ConvertButton(widgetset.CustomButton):
         y = (context.height - self.image.height - 100) // 2 + 50
         self.image.draw(context, x, y, self.image.width, self.image.height)
         if self.image == self.off:
-            layout_manager.set_font(BUTTON_FONT, family=DEFAULT_FONT)
+            layout_manager.set_font(CONVERT_NOW_FONTSIZE,
+                                    family=CONVERT_NOW_FONT)
             layout_manager.set_text_shadow(widgetutil.Shadow(TEXT_SHADOW,
                                                              0.5, (-1, -1), 0))
             layout_manager.set_text_color(TEXT_DISABLED)
         else:
-            layout_manager.set_font(BUTTON_FONT, bold=True,
-                                    family=DEFAULT_FONT)
+            layout_manager.set_font(CONVERT_NOW_FONTSIZE, bold=True,
+                                    family=CONVERT_NOW_FONT)
             layout_manager.set_text_shadow(widgetutil.Shadow(TEXT_SHADOW,
                                                              0.5, (1, 1), 0))
             layout_manager.set_text_color(TEXT_ACTIVE)
@@ -917,7 +941,7 @@ class Application(mvc.Application):
         bottom = BottomBackground()
         bottom_box = widgetset.VBox()
         self.convert_label = CustomLabel('Convert to')
-        self.convert_label.set_font(DEFAULT_FONT)
+        self.convert_label.set_font(CONVERT_TO_FONT, CONVERT_TO_FONTSIZE)
         self.convert_label.set_color(TEXT_COLOR)
         bottom_box.pack_start(widgetutil.align_left(self.convert_label,
                                                     top_pad=10,

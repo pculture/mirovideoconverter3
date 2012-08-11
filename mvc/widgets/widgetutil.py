@@ -6,6 +6,15 @@ def make_surface(image_name):
     path = image_path(image_name + '.png')
     return widgetset.ImageSurface(widgetset.Image(path))
 
+def font_scale_from_osx_points(points):
+    """Create a font scale so that it's points large on OS X.
+
+    Assumptions (these should be true for OS X)
+        - the default font size is 13pt
+        - the DPI is 72ppi
+    """
+    return points / 13.0
+
 def css_to_color(css_string):
     parts = (css_string[1:3], css_string[3:5], css_string[5:7])
     return tuple((int(value, 16) / 255.0) for value in parts)
