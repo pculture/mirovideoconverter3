@@ -738,19 +738,21 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
                     layout_manager.set_text_color(TEXT_CLICKED)
                 top.pack(cellpack.Hotspot('show-file', IconWithText(
                             self.showfile,
-                            layout_manager.textbox('Show File'))))
+                            layout_manager.textbox('Show File',
+                                                   underline=True))))
             elif self.status == 'failed':
                 color = TEXT_CLICKED if hotspot == 'show-log' else TEXT_COLOR
                 layout_manager.set_text_color(color)
                 # XXX Missing grey error icon
                 top.pack(cellpack.Hotspot('show-log', IconWithText(
                          self.show_ffmpeg,
-                         layout_manager.textbox('Error - Show FFmpeg Output'))))
+                         layout_manager.textbox('Error - Show FFmpeg Output',
+                                                underline=True))))
             color = TEXT_CLICKED if hotspot == 'clear' else TEXT_COLOR
             layout_manager.set_text_color(color)
             top.pack(cellpack.Hotspot('clear', IconWithText(
                      self.showfile,
-                     layout_manager.textbox('Clear'))))
+                     layout_manager.textbox('Clear', underline=True))))
             vbox.pack(top)
             if self.status == 'finished':
                 layout_manager.set_text_color(TEXT_INFO)
