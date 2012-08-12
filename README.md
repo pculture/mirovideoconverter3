@@ -13,6 +13,13 @@ This is an in-progress rewrite of the existing application.  If you're looking f
 * FFmpeg2Theora (for conversions to Theora/Ogg)
 * GTK2 and its Python bindings (for the GTK UI)
 
+A copy of qtfaststart is bundled within this application, it is licensed
+under the GPL version 3 or (at your option) any later version.
+
+The copy was retrieved at:
+
+https://github.com/danielgtaylor/qtfaststart identified by commit eb8594d.
+
 On Debian/Ubuntu, that looks like:
 
     $ sudo apt-get install -y python2.7 ffmpeg ffmpeg2theora python-gtk2

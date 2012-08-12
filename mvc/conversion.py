@@ -179,7 +179,7 @@ class Conversion(object):
             self.status = 'staging'
             self.notify_listeners()
             try:
-                shutil.move(self.temp_output, self.output)
+                self.converter.finalize(self.temp_output, self.output)
             except EnvironmentError, e:
                 logger.exception('while trying to move %r to %r after %s',
                                   self.temp_output, self.output, self)

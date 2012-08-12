@@ -25,6 +25,7 @@ packages = [
     'mvc.ui',
     'mvc.resources',
     'mvc.windows',
+    'mvc.qtfaststart',
 ]
 
 def resources_dir():

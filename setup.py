@@ -26,7 +26,8 @@ DATA_FILES = ['mvc/widgets/osx/Resources-Widgets/MainMenu.nib']
 OPTIONS = {
     'excludes': ['mvc.widgets.gtk'],
     'includes': ['mvc.widgets.osx.fasttypes'],
-    'packages': ['mvc', 'mvc.widgets', 'mvc.widgets.osx', 'mvc.ui', 'mvc.resources']
+    'packages': ['mvc', 'mvc.widgets', 'mvc.widgets.osx', 'mvc.ui',
+                 'mvc.qtfaststart', 'mvc.resources']
 }
 
 # this should work if run from build.sh

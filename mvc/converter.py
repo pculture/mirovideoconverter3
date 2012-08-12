@@ -7,6 +7,9 @@ import os.path
 from mvc import resources, settings, utils
 from mvc.utils import hms_to_seconds
 
+from mvc.qtfaststart import processor
+from mvc.qtfaststart.exceptions import FastStartException
+
 logger = logging.getLogger(__name__)
 
 NON_WORD_CHARS = re.compile(r"[^a-zA-Z0-9]+")
@@ -36,6 +39,17 @@ class ConverterInfo(object):
             return None
         if video.duration:
             return self.bitrate * video.duration / 8
+
+    def finalize(self, temp_output, output):
+        if self.extension == 'mp4':
+            logging.debug('mp4 extension detected.  Running qtfaststart...')
+            try:
+                processor.process(temp_output, output)
+            except FastStartException:
+                logging.exception('qtfaststart: exception occurred')
+                raise EnvironmentError('qtfaststart exception')
+        else:
+            shutil.move(self.temp_output, self.output)
 
     def process_status_line(self, line):
         raise NotImplementedError
