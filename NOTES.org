@@ -12,9 +12,6 @@
 * UI TODOs
 ** TODO probably other tweaks (npr/janet/dave?)
 * Package TODOs
-** TODO Windows installer
-*** Should we use NSIS again? OpenInstall?
-*** http://bugzilla.pculture.org/show_bug.cgi?id=19287
 ** TODO Ubuntu packages
 *** can probably piggyback on http://git.participatoryculture.org/miro-packaging/
 *** scripts should live on GitHub, not g.p.o
