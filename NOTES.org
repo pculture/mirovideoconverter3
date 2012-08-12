@@ -8,12 +8,6 @@
 *** export BKIT_PATH=/path/to/bkit
 *** sh build.sh
 *** ./make_disk_image.sh # makes dist/mvc-YYYY-MM-DD.dmg
-* Feature TODOs
-** TODO clear and start over
-*** https://projects.invisionapp.com/share/Q42Z5W8E#/1261300
-*** http://bugzilla.pculture.org/show_bug.cgi?id=19284
-** TODO allow resetting conversion after completion 
-*** http://bugzilla.pculture.org/show_bug.cgi?id=13365
 
 * UI TODOs
 ** TODO probably other tweaks (npr/janet/dave?)
