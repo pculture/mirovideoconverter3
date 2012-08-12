@@ -14,8 +14,6 @@
 *** http://bugzilla.pculture.org/show_bug.cgi?id=19284
 ** TODO allow resetting conversion after completion 
 *** http://bugzilla.pculture.org/show_bug.cgi?id=13365
-** TODO Send to iTunes (Windows/OSX)
-*** http://bugzilla.pculture.org/show_bug.cgi?id=19285
 
 * UI TODOs
 ** TODO probably other tweaks (npr/janet/dave?)
