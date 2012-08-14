@@ -51,12 +51,13 @@ import wrappermap
 from .base import Container, Bin, FlippedView
 from mvc.utils import Matrix
 
-try:
-    from AppKit import NSScrollerKnobStyleLight
-except ImportError:
-    # NSScrollerKnobStyleLight is only defined in recent x code versions.
-    NSScrollerKnobStyleLight = 2
+# These don't seem to be in pyobjc's AppKit (yet)
+NSScrollerKnobStyleDefault = 0
+NSScrollerKnobStyleDark = 1
+NSScrollerKnobStyleLight = 2
 
+NSScrollerStyleLegacy = 0
+NSScrollerStyleOverlay = 1
 
 def _extra_space_iter(extra_length, count):
     """Utility function to allocate extra space left over in containers."""
@@ -492,9 +493,6 @@ class Scroller(Bin):
         self.view.setHasVerticalScroller_(vertical)
         self.document_view = FlippedView.alloc().init()
         self.view.setDocumentView_(self.document_view)
-        # XXX HACK: if nothing else works, enable this for bz19248
-        #self.set_background_color((0.05, 0.10, 0.15))
-        #self.prepare_for_dark_content()
 
     def prepare_for_dark_content(self):
         try:
@@ -546,14 +544,18 @@ class Scroller(Bin):
     def calc_size_request(self):
         if self.child:
             width = height = 0
+            try:
+                legacy = self.view.scrollerStyle() == NSScrollerStyleLegacy
+            except AttributeError:
+                legacy = True
             if not self.view.hasHorizontalScroller():
                 width = self.child.get_size_request()[0]
             if not self.view.hasVerticalScroller():
                 height = self.child.get_size_request()[1]
-            # Add a little room for the scrollbars
-            if self.view.hasHorizontalScroller():
+            # Add a little room for the scrollbars (if necessary)
+            if legacy and self.view.hasHorizontalScroller():
                 height += NSScroller.scrollerWidth()
-            if self.view.hasVerticalScroller():
+            if legacy and self.view.hasVerticalScroller():
                 width += NSScroller.scrollerWidth()
             return width, height
         else:

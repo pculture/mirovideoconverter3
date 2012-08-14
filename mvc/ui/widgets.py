@@ -66,7 +66,7 @@ TEXT_INFO = widgetutil.css_to_color('#808080')
 TEXT_COLOR = widgetutil.css_to_color('#ffffff')
 TEXT_SHADOW = widgetutil.css_to_color('#000000')
 
-TABLE_WIDTH, TABLE_HEIGHT = 450, 87
+TABLE_WIDTH, TABLE_HEIGHT = 470, 87
 
 # app singleton
 app = None
@@ -677,15 +677,18 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
 
     @staticmethod
     def draw_background(context, x, y, width, height):
-        gradient = widgetset.Gradient(x, y + 1, x, height - 1)
+        gradient = widgetset.Gradient(x, y + 1, x, height)
         gradient.set_start_color(GRADIENT_TOP)
         gradient.set_end_color(GRADIENT_BOTTOM)
-        context.rectangle(x, y + 1, width, height -1 )
+        context.rectangle(x, y + 1, width, height)
         context.gradient_fill(gradient)
         context.set_line_width(1)
         context.set_color((0, 0, 0))
         context.move_to(0, 0.5)
         context.line_to(context.width, 0.5)
+        context.stroke()
+        context.move_to(0, context.height)
+        context.line_to(context.width, context.height)
         context.stroke()
 
     def draw_progressbar(self, context, x, y, _, height, width):
@@ -901,7 +904,7 @@ class Application(mvc.Application):
                         'input', 'output_size', 'converter', 'status',
                         'duration', 'progress', 'eta', 'thumbnail',
                         'conversion'))))
-        c.set_min_width(450)
+        c.set_min_width(TABLE_WIDTH)
         self.table.add_column(c)
         self.table.connect('hotspot-clicked', self.hotspot_clicked)
 
@@ -946,6 +949,7 @@ class Application(mvc.Application):
         vbox = widgetset.VBox()
         self.scroller = widgetset.Scroller(False, True)
         self.scroller.set_size_request(0, 0)
+        self.scroller.set_background_color(DRAG_AREA)
         self.scroller.add(self.table)
         vbox.pack_start(self.scroller)
         vbox.pack_start(self.drop_target, expand=True)
