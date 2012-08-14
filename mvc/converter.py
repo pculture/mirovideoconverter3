@@ -1,7 +1,8 @@
-import logging
 import json
-import re
+import logging
 import os
+import re
+import shutil
 
 from mvc import resources, settings, utils
 from mvc.utils import hms_to_seconds
@@ -40,15 +41,29 @@ class ConverterInfo(object):
             return self.bitrate * video.duration / 8
 
     def finalize(self, temp_output, output):
+        err = None
         if self.extension == 'mp4':
             logging.debug('mp4 extension detected.  Running qtfaststart...')
             try:
                 processor.process(temp_output, output)
             except FastStartException:
                 logging.exception('qtfaststart: exception occurred')
-                raise EnvironmentError('qtfaststart exception')
+                err = EnvironmentError('qtfaststart exception')
         else:
-            shutil.move(self.temp_output, self.output)
+            try:
+                shutil.move(temp_output, output)
+            except EnvironmentError, e:
+                err = e
+        # If it didn't work for some reason try to clean up the stale stuff.
+        # And if that doesn't work ... just log, and re-raise the original
+        # error.
+        if err:
+            try:
+                os.remove(temp_output)
+            except EnvironmentError, e:
+                logging.error('finalize(): error occurred but cannot '
+                              'remove stale file %r', temp_output)
+            raise err
 
     def process_status_line(self, line):
         raise NotImplementedError
