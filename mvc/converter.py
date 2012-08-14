@@ -42,7 +42,9 @@ class ConverterInfo(object):
 
     def finalize(self, temp_output, output):
         err = None
+        needs_remove = False
         if self.extension == 'mp4':
+            needs_remove = True
             logging.debug('mp4 extension detected.  Running qtfaststart...')
             try:
                 processor.process(temp_output, output)
@@ -53,17 +55,21 @@ class ConverterInfo(object):
             try:
                 shutil.move(temp_output, output)
             except EnvironmentError, e:
+                needs_remove = True
                 err = e
         # If it didn't work for some reason try to clean up the stale stuff.
         # And if that doesn't work ... just log, and re-raise the original
         # error.
-        if err:
+        if needs_remove:
             try:
                 os.remove(temp_output)
             except EnvironmentError, e:
-                logging.error('finalize(): error occurred but cannot '
-                              'remove stale file %r', temp_output)
-            raise err
+                logging.error('finalize(): cannot remove stale file %r',
+                              temp_output)
+                if err:
+                    logging.error('finalize(): removal was in response to '
+                                  'error: %s', str(err))
+                    raise err
 
     def process_status_line(self, line):
         raise NotImplementedError
