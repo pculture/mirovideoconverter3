@@ -1076,7 +1076,11 @@ class Application(mvc.Application):
             except EnvironmentError:
                 # can't write to the destination directory; ask for a new one
                 self.options.on_destination_clicked(None)
-        vf = VideoFile(filename)
+        try:
+            vf = VideoFile(filename)
+        except ValueError:
+            logging.info('invalid file %r, cannot parse', filename)
+            return
         c = self.conversion_manager.get_conversion(
             vf,
             self.current_converter,
