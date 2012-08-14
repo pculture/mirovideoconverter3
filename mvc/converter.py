@@ -1,8 +1,7 @@
 import logging
-from glob import glob
 import json
 import re
-import os.path
+import os
 
 from mvc import resources, settings, utils
 from mvc.utils import hms_to_seconds
