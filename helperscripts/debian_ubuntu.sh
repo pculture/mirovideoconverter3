@@ -13,5 +13,4 @@
 
 apt-get install \
     python-gtk2 \
-    ffmpeg \
-    ffmpeg2theora
+    ffmpeg
