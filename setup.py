@@ -24,6 +24,7 @@ ROOT = os.path.dirname(__file__)
 APP = ['mvc/ui/widgets.py']
 DATA_FILES = ['mvc/widgets/osx/Resources-Widgets/MainMenu.nib']
 OPTIONS = {
+    'iconfile': 'mvc3.icns',
     'excludes': ['mvc.widgets.gtk'],
     'includes': ['mvc.widgets.osx.fasttypes'],
     'packages': ['mvc', 'mvc.widgets', 'mvc.widgets.osx', 'mvc.ui',
