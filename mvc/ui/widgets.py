@@ -1145,6 +1145,7 @@ class Application(mvc.Application):
         del self._doing_conversion_change
 
     def convert(self, widget):
+        self.convert_button.disable()
         if not self.conversion_manager.running:
             for conversion in self.model.conversions():
                 if conversion.status == 'initialized':
@@ -1172,6 +1173,7 @@ class Application(mvc.Application):
                 conversion.stop()
                 self.update_conversion(conversion)
         self.update_convert_button()
+        self.convert_button.enable()
 
     def update_conversion(self, conversion):
         self.model.update_conversion(conversion)
