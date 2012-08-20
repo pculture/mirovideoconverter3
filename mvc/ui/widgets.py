@@ -1026,12 +1026,20 @@ class Application(mvc.Application):
         can_start = False
         has_conversions = any(self.model.conversions())
         all_done = self.model.all_conversions_done()
+        print 'all_done ', all_done, ' cancel ', can_cancel, ' start ', can_start
+        print 'has convesions ', has_conversions
+        print 'converter is empty', self.current_converter is EMPTY_CONVERTER
         for c in self.model.conversions():
             if c.status == 'converting':
                 can_cancel = True
                 break
             elif c.status == 'initialized':
                 can_start = True
+        # if there are no conversions ... these can't be set
+        if not has_conversions:
+            for m in self.menus:
+                m.set_selected(False)
+            self.settings_button.set_selected(False)
         self.convert_label.set_color(TEXT_DISABLED)
         # Set the colors - all are enabled if all conversions complete, or
         # if we have conversions conversions but the converter has not yet
@@ -1182,7 +1190,6 @@ class Application(mvc.Application):
 
     def update_conversion(self, conversion):
         self.model.update_conversion(conversion)
-        self.update_convert_button()
         self.update_table_size()
 
     def update_table_size(self):
