@@ -1,5 +1,8 @@
 import os
+import subprocess
 import sys
+
+ffmpeg_version = None
 
 def which(name):
     if sys.platform == 'win32':
@@ -30,3 +33,46 @@ def get_ffmpeg_executable_path():
     if avconv is not None:
        return avconv
     return which("ffmpeg")
+
+def get_ffmpeg_version():
+    global ffmpeg_version
+    if ffmpeg_version is None:
+        commandline = [get_ffmpeg_executable_path(), '-version']
+        p = subprocess.Popen(commandline,
+                             stdout=subprocess.PIPE,
+                             stderr=file(os.devnull, "wb"))
+        stdout, _ = p.communicate()
+        lines = stdout.split('\n')
+        version = lines[0].rsplit(' ', 1)[1].split('.')
+        def maybe_int(v):
+            try:
+                return int(v)
+            except ValueError:
+                return v
+        ffmpeg_version = tuple(maybe_int(v) for v in version)
+    return ffmpeg_version
+
+def customize_ffmpeg_parameters(params):
+    """Takes a list of parameters and modifies it based on
+    platform-specific issues.  Returns the newly modified list of
+    parameters.
+
+    :param params: list of parameters to modify
+
+    :returns: list of modified parameters that will get passed to
+        ffmpeg
+    """
+    if get_ffmpeg_version() < (0, 8):
+        # Fallback for older versions of FFmpeg (Ubuntu Natty, in particular).
+        # see also #18969
+        params = ['-vpre' if i == '-preset' else i for i in params]
+        try:
+            profile_index = params.index('-profile:v')
+        except ValueError:
+            pass
+        else:
+            if params[profile_index + 1] == 'baseline':
+                params[profile_index:profile_index+2] = [
+                    '-coder', '0', '-bf', '0', '-refs', '1',
+                    '-flags2', '-wpred-dct8x8']
+    return params
