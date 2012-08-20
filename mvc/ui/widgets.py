@@ -1147,27 +1147,28 @@ class Application(mvc.Application):
     def convert(self, widget):
         self.convert_button.disable()
         if not self.conversion_manager.running:
-            for conversion in self.model.conversions():
-                if conversion.status == 'initialized':
-                    self.conversion_manager.run_conversion(conversion)
-            self.button_bar.disable()
-            # all done: no conversion job should be running at this point
-            all_done = self.model.all_conversions_done()
-            if all_done:
-                # take stuff off one by one from the list until we have none!
-                # might not be very efficient.
-                iter_ = self.model.first_iter()
-                while iter_ is not None:
-                    conversion = self.model[iter_][-1]
-                    if conversion.status in ('finished',
-                                             'failed',
-                                             'initialized'):
-                        try:
-                            self.conversion_manager.remove(conversion)
-                        except ValueError:
-                            pass
-                    iter_ = self.model.remove(iter_)
-                self.update_table_size()
+            if self.current_converter is not EMPTY_CONVERTER:
+                for conversion in self.model.conversions():
+                    if conversion.status == 'initialized':
+                        self.conversion_manager.run_conversion(conversion)
+                self.button_bar.disable()
+                # all done: no conversion job should be running at this point
+                all_done = self.model.all_conversions_done()
+                if all_done:
+                    # take stuff off one by one from the list until we have none!
+                    # might not be very efficient.
+                    iter_ = self.model.first_iter()
+                    while iter_ is not None:
+                        conversion = self.model[iter_][-1]
+                        if conversion.status in ('finished',
+                                                 'failed',
+                                                 'initialized'):
+                            try:
+                                self.conversion_manager.remove(conversion)
+                            except ValueError:
+                                pass
+                        iter_ = self.model.remove(iter_)
+                    self.update_table_size()
         else:
             for conversion in self.model.conversions():
                 conversion.stop()
