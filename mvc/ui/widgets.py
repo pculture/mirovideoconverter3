@@ -283,7 +283,7 @@ class SettingsButton(widgetset.CustomButton):
     def size_request(self, layout_manager):
         hbox = self.build_hbox(layout_manager)
         size = hbox.get_size()
-        return size[0] + 2, size[1] + 2 # padding
+        return int(size[0]) + 2, int(size[1]) + 2 # padding
 
     def build_hbox(self, layout_manager):
         hbox = cellpack.HBox(spacing=5)
