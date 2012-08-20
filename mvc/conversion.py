@@ -84,15 +84,20 @@ class Conversion(object):
         logger.info('stopping %r', self)
         self.error = 'manually stopped'
         if self.popen is None:
-            self.status = 'failed'
+            status = 'canceled'
             try:
                 self.manager.remove(self)
             except ValueError:
+                status = 'failed'
                 logger.exception('not running and not waiting %s' % (self,))
+            self.status = status
             return
         try:
             self.popen.kill()
             self.popen.wait()
+            # set the status transition last, if we had hit an exception
+            # then we will transition the next state to 'failed' in finalize()
+            self.status = 'canceled'
         except EnvironmentError, e:
             logger.exception('while stopping %s' % (self,))
             self.error = str(e)
@@ -194,7 +199,8 @@ class Conversion(object):
                 except EnvironmentError:
                     pass # ignore errors removing temp files; they may not have
                          # been created
-            self.status = 'failed'
+            if self.status != 'canceled':
+                self.status = 'failed'
         self.notify_listeners()
         logger.info('finished %r; status: %s', self, self.status)
 

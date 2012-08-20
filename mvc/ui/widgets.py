@@ -566,7 +566,7 @@ class ConversionModel(widgetset.TableModel):
     def all_conversions_done(self):
         has_conversions = any(self.conversions())
         all_done = ((set(c.status for c in self.conversions()) -
-                     set(['finished', 'failed'])) == set())
+                     set(['canceled', 'finished', 'failed'])) == set())
         return all_done and has_conversions
 
     def get_image(self, path):
@@ -712,7 +712,7 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             min_width=80)
         if self.status == 'finished':
             return cellpack.Alignment(self.completed, **alignment_kwargs)
-        elif self.status == 'failed':
+        elif self.status in ('canceled', 'failed'):
             return cellpack.Alignment(self.error, **alignment_kwargs)
         else:
             if hotspot == 'cancel':
@@ -746,7 +746,7 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             return box
         elif self.status == 'initialized': # queued
             return IconWithText(self.queued, layout_manager.textbox("Queued"))
-        elif self.status in ('finished', 'failed'):
+        elif self.status in ('finished', 'failed', 'canceled'):
             vbox = cellpack.VBox(spacing=5)
             top = cellpack.HBox(spacing=5)
             if self.status == 'finished':
@@ -756,14 +756,17 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
                             self.showfile,
                             layout_manager.textbox('Show File',
                                                    underline=True))))
-            elif self.status == 'failed':
+            elif self.status in ('failed', 'canceled'):
                 color = TEXT_CLICKED if hotspot == 'show-log' else TEXT_COLOR
                 layout_manager.set_text_color(color)
                 # XXX Missing grey error icon
+                if self.status == 'failed':
+                    text = 'Error - Show FFmpeg Output'
+                else:
+                    text = 'Canceled - Show FFmpeg Output'
                 top.pack(cellpack.Hotspot('show-log', IconWithText(
                          self.show_ffmpeg,
-                         layout_manager.textbox('Error - Show FFmpeg Output',
-                                                underline=True))))
+                         layout_manager.textbox(text, underline=True))))
             color = TEXT_CLICKED if hotspot == 'clear' else TEXT_COLOR
             layout_manager.set_text_color(color)
             top.pack(cellpack.Hotspot('clear', IconWithText(
@@ -1162,6 +1165,7 @@ class Application(mvc.Application):
                         conversion = self.model[iter_][-1]
                         if conversion.status in ('finished',
                                                  'failed',
+                                                 'canceled',
                                                  'initialized'):
                             try:
                                 self.conversion_manager.remove(conversion)
