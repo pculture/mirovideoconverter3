@@ -1,3 +1,5 @@
+import sys
+
 from AppKit import NSApplication, NSApplicationMain, NSWorkspace
 from objc import nil
 
@@ -12,7 +14,7 @@ def initialize():
     size_request_manager = SizeRequestManager()
 
 def mainloop_start():
-    NSApplicationMain([])
+    NSApplicationMain(sys.argv)
 
 def mainloop_stop():
     NSApplication.sharedApplication().terminate_(nil)
