@@ -1,0 +1,4 @@
+# app.py
+
+widgetapp = None
+

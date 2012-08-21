@@ -2,8 +2,9 @@ import os
 import gtk
 import gobject
 
-def initialize():
-    pass
+def initialize(app):
+    app.startup()
+    app.run()
 
 def mainloop_start():
     gtk.main()

@@ -10,6 +10,7 @@ import collections
 from mvc.widgets import signals
 from mvc.widgets import widgetutil
 from mvc.widgets import widgetset
+from mvc.widgets import app
 
 from mvc.widgets.keyboard import (Shortcut, CTRL, ALT, SHIFT, CMD,
      MOD, RIGHT_ARROW, LEFT_ARROW, UP_ARROW, DOWN_ARROW, SPACE, ENTER, DELETE,
@@ -17,7 +18,9 @@ from mvc.widgets.keyboard import (Shortcut, CTRL, ALT, SHIFT, CMD,
 
 # XXX hack:
 
-def _(text):
+def _(text, *params):
+    if params:
+       return text % params[0]
     return text
 
 class MenuItem(widgetset.MenuItem):
@@ -55,6 +58,8 @@ class MenuItemFetcher(object):
 def get_app_menu():
     """Returns the default menu structure."""
 
+    app_name = "Miro Video Converter"    # XXX HACK
+
     file_menu = widgetset.Menu(_("_File"), "FileMenu", [
                     MenuItem(_("_Open"), "Open", Shortcut("o", MOD),
                              groups=["NonPlaying"]),
@@ -62,7 +67,7 @@ def get_app_menu():
                     ])
     help_menu = widgetset.Menu(_("_Help"), "HelpMenu", [
                     MenuItem(_("About %(name)s",
-                               {'name': app.config.get(prefs.SHORT_APP_NAME)}),
+                               {'name': app_name}),
                              "About")
                     ])
 
@@ -115,7 +120,7 @@ def group_action_handler(action_prefix):
 # File menu
 @action_handler("Open")
 def on_open():
-    app.widgetapp.open_video()
+    app.widgetapp.choose_file(None)
 
 @action_handler("Quit")
 def on_quit():
@@ -152,9 +157,7 @@ class MenuManager(signals.SignalEmitter):
         """
         menubar.add_initial_menus(get_app_menu())
         menubar.connect("activate", on_menubar_activate)
-        self.menu_updaters = [
-            LegacyMenuUpdater(),
-        ]
+        self.menu_updaters = []
 
     def _set_play_pause(self):
         if ((not app.playback_manager.is_playing

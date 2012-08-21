@@ -43,7 +43,9 @@ from mvc.widgets import keyboard
 from mvc.widgets.keyboard import Shortcut, MOD
 
 # XXX hacks
-def _(text):
+def _(text, *params):
+    if params:
+        return text % params[0]
     return text
 
 MODIFIERS_MAP = {
@@ -441,17 +443,13 @@ class MenuBar(MenuShell):
         # Application menu
         miroMenuItems = [
             self._extract_menu_item("About"),
-        ]
-
-        miroMenuItems += [
+            Separator(),
             self._extract_menu_item("Quit")
         ]
+
         for item in miroMenuItems:
             self._app_menu.append(item)
 
-        self._app_menu.find("EditPreferences").set_label(_("Preferences..."))
-        self._app_menu.find("EditPreferences")._change_shortcut(
-            Shortcut(",", MOD))
         self._app_menu.find("Quit").set_label(_("Quit %(appname)s",
                                        {"appname": short_appname}))
 
@@ -475,6 +473,7 @@ class MenuBar(MenuShell):
             app.widgetapp.window.nswindow.makeKeyAndOrderFront_(self)
 
     def _connect_to_signals(self):
+        return
         app.playback_manager.connect("will-play", self._on_playback_change)
         app.playback_manager.connect("will-stop", self._on_playback_change)
 
@@ -482,6 +481,7 @@ class MenuBar(MenuShell):
         self._update_present_menu()
 
     def _update_present_menu(self):
+        return
         if self._should_enable_present_menu():
             for menu_item in self.present_menu.get_children():
                 menu_item.enable()
@@ -490,6 +490,7 @@ class MenuBar(MenuShell):
                 menu_item.disable()
 
     def _should_enable_present_menu(self):
+        return False
         if (app.playback_manager.is_playing and
             not app.playback_manager.is_playing_audio):
             # we're currently playing video, allow the user to fullscreen

@@ -1,20 +1,38 @@
 import sys
 
-from AppKit import NSApplication, NSApplicationMain, NSWorkspace
+from AppKit import NSApplication, NSApplicationMain, NSWorkspace, NSObject
 from objc import nil
 
 from PyObjCTools import AppHelper
 
 size_request_manager = None
 
-def initialize():
+class AppController(NSObject):
+    def applicationDidFinishLaunching_(self, notification):
+        self.portableApp.startup()
+        self.portableApp.run()
+
+    def setPortableApp_(self, portableApp):
+        self.portableApp = portableApp
+
+    def handleMenuActivate_(self, menu_item):
+        from mvc.widgets.osx import osxmenus
+        osxmenus.handle_menu_activate(menu_item)
+
+def initialize(app):
+    nsapp = NSApplication.sharedApplication()
+    delegate = AppController.alloc().init()
+    delegate.setPortableApp_(app)
+    nsapp.setDelegate_(delegate)
+
     global size_request_manager
-    NSApplication.sharedApplication()
     from mvc.widgets.osx.widgetupdates import SizeRequestManager
     size_request_manager = SizeRequestManager()
 
-def mainloop_start():
     NSApplicationMain(sys.argv)
+
+def mainloop_start():
+    pass
 
 def mainloop_stop():
     NSApplication.sharedApplication().terminate_(nil)

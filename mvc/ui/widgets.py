@@ -24,6 +24,7 @@ from mvc.widgets import widgetset
 from mvc.widgets import cellpack
 from mvc.widgets import widgetconst
 from mvc.widgets import widgetutil
+from mvc.widgets import app
 
 from mvc.converter import ConverterInfo
 from mvc.video import VideoFile
@@ -68,9 +69,6 @@ TEXT_COLOR = widgetutil.css_to_color('#ffffff')
 TEXT_SHADOW = widgetutil.css_to_color('#000000')
 
 TABLE_WIDTH, TABLE_HEIGHT = 470, 87
-
-# app singleton
-app = None
 
 class CustomLabel(widgetset.Background):
     def __init__(self, text=''):
@@ -805,7 +803,7 @@ class ConvertButton(widgetset.CustomButton):
         self.set_off()
 
     def set_on(self):
-        self.label = 'Convert to %s' % app.current_converter.name
+        self.label = 'Convert to %s' % app.widgetapp.current_converter.name
         self.image = self.on
         self.set_cursor(widgetconst.CURSOR_POINTING_HAND)
         self.queue_redraw()
@@ -890,9 +888,9 @@ class Application(mvc.Application):
 
         mvc.Application.startup(self)
 
-        #self.menubar = widgetset.MenuBar()
-        #self.menu_manager = menus.MenuManager()
-        #self.menu_manager.setup_menubar(self.menubar)
+        self.menubar = widgetset.MenuBar()
+        self.menu_manager = menus.MenuManager()
+        self.menu_manager.setup_menubar(self.menubar)
 
         self.window = widgetset.Window("Miro Video Converter")
         self.window.connect('will-close', self.destroy)
@@ -1281,7 +1279,5 @@ class Application(mvc.Application):
 
 
 if __name__ == "__main__":
-    initialize()
-    app = Application()
-    app.startup()
-    app.run()
+    app.widgetapp = Application()
+    initialize(app.widgetapp)
