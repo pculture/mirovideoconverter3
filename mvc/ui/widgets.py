@@ -1026,9 +1026,6 @@ class Application(mvc.Application):
         can_start = False
         has_conversions = any(self.model.conversions())
         all_done = self.model.all_conversions_done()
-        print 'all_done ', all_done, ' cancel ', can_cancel, ' start ', can_start
-        print 'has convesions ', has_conversions
-        print 'converter is empty', self.current_converter is EMPTY_CONVERTER
         for c in self.model.conversions():
             if c.status == 'converting':
                 can_cancel = True
