@@ -54,4 +54,5 @@ from .tableview import (TableView, TableColumn,
         CUSTOM_HEADER_HEIGHT)
 from .tablemodel import (TableModel,
         TreeTableModel)
+from .osxmenus import (MenuBar, Menu, Separator, MenuItem, RadioMenuItem, CheckMenuItem)
 from .base import Widget

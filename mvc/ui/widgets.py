@@ -19,6 +19,7 @@ import urlparse
 
 from mvc.widgets import (initialize, idle_add, mainloop_start, mainloop_stop,
                          reveal_file)
+from mvc.widgets import menus
 from mvc.widgets import widgetset
 from mvc.widgets import cellpack
 from mvc.widgets import widgetconst
@@ -888,6 +889,10 @@ class Application(mvc.Application):
         self.current_converter = EMPTY_CONVERTER
 
         mvc.Application.startup(self)
+
+        #self.menubar = widgetset.MenuBar()
+        #self.menu_manager = menus.MenuManager()
+        #self.menu_manager.setup_menubar(self.menubar)
 
         self.window = widgetset.Window("Miro Video Converter")
         self.window.connect('will-close', self.destroy)
