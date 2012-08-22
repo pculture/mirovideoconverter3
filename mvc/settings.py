@@ -1,7 +1,8 @@
 import logging
 import os
-import subprocess
 import sys
+
+from mvc import execute
 
 ffmpeg_version = None
 
@@ -48,9 +49,7 @@ def get_ffmpeg_version():
     global ffmpeg_version
     if ffmpeg_version is None:
         commandline = [get_ffmpeg_executable_path(), '-version']
-        p = subprocess.Popen(commandline,
-                             stdout=subprocess.PIPE,
-                             stderr=file(os.devnull, "wb"))
+        p = execute.Popen(commandline, stderr=open(os.devnull, "wb"))
         stdout, _ = p.communicate()
         lines = stdout.split('\n')
         version = lines[0].rsplit(' ', 1)[1].split('.')

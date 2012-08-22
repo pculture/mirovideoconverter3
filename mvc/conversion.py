@@ -5,9 +5,9 @@ import time
 import tempfile
 import threading
 import shutil
-import subprocess
 import logging
 
+from mvc import execute
 from mvc.utils import line_reader
 
 logger = logging.getLogger(__name__)
@@ -107,12 +107,8 @@ class Conversion(object):
         os.close(self.temp_fd)
         os.unlink(self.temp_output) # unlink temp file before FFmpeg gets it
         try:
-            self.popen = subprocess.Popen(self.get_subprocess_arguments(
-                    self.temp_output),
-                                          bufsize=1,
-                                          stdin=open(os.devnull, 'rb'),
-                                          stdout=subprocess.PIPE,
-                                          stderr=subprocess.STDOUT)
+            commandline = self.get_subprocess_arguments(self.temp_output)
+            self.popen = execute.Popen(commandline, bufsize=1)
             self.process_output()
             if self.popen:
                 # if we stop the thread, we can get here after `.stop()`
