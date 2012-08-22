@@ -9,4 +9,4 @@ if [ ! -e mvc-env ] ; then
         exit 1
 fi
 
-PYTHONPATH="." mvc-env/Scripts/python.exe mvc
+PATH="mvc-env/ffmpeg:mvc-env/avconv:$PATH" PYTHONPATH="." mvc-env/Scripts/python.exe mvc

@@ -1,8 +1,14 @@
+import logging
 import os
 import subprocess
 import sys
 
 ffmpeg_version = None
+
+_search_path_extra = []
+def add_to_search_path(directory):
+    """Add a path to the list of paths that which() searches."""
+    _search_path_extra.append(directory)
 
 def which(name):
     if sys.platform == 'win32':
@@ -13,11 +19,15 @@ def which(name):
                             '..', '..', '..', '..', 'Helpers', name)
         if os.path.exists(path):
             return path
-    for dirname in os.environ['PATH'].split(os.pathsep):
+    dirs_to_search = os.environ['PATH'].split(os.pathsep)
+    dirs_to_search += _search_path_extra
+    for dirname in dirs_to_search:
         fullpath = os.path.join(dirname, name)
         # XXX check for +x bit
         if os.path.exists(fullpath):
             return fullpath
+    logging.warn("Can't find path to %s (searched in %s)", name,
+            dirs_to_search)
 
 def memoize(func):
     cache = []
