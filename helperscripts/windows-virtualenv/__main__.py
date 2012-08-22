@@ -29,11 +29,11 @@ download_info = [
     ('9633cf25444f41b2fb78b0bb3f509ec3',
         ('http://ffmpeg.zeranoe.com/builds/win32/static/'
             'ffmpeg-20120426-git-a4b58fd-win32-static.7z')),
-    ('b0c0ac9a47ba4de705849d88165cb440',
-        'http://v2v.cc/~j/ffmpeg2theora/ffmpeg2theora-0.28.exe'),
     ('d7e43beabc017a7d892a3d6663e988d4',
         'http://sourceforge.net/projects/nsis/files/'
         'NSIS%202/2.46/nsis-2.46.zip/download'),
+    ('9aa6c2d7229a37a3996270bff411ab22',
+        'http://win32.libav.org/win32/libav-win32-20120821.7z'),
 ]
 
 def get_download_hash(url):
@@ -264,22 +264,38 @@ def install_ffmpeg():
     download_path = get_download_path(url)
     check_call(options.seven_zip_path, "x", download_path, '-o' + build_dir)
 
-    ffmpeg_dir = os.path.join(build_dir,
+    archive_dir = os.path.join(build_dir,
             os.path.splitext(os.path.basename(url))[0])
-    shutil.move(os.path.join(ffmpeg_dir, "presets"),
-            os.path.join(env_dir, "ffmpeg-presets"))
+    dest_dir = os.path.join(env_dir, "ffmpeg")
+
+    os.mkdir(dest_dir)
+    shutil.move(os.path.join(archive_dir, "presets"),
+            os.path.join(dest_dir, "presets"))
 
     for exe_name in ("ffmpeg.exe", "ffplay.exe", "ffprobe.exe"):
-        shutil.move(os.path.join(ffmpeg_dir, "bin", exe_name),
-                os.path.join(scripts_dir, exe_name))
+        shutil.move(os.path.join(archive_dir, "bin", exe_name),
+                os.path.join(dest_dir, exe_name))
 
-
-def install_ffmpeg2theora():
-    url = "http://v2v.cc/~j/ffmpeg2theora/ffmpeg2theora-0.28.exe"
-    exe_name = os.path.basename(url)
+def install_avconv():
+    # We use a nightly build of avconv because I (BDK) couldn't find any
+    # official builds after version 7.7, released in June 2011
+    url = 'http://win32.libav.org/win32/libav-win32-20120821.7z'
     download_path = get_download_path(url)
-    check_call("chmod", "+x", download_path)
-    shutil.move(download_path, os.path.join(scripts_dir, exe_name))
+    check_call(options.seven_zip_path, "x", download_path, '-o' + build_dir)
+
+    archive_dir = os.path.join(build_dir,
+            os.path.splitext(os.path.basename(url))[0])
+    dest_dir = os.path.join(env_dir, "avconv")
+    bin_dir = os.path.join(archive_dir, "usr", "bin")
+    lib_dir = os.path.join(archive_dir, "usr", "lib")
+    preset_dir = os.path.join(archive_dir, "usr", "share", "avconv")
+
+    os.mkdir(dest_dir)
+    for src_dir in (bin_dir, lib_dir, preset_dir):
+        for filename in os.listdir(src_dir):
+            shutil.move(os.path.join(src_dir, filename), 
+                    os.path.join(dest_dir, filename))
+
 
 def main():
     parse_args()
@@ -292,7 +308,7 @@ def main():
         install_py2exe()
         install_pygtk()
         install_ffmpeg()
-        install_ffmpeg2theora()
+        install_avconv()
         install_nsis()
 
 if __name__ == '__main__':
