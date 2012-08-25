@@ -120,7 +120,7 @@ def group_action_handler(action_prefix):
 # File menu
 @action_handler("Open")
 def on_open():
-    app.widgetapp.choose_file(None)
+    app.widgetapp.choose_file()
 
 @action_handler("Quit")
 def on_quit():

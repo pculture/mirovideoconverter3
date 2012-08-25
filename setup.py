@@ -9,6 +9,7 @@ if sys.version < '2.7':
     raise RuntimeError('MVC requires Python 2.7')
 import glob
 import os
+import plistlib
 import shutil
 
 from setuptools import setup
@@ -62,6 +63,17 @@ class py2app_mvc(py2app_cmd):
         lib_paths = glob.glob(os.path.join(BKIT_DIR, "ffmpeg", "bin", "*.dylib")) 
         ffmpeg_files.extend(os.path.basename(p) for p in lib_paths)
         copy_binaries('ffmpeg/bin/', helpers_root, ffmpeg_files)
+
+plist = plistlib.readPlist('Info.plist')
+plist['NSHumanReadableCopyright'] = 'Copyright (C) Participapatory Culture Foundation'
+plist['CFBundleGetInfoString'] = 'Miro Video Converter'
+plist['CFBundleIdentifier'] = 'org.participatoryculture.mvc3'
+plist['CFBundleShortVersionString'] = '3.0.0'
+plist['CFBundleExecutable'] = 'Miro Video Converter'
+plist['CFBundleName'] = 'Miro Video Converter'
+plist['CFBundleVersion'] = '3.0.0'
+
+OPTIONS['plist'] = plist
 
 setup(
     name="Miro Video Converter",

@@ -244,12 +244,7 @@ class FileDropTarget(widgetset.SolidBackground):
             self.queue_redraw()
 
     def choose_file(self, widget):
-        dialog = widgetset.FileOpenDialog('Choose Files...')
-        dialog.set_select_multiple(True)
-        if dialog.run() == 0: # success
-            for filename in dialog.get_filenames():
-                self.emit('file-activated', filename)
-        dialog.destroy()
+        app.widgetapp.choose_file()
 
 BUTTON_BACKGROUND = widgetutil.ThreeImageSurface('settings-base')
 
@@ -1016,6 +1011,25 @@ class Application(mvc.Application):
 
     def run(self):
         mainloop_start()
+
+    def choose_file(self):
+        dialog = widgetset.FileOpenDialog('Choose Files...')
+        dialog.set_select_multiple(True)
+        if dialog.run() == 0: # success
+            for filename in dialog.get_filenames():
+                self.emit('file-activated', filename)
+        dialog.destroy()
+
+    def about(self):
+        dialog = widgetset.AboutDialog()
+        dialog.set_transient_for(self.window)
+        try:
+            dialog.run()
+        finally:
+            dialog.destroy()
+
+    def quit(self):
+        self.window.close()
 
     def show_options_menu(self, widget, options):
         menu = widgetset.ContextMenu([

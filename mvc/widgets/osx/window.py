@@ -713,9 +713,11 @@ class DirectorySelectDialog(FileDialogBase):
 class AboutDialog(DialogBase):
     def run(self):
         optionsDictionary = dict()
-        revision = app.config.get(prefs.APP_REVISION_NUM)
-        if revision:
-            optionsDictionary['Version'] = revision
+        #revision = app.config.get(prefs.APP_REVISION_NUM)
+        #if revision:
+        #    optionsDictionary['Version'] = revision
+        if not optionsDictionary:
+            optionsDictionary = nil
         NSApplication.sharedApplication().orderFrontStandardAboutPanelWithOptions_(optionsDictionary)
     def destroy(self):
         pass
