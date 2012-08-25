@@ -1,8 +1,9 @@
 import logging
+import os
 import re
-import subprocess
 import tempfile
 
+from mvc import execute
 from mvc.settings import get_ffmpeg_executable_path
 from mvc.utils import hms_to_seconds
 
@@ -221,9 +222,8 @@ def get_ffmpeg_output(filepath):
     commandline = [get_ffmpeg_executable_path(),
                    "-i", filepath]
     try:
-        output = subprocess.check_output(commandline,
-                                         stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, e:
+        output = execute.check_output(commandline)
+    except execute.CalledProcessError, e:
         if e.returncode != 1:
             logger.exception("error calling %r\noutput:%s", commandline,
                               e.output)
@@ -260,9 +260,8 @@ def get_thumbnail(filename, width, height, output, skip=0):
                    '-vframes', '1', output]
 
     try:
-        subprocess.check_output(commandline,
-                                stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, e:
+        execute.check_output(commandline)
+    except execute.CalledProcessError, e:
         logger.exception('error calling %r\ncode:%s\noutput:%s',
                           commandline, e.returncode, e.output)
         return None
