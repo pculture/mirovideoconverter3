@@ -2,9 +2,12 @@ from math import pi as PI
 from mvc.widgets import widgetset
 from mvc.resources import image_path
 
-def make_surface(image_name):
+def make_surface(image_name, height=None):
     path = image_path(image_name + '.png')
-    return widgetset.ImageSurface(widgetset.Image(path))
+    image = widgetset.Image(path)
+    if height is not None:
+        image = image.resize(image.width, height)
+    return widgetset.ImageSurface(image)
 
 def font_scale_from_osx_points(points):
     """Create a font scale so that it's points large on OS X.
@@ -175,14 +178,14 @@ class ThreeImageSurface(object):
     This does the same thing, but allows you to explicitly set which images
     get used.
     """
-    def __init__(self, basename=None):
+    def __init__(self, basename=None, height=None):
         self.left = self.center = self.right = None
         self.height = 0
         self.width = None
         if basename is not None:
-            left = make_surface(basename + '_left')
-            center = make_surface(basename + '_center')
-            right = make_surface(basename + '_right')
+            left = make_surface(basename + '_left', height)
+            center = make_surface(basename + '_center', height)
+            right = make_surface(basename + '_right', height)
             self.set_images(left, center, right)
 
     def set_images(self, left, center, right):

@@ -267,6 +267,8 @@ class SettingsButton(widgetset.CustomButton):
                     image_path('%s-icon-on.png' % name)))
             self.surface_off = widgetset.ImageSurface(widgetset.Image(
                     image_path('%s-icon-off.png' % name)))
+            if self.surface_on.height != self.surface_off.height:
+                raise ValueError('invalid surface: height mismatch')
         else:
             self.surface_on = self.surface_off = None
 
@@ -277,7 +279,8 @@ class SettingsButton(widgetset.CustomButton):
     def size_request(self, layout_manager):
         hbox = self.build_hbox(layout_manager)
         size = hbox.get_size()
-        return int(size[0]) + 2, int(size[1]) + 2 # padding
+        height = max(BUTTON_BACKGROUND.height, size[1])
+        return int(size[0]) + 2, int(height) + 2  # padding
 
     def build_hbox(self, layout_manager):
         hbox = cellpack.HBox(spacing=5)
@@ -313,11 +316,20 @@ class SettingsButton(widgetset.CustomButton):
 
 
 class OptionMenuBackground(widgetset.Background):
+    def __init__(self):
+        widgetset.Background.__init__(self)
+        self.surface = widgetutil.ThreeImageSurface('settings-depth')
 
-    surface = widgetutil.ThreeImageSurface('settings-depth')
+    def set_child(self, child):
+        widgetset.Background.set_child(self, child)
+        # re-create the image surface and scale it as it needs to cover 
+        # the whole of the height of the child
+        _, h = child.get_size_request()
+        self.surface = widgetutil.ThreeImageSurface('settings-depth', height=h)
+        self.invalidate_size_request()
 
     def size_request(self, layout_manager):
-        return 1, self.surface.height
+        return -1, self.surface.height
 
     def draw(self, context, layout_manager):
         child_width = self.child.get_size_request()[0]
