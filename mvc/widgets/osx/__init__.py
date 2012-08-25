@@ -9,6 +9,8 @@ size_request_manager = None
 
 class AppController(NSObject):
     def applicationDidFinishLaunching_(self, notification):
+        from mvc.widgets.osx.osxmenus import MenuBar
+        self.portableApp.menubar = MenuBar()
         self.portableApp.startup()
         self.portableApp.run()
 
@@ -31,7 +33,7 @@ def initialize(app):
 
     NSApplicationMain(sys.argv)
 
-def attach_menubar(self):
+def attach_menubar():
     pass
 
 def mainloop_start():
