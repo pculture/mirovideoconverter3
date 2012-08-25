@@ -587,81 +587,82 @@ class DirectorySelectDialog(FileDialogBase):
 
 class AboutDialog(Dialog):
     def __init__(self):
-        Dialog.__init__(self,
-            _("About %(appname)s",
-              {'appname': app.config.get(prefs.SHORT_APP_NAME)}))
-        self.add_button(_("Close"))
+        Dialog.__init__(self, "Miro Video Converter")
+#            _("About %(appname)s",
+#              {'appname': app.config.get(prefs.SHORT_APP_NAME)}))
+#        self.add_button(_("Close"))
+        self.add_button("Close")
         self._window.set_has_separator(False)
 
     def build_content(self):
         packing_vbox = layout.VBox(spacing=20)
-        icon_pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
-                resources.share_path('icons/hicolor/128x128/apps/miro.png'),
-                48, 48)
-        packing_vbox._widget.pack_start(gtk.image_new_from_pixbuf(icon_pixbuf))
-        if app.config.get(prefs.APP_REVISION_NUM):
-            version = "%s (%s)" % (
-                app.config.get(prefs.APP_VERSION),
-                app.config.get(prefs.APP_REVISION_NUM))
-        else:
-            version = "%s" % app.config.get(prefs.APP_VERSION)
+        #icon_pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
+        #        resources.share_path('icons/hicolor/128x128/apps/miro.png'),
+        #        48, 48)
+        #packing_vbox._widget.pack_start(gtk.image_new_from_pixbuf(icon_pixbuf))
+        #if app.config.get(prefs.APP_REVISION_NUM):
+        #    version = "%s (%s)" % (
+        #        app.config.get(prefs.APP_VERSION),
+        #        app.config.get(prefs.APP_REVISION_NUM))
+        #else:
+        #    version = "%s" % app.config.get(prefs.APP_VERSION)
+        version = '3.0.0'
+        #name_label = gtk.Label(
+        #    '<span size="xx-large" weight="bold">%s %s</span>' % (
+        #        app.config.get(prefs.SHORT_APP_NAME), version))
         name_label = gtk.Label(
             '<span size="xx-large" weight="bold">%s %s</span>' % (
-                app.config.get(prefs.SHORT_APP_NAME), version))
+                'Miro Video Converter', version))
         name_label.set_use_markup(True)
         packing_vbox._widget.pack_start(name_label)
-        copyright_text = _(
-            '%(copyright)s.  See license.txt file for details.\n'
-            '%(trademark)s',
-            {"copyright": app.config.get(prefs.COPYRIGHT),
-             "trademark": app.config.get(prefs.TRADEMARK)})
+        copyright_text = 'Copyright (c) Participatory Culture Foundation'
         copyright_label = gtk.Label('<small>%s</small>' % copyright_text)
         copyright_label.set_use_markup(True)
         copyright_label.set_justify(gtk.JUSTIFY_CENTER)
         packing_vbox._widget.pack_start(copyright_label)
 
         # FIXME - make the project url clickable
-        packing_vbox._widget.pack_start(
-            gtk.Label(app.config.get(prefs.PROJECT_URL)))
+        #packing_vbox._widget.pack_start(
+        #    gtk.Label(app.config.get(prefs.PROJECT_URL)))
 
-        contributor_label = gtk.Label(
-            _("Thank you to all the people who contributed to %(appname)s "
-              "%(version)s:",
-              {"appname": app.config.get(prefs.SHORT_APP_NAME),
-               "version": app.config.get(prefs.APP_VERSION)}))
-        contributor_label.set_justify(gtk.JUSTIFY_CENTER)
-        packing_vbox._widget.pack_start(contributor_label)
+        #contributor_label = gtk.Label(
+        #    _("Thank you to all the people who contributed to %(appname)s "
+        #      "%(version)s:",
+        #      {"appname": app.config.get(prefs.SHORT_APP_NAME),
+        #       "version": app.config.get(prefs.APP_VERSION)}))
+        #contributor_label.set_justify(gtk.JUSTIFY_CENTER)
+        #packing_vbox._widget.pack_start(contributor_label)
 
         # get contributors, remove newlines and wrap it
-        contributors = open(resources.path('CREDITS'), 'r').readlines()
-        contributors = [c[2:].strip()
-                        for c in contributors if c.startswith("* ")]
-        contributors = ", ".join(contributors)
+        #contributors = open(resources.path('CREDITS'), 'r').readlines()
+        #contributors = [c[2:].strip()
+        #                for c in contributors if c.startswith("* ")]
+        #contributors = ", ".join(contributors)
 
         # show contributors
-        contrib_buffer = gtk.TextBuffer()
-        contrib_buffer.set_text(contributors)
+        #contrib_buffer = gtk.TextBuffer()
+        #contrib_buffer.set_text(contributors)
 
-        contrib_view = gtk.TextView(contrib_buffer)
-        contrib_view.set_editable(False)
-        contrib_view.set_cursor_visible(False)
-        contrib_view.set_wrap_mode(gtk.WRAP_WORD)
-        contrib_window = gtk.ScrolledWindow()
-        contrib_window.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
-        contrib_window.add(contrib_view)
-        contrib_window.set_size_request(-1, 100)
-        packing_vbox._widget.pack_start(contrib_window)
+        #contrib_view = gtk.TextView(contrib_buffer)
+        #contrib_view.set_editable(False)
+        #contrib_view.set_cursor_visible(False)
+        #contrib_view.set_wrap_mode(gtk.WRAP_WORD)
+        #contrib_window = gtk.ScrolledWindow()
+        #contrib_window.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+        #contrib_window.add(contrib_view)
+        #contrib_window.set_size_request(-1, 100)
+        #packing_vbox._widget.pack_start(contrib_window)
 
         # FIXME - make the project url clickable
-        donate_label = gtk.Label(
-            _("To help fund continued %(appname)s development, visit the "
-              "donation page at:",
-              {"appname": app.config.get(prefs.SHORT_APP_NAME)}))
-        donate_label.set_justify(gtk.JUSTIFY_CENTER)
-        packing_vbox._widget.pack_start(donate_label)
+        #donate_label = gtk.Label(
+        #    _("To help fund continued %(appname)s development, visit the "
+        #      "donation page at:",
+        #      {"appname": app.config.get(prefs.SHORT_APP_NAME)}))
+        #donate_label.set_justify(gtk.JUSTIFY_CENTER)
+        #packing_vbox._widget.pack_start(donate_label)
 
-        packing_vbox._widget.pack_start(
-            gtk.Label(app.config.get(prefs.DONATE_URL)))
+        #packing_vbox._widget.pack_start(
+        #    gtk.Label(app.config.get(prefs.DONATE_URL)))
         return packing_vbox
 
     def on_contrib_link_event(self, texttag, widget, event, iter_):

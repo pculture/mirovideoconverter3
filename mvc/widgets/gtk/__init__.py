@@ -3,8 +3,14 @@ import gtk
 import gobject
 
 def initialize(app):
+    from gtkmenus import MainWindowMenuBar
+    app.menubar = MainWindowMenuBar()
     app.startup()
     app.run()
+
+def attach_menubar():
+    from mvc.widgets import app
+    app.widgetapp.vbox.pack_start(app.widgetapp.menubar)
 
 def mainloop_start():
     gtk.main()

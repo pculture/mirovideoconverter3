@@ -18,7 +18,7 @@ import urllib
 import urlparse
 
 from mvc.widgets import (initialize, idle_add, mainloop_start, mainloop_stop,
-                         reveal_file)
+                         attach_menubar, reveal_file)
 from mvc.widgets import menus
 from mvc.widgets import widgetset
 from mvc.widgets import cellpack
@@ -883,7 +883,6 @@ class Application(mvc.Application):
 
         mvc.Application.startup(self)
 
-        self.menubar = widgetset.MenuBar()
         self.menu_manager = menus.MenuManager()
         self.menu_manager.setup_menubar(self.menubar)
 
@@ -948,6 +947,10 @@ class Application(mvc.Application):
 
         # # finish up
         vbox = widgetset.VBox()
+        self.vbox = vbox
+
+        attach_menubar()
+
         self.scroller = widgetset.Scroller(False, True)
         self.scroller.set_size_request(0, 0)
         self.scroller.set_background_color(DRAG_AREA)

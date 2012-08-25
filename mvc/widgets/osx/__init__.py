@@ -31,6 +31,9 @@ def initialize(app):
 
     NSApplicationMain(sys.argv)
 
+def attach_menubar(self):
+    pass
+
 def mainloop_start():
     pass
 

@@ -8,6 +8,7 @@ else:
     from .gtk import widgetset
 
 initialize = plat.initialize
+attach_menubar = plat.attach_menubar
 mainloop_start = plat.mainloop_start
 mainloop_stop = plat.mainloop_stop
 idle_add = plat.idle_add

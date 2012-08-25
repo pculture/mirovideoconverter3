@@ -59,3 +59,5 @@ from .simple import (Image, ImageDisplay,
         AnimatedImageDisplay, Label, Scroller, Expander, SolidBackground,
         ProgressBar, HLine)
 from .widgets import Rect
+from .gtkmenus import (MenuItem, RadioMenuItem, CheckMenuItem, Separator,
+        Menu, MenuBar, MainWindowMenuBar)
