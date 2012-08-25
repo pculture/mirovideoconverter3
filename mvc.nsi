@@ -17,6 +17,10 @@ section
     File *.dll
     File library.zip
     File ${EXE_NAME}
+    SetOutPath "$INSTDIR\ffmpeg"
+    File /r ffmpeg\*.*
+    SetOutPath "$INSTDIR\avconv"
+    File /r avconv\*.*
     SetOutPath "$INSTDIR\resources\converters"
     File resources\converters\*.*
     SetOutPath "$INSTDIR\resources\images"
@@ -40,6 +44,8 @@ section "uninstall"
     delete "$INSTDIR\${EXE_NAME}"
     delete "$INSTDIR\resources\converters\*.*"
     delete "$INSTDIR\resources\images\*.*"
+    rmdir /r "$INSTDIR\avconv"
+    rmdir /r "$INSTDIR\ffmpeg"
     rmdir "$INSTDIR\resources\converters"
     rmdir "$INSTDIR\resources\images"
     rmdir "$INSTDIR\resources"

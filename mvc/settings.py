@@ -1,8 +1,15 @@
+import logging
 import os
-import subprocess
 import sys
 
+from mvc import execute
+
 ffmpeg_version = None
+
+_search_path_extra = []
+def add_to_search_path(directory):
+    """Add a path to the list of paths that which() searches."""
+    _search_path_extra.append(directory)
 
 def which(name):
     if sys.platform == 'win32':
@@ -13,11 +20,15 @@ def which(name):
                             '..', '..', '..', '..', 'Helpers', name)
         if os.path.exists(path):
             return path
-    for dirname in os.environ['PATH'].split(os.pathsep):
+    dirs_to_search = os.environ['PATH'].split(os.pathsep)
+    dirs_to_search += _search_path_extra
+    for dirname in dirs_to_search:
         fullpath = os.path.join(dirname, name)
         # XXX check for +x bit
         if os.path.exists(fullpath):
             return fullpath
+    logging.warn("Can't find path to %s (searched in %s)", name,
+            dirs_to_search)
 
 def memoize(func):
     cache = []
@@ -38,9 +49,7 @@ def get_ffmpeg_version():
     global ffmpeg_version
     if ffmpeg_version is None:
         commandline = [get_ffmpeg_executable_path(), '-version']
-        p = subprocess.Popen(commandline,
-                             stdout=subprocess.PIPE,
-                             stderr=file(os.devnull, "wb"))
+        p = execute.Popen(commandline, stderr=open(os.devnull, "wb"))
         stdout, _ = p.communicate()
         lines = stdout.split('\n')
         version = lines[0].rsplit(' ', 1)[1].split('.')
