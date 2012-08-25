@@ -161,8 +161,6 @@ class FileDropTarget(widgetset.SolidBackground):
             bottom_pad=10, left_pad=40)
         self.add(self.alignment)
 
-        self.create_signal('file-activated')
-
         self.widgets = {
             False: self.build_large_widgets(),
             True: self.build_small_widgets()
@@ -954,7 +952,6 @@ class Application(mvc.Application):
         self.button_bar.pack_end(omb)
 
         self.drop_target = FileDropTarget()
-        self.drop_target.connect('file-activated', self.file_activated)
         self.drop_target.set_size_request(-1, 70)
 
         # # finish up
@@ -1032,7 +1029,7 @@ class Application(mvc.Application):
         dialog.set_select_multiple(True)
         if dialog.run() == 0: # success
             for filename in dialog.get_filenames():
-                self.emit('file-activated', filename)
+                self.file_activated(None, filename)
         dialog.destroy()
 
     def about(self):
