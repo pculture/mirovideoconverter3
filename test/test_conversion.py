@@ -183,5 +183,5 @@ class ConversionManagerTest(base.Test):
         time.sleep(0.5)
         c.stop()
         self.spin(1)
-        self.assertEqual(c.status, 'failed')
+        self.assertEqual(c.status, 'canceled')
         self.assertEqual(c.error, 'manually stopped')
