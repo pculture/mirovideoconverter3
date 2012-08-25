@@ -371,6 +371,7 @@ class Window(signals.SignalEmitter):
     def performDragOperation_(self, info):
         pb = info.draggingPasteboard()
         available_types = set(pb.types()) & set([NSFilenamesPboardType])
+        drag_ok = False
         if available_types:
             type_ = available_types.pop()
             # DANCE!  Everybody dance for portable Python code!
@@ -378,7 +379,9 @@ class Window(signals.SignalEmitter):
                       NSURL.fileURLWithPath_(v).filePathURL()).encode('utf-8')
                       for v in list(pb.propertyListForType_(type_))]
             self.emit('file-drag-received', values)
+            drag_ok = True
         self.draggingExited_(info)
+        return drag_ok
 
     def draggingEntered_(self, info):
         return self.draggingUpdated_(info)
