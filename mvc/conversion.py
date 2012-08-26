@@ -9,6 +9,7 @@ import logging
 
 from mvc import execute
 from mvc.utils import line_reader
+from mvc.widgets import get_conversion_directory
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ class Conversion(object):
         self.video = video
         self.manager = manager
         if output_dir is None:
-            output_dir = os.path.dirname(video.filename)
+            output_dir = get_conversion_directory()
         self.output_dir = output_dir
         self.lines = []
         self.thread = None

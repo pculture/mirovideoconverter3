@@ -1,7 +1,8 @@
 import sys
 
-from AppKit import NSApplication, NSApplicationMain, NSWorkspace, NSObject
-from objc import nil
+from objc import *
+from Foundation import *
+from AppKit import *
 
 from PyObjCTools import AppHelper
 
@@ -57,3 +58,9 @@ def idle_remove(id_):
 def reveal_file(filename):
     NSWorkspace.sharedWorkspace().selectFile_inFileViewerRootedAtPath_(
         filename, nil)
+
+def get_conversion_directory():
+    url, error = NSFileManager.defaultManager().URLForDirectory_inDomain_appropriateForURL_create_error_(NSMoviesDirectory, NSUserDomainMask, nil, YES, None)
+    if error:
+        return None
+    return url.path().encode('utf-8')

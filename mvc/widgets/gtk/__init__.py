@@ -46,3 +46,15 @@ def reveal_file(filename):
         os.startfile(filename)
     else:
         open_file_linux(filename)
+
+def get_conversion_directory_windows():
+    from mvc.windows import specialfolders
+    return specialfolders.base_movies_directory()
+
+def get_conversion_directory_linux():
+    return os.path.expanduser('~')
+
+if sys.platform == 'win32':   
+   get_conversion_directory = get_conversion_directory_windows
+else:
+   get_conversion_directory = get_conversion_directory_linux

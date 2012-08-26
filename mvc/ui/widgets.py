@@ -18,7 +18,7 @@ import urllib
 import urlparse
 
 from mvc.widgets import (initialize, idle_add, mainloop_start, mainloop_stop,
-                         attach_menubar, reveal_file)
+                         attach_menubar, reveal_file, get_conversion_directory)
 from mvc.widgets import menus
 from mvc.widgets import widgetset
 from mvc.widgets import cellpack
@@ -402,11 +402,19 @@ class CustomOptions(widgetset.Background):
 
     def create_top(self):
         hbox = widgetset.HBox(spacing=5)
-        hbox.pack_start(widgetset.Label('Save to', color=TEXT_COLOR))
-        button = widgetset.Button('Current Video Location')
-        button.connect('clicked', self.on_destination_clicked)
-        hbox.pack_start(button)
-        return widgetutil.align_center(hbox, top_pad=10, bottom_pad=10)
+        save_label = 'Save to %s' % get_conversion_directory()
+        self.path_label = widgetset.Label(save_label, color=TEXT_COLOR)
+        self.path_label.set_size(widgetconst.SIZE_SMALL)
+        self.path_label.set_size_request(200, -1)
+        hbox.pack_start(self.path_label)
+        # XXX: disabled until we can figure out how to do this properly.
+        #button = widgetset.Button('...')
+        #button.connect('clicked', self.on_destination_clicked)
+        #reset = widgetset.Button('Reset')
+        #reset.connect('clicked', self.on_destination_reset)
+        #hbox.pack_start(button)
+        #hbox.pack_start(reset)
+        return widgetutil.align(hbox, xalign=0.5, yalign=0.5)
 
     def create_left(self):
         custom_size = widgetset.Checkbox('Custom Size', color=TEXT_COLOR)
@@ -500,13 +508,15 @@ class CustomOptions(widgetset.Background):
         dialog = widgetset.DirectorySelectDialog('Destination Directory')
         r = dialog.run()
         if r == 0: # picked a directory
-            self._change_setting('destination', dialog.get_directory())
-            if widget:
-                widget.set_text(os.path.basename(dialog.get_directory()))
-        else: # cancel
-            self._change_setting('destination', None)
-            if widget:
-                widget.set_text('Current Video Location')
+            directory = dialog.get_directory()
+            save_label = 'Save to %s' % directory
+            self.path_label.set_text(save_label)
+            self._change_setting('destination', directory)
+
+    def on_destination_reset(self, widget):
+        save_label = 'Save to %s' % get_conversion_directory()
+        self.path_label.set_text(save_label)
+        self._change_setting('destination', None)
 
     def on_custom_size_changed(self, widget):
         self._change_setting('custom-size', widget.get_checked())
@@ -1107,12 +1117,14 @@ class Application(mvc.Application):
             if c.video.filename == filename:
                 logger.info('ignoring duplicate: %r', filename)
                 return
-        if self.options.options['destination'] is None:
-            try:
-                tempfile.TemporaryFile(dir=os.path.dirname(filename))
-            except EnvironmentError:
-                # can't write to the destination directory; ask for a new one
-                self.options.on_destination_clicked(None)
+        # XXX disabled - don't want to allow individualized file outputs
+        # since the workflow isn't entirely clear for now.
+        #if self.options.options['destination'] is None:
+        #    try:
+        #        tempfile.TemporaryFile(dir=os.path.dirname(filename))
+        #    except EnvironmentError:
+        #        # can't write to the destination directory; ask for a new one
+        #        self.options.on_destination_clicked(None)
         try:
             vf = VideoFile(filename)
         except ValueError:
