@@ -59,6 +59,11 @@ class ConversionManagerTest(base.Test):
     def start_conversion(self, filename, timeout=3):
         vf = video.VideoFile(filename)
         c = self.manager.start_conversion(vf, self.converter)
+        # XXX HACK: for test harness change the output directory to be the
+        # same as the input file (so we can nuke in one go)
+        c.output_dir = os.path.dirname(filename)
+        c.output = os.path.join(c.output_dir,
+                                self.converter.get_output_filename(vf))
         c.listen(self.changed)
         self.assertTrue(self.manager.running)
         self.assertTrue(c in self.manager.in_progress)
@@ -80,8 +85,6 @@ class ConversionManagerTest(base.Test):
         self.assertEqual(c.status, 'finished')
         self.assertEqual(c.progress, c.duration)
         self.assertEqual(c.progress_percent, 1.0)
-        self.assertEqual(os.path.dirname(c.output),
-                         os.path.dirname(c.temp_output))
         self.assertTrue(os.path.exists(c.output))
         self.assertEqual(file(c.output).read(), 'blank')
         self.assertEqual(self.changes, [
