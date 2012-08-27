@@ -1223,6 +1223,7 @@ class Application(mvc.Application):
             for conversion in self.model.conversions():
                 conversion.stop()
                 self.update_conversion(conversion)
+            self.conversion_manager.running = False
         self.update_convert_button()
         self.convert_button.enable()
 

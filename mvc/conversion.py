@@ -93,16 +93,19 @@ class Conversion(object):
                 logger.exception('not running and not waiting %s' % (self,))
             self.status = status
             return
-        try:
-            self.popen.kill()
-            self.popen.wait()
-            # set the status transition last, if we had hit an exception
-            # then we will transition the next state to 'failed' in finalize()
-            self.status = 'canceled'
-        except EnvironmentError, e:
-            logger.exception('while stopping %s' % (self,))
-            self.error = str(e)
+        else:
+            try:
+                self.popen.kill()
+                self.popen.wait()
+                # set the status transition last, if we had hit an exception
+                # then we will transition the next state to 'failed' in
+                # finalize()
+                self.status = 'canceled'
+            except EnvironmentError, e:
+                logger.exception('while stopping %s' % (self,))
+                self.error = str(e)
         self.popen = None
+        self.manager.conversion_finished(self)
 
     def _thread(self):
         os.close(self.temp_fd)
@@ -241,7 +244,7 @@ class ConversionManager(object):
         self.notify_queue, changed = set(), self.notify_queue
 
         for conversion in changed:
-            if conversion.status in ('finished', 'failed'):
+            if conversion.status in ('canceled', 'finished', 'failed'):
                 self.conversion_finished(conversion)
             for listener in conversion.listeners:
                 listener(conversion)
