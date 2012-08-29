@@ -1271,6 +1271,7 @@ class Application(mvc.Application):
                 self.update_table_size()
             else:
                 conversion.stop()
+                self.update_conversion(conversion)
 
     def on_settings_toggle(self, widget):
         if not self.options.child:

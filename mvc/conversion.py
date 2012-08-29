@@ -201,7 +201,8 @@ class Conversion(object):
                          # been created
             if self.status != 'canceled':
                 self.status = 'failed'
-        self.notify_listeners()
+        if self.status != 'canceled':
+            self.notify_listeners()
         logger.info('finished %r; status: %s', self, self.status)
 
     def get_subprocess_arguments(self, output):
