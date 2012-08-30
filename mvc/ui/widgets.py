@@ -1171,7 +1171,6 @@ class Application(mvc.Application):
         self.update_table_size()
 
     def on_select_converter(self, widget, identifier):
-        print 'identifier ', identifier
         self.current_converter = self.converter_manager.get_by_id(identifier)
         self.options.reset()
 

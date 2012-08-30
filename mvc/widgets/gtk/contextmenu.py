@@ -14,7 +14,10 @@ class ContextMenu(Widget):
             else:
                 label, callback = item_info
                 item = gtk.MenuItem(label)
-                if callback is not None:
+                if isinstance(callback, list):
+                    submenu = ContextMenu(callback)
+                    item.set_submenu(submenu._widget)
+                elif callback is not None:
                     item.connect('activate', self.on_activate, callback, i)
                 else:
                     item.set_sensitive(False)
