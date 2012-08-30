@@ -935,7 +935,12 @@ class Application(mvc.Application):
             media_type = c.media_type
             if media_type not in converter_types:
                 media_type = 'others'
-            converters.setdefault(media_type, []).append(c)
+            brand = self.converter_manager.converter_to_brand(c)
+            # None = top level.  Otherwise tack on the brand name.
+            if brand is None:
+                converters.setdefault(media_type, set()).add(c)
+            else:
+                converters.setdefault(media_type, set()).add(brand)
 
         self.menus = []
 
@@ -943,9 +948,16 @@ class Application(mvc.Application):
         buttons = widgetset.HBox()
 
         for type_ in converter_types:
-            options = [(c.name, c.identifier) for c in
-                       converters[type_]]
-            options.sort()
+            options = []
+            for c in converters[type_]:
+                if isinstance(c, str):
+                    rconverters = self.converter_manager.brand_to_converters(c)
+                    values = []
+                    for r in rconverters:
+                        values.append((r.name, r.identifier))
+                    options.append((c, values))
+                else:
+                    options.append((c.name, c.identifier))
             menu = SettingsButton(type_)
             menu.connect('clicked', self.show_options_menu, options)
             self.menus.append(menu)
@@ -1053,11 +1065,27 @@ class Application(mvc.Application):
     def quit(self):
         self.window.close()
 
+    def _generate_suboptions_menu(self, widget, options):
+        submenu = []
+        for option, id_ in options:
+            callback = lambda x, i: self.on_select_converter(widget,
+                                                             options[i][1])
+            value = (option, callback)
+            submenu.append(value)
+        return submenu
+
     def show_options_menu(self, widget, options):
-        menu = widgetset.ContextMenu([
-                (option, lambda x, i: self.on_select_converter(widget,
-                                                               options[i][1]))
-                for option, id_ in options])
+        optionlist = []
+        identifiers = dict()
+        for option, submenu in options:
+            if isinstance(submenu, list):
+                callback = self._generate_suboptions_menu(widget, submenu)
+            else:
+                callback = lambda x, i: self.on_select_converter(widget,
+                                                                 options[i][1])
+            value = (option, callback)
+            optionlist.append(value)
+        menu = widgetset.ContextMenu(optionlist)
         menu.popup()
 
     def update_convert_button(self):
@@ -1143,8 +1171,8 @@ class Application(mvc.Application):
         self.update_table_size()
 
     def on_select_converter(self, widget, identifier):
-        self.current_converter = self.converter_manager.get_by_id(
-            identifier)
+        print 'identifier ', identifier
+        self.current_converter = self.converter_manager.get_by_id(identifier)
         self.options.reset()
 
         self.converter_changed(widget)

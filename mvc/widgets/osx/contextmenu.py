@@ -49,9 +49,13 @@ class ContextMenu(object):
                     nsitem.setAttributedTitle_(attributed_label)
                 else:
                     nsitem.setTitle_(label)
-                handler = ContextMenuHandler.alloc().initWithCallback_widget_i_(callback, self, i)
-                nsitem.setTarget_(handler)
-                nsitem.setAction_('handleMenuItem:')
+                if isinstance(callback, list):
+                    submenu = ContextMenu(callback)
+                    self.menu.setSubmenu_forItem_(submenu.menu, nsitem)
+                else:
+                    handler = ContextMenuHandler.alloc().initWithCallback_widget_i_(callback, self, i)
+                    nsitem.setTarget_(handler)
+                    nsitem.setAction_('handleMenuItem:')
             self.menu.addItem_(nsitem)
 
     def popup(self):

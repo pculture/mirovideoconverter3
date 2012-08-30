@@ -153,6 +153,10 @@ class FFmpegConverterInfo(FFmpegConverterInfoBase):
 class ConverterManager(object):
     def __init__(self):
         self.converters = {}
+        # converter -> brand reverse map.  XXX: this code, really, really sucks
+        # and not very scalable.
+        self.brand_rmap = {}
+        self.brand_map = {}
 
     def add_converter(self, converter):
         self.converters[converter.identifier] = converter
@@ -160,6 +164,18 @@ class ConverterManager(object):
     def startup(self):
         self.load_simple_converters()
         self.load_converters(resources.converter_scripts())
+
+    def brand_to_converters(self, brand):
+        try:
+            return self.brand_map[brand]
+        except KeyError:
+            return None
+
+    def converter_to_brand(self, converter):
+        try:
+            return self.brand_rmap[converter]
+        except KeyError:
+            return None
 
     def load_simple_converters(self):
         from mvc import basicconverters
@@ -171,8 +187,17 @@ class ConverterManager(object):
             global_dict = {}
             execfile(converter_file, global_dict)
             if 'converters' in global_dict:
-                [self.add_converter(converter) for converter in
-                 global_dict['converters']]
+                for converter in global_dict['converters']:
+                    if isinstance(converter, tuple):
+                        brand, realconverters = converter
+                        for realconverter in realconverters:
+                            self.brand_rmap[realconverter] = brand
+                            self.brand_map.setdefault(brand, []).append(realconverter)
+                            self.add_converter(realconverter)
+                    else:
+                        self.brand_rmap[converter] = None
+                        self.brand_map.setdefault(None, []).append(converter)
+                        self.add_converter(converter)
                 logger.info('load_converters: loaded %i from %r',
                             len(global_dict['converters']),
                             converter_file)
