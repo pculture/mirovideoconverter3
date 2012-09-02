@@ -50,7 +50,7 @@ def reveal_file(filename):
 
 def get_conversion_directory_windows():
     from mvc.windows import specialfolders
-    return specialfolders.base_movies_directory()
+    return specialfolders.base_movies_directory
 
 def get_conversion_directory_linux():
     return os.path.expanduser('~')
