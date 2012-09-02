@@ -56,8 +56,10 @@ def idle_remove(id_):
     pass
 
 def reveal_file(filename):
+    # XXX: dumb lousy type conversions ...
+    path = NSURL.fileURLWithPath_(filename.decode('utf-8')).path()
     NSWorkspace.sharedWorkspace().selectFile_inFileViewerRootedAtPath_(
-        filename, nil)
+        path, nil)
 
 def get_conversion_directory():
     url, error = NSFileManager.defaultManager().URLForDirectory_inDomain_appropriateForURL_create_error_(NSMoviesDirectory, NSUserDomainMask, nil, YES, None)
