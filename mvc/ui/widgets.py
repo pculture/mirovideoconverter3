@@ -1276,7 +1276,7 @@ class Application(mvc.Application):
     def hotspot_clicked(self, widget, name, iter_):
         conversion = self.model[iter_][-1]
         if name == 'show-file':
-            reveal_file(os.path.dirname(conversion.output))
+            reveal_file(conversion.output)
         elif name == 'clear':
             self.model.remove(iter_)
             self.update_table_size()
