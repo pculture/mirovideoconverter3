@@ -3,6 +3,9 @@ if __name__ == "__main__":
         from mvc.ui.widgets import Application
     except ImportError:
         from mvc.ui.console import Application
-    app = Application()
-    app.startup()
-    app.run()
+    from mvc.widgets import app
+    from mvc.widgets import initialize
+    app.widgetapp = Application()
+    initialize(app.widgetapp)
+    app.widgetapp.startup()
+    app.widgetapp.run()
