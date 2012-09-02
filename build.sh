@@ -19,3 +19,7 @@ ${SANDBOX_PATH}/Frameworks/Python.framework/Versions/2.7/bin/python setup.py py2
 if [ "$1" = "--sign" ]; then
     source sign.sh
 fi
+
+if [ "$2" = "--installer"] ; then
+    source build_installer.sh
+fi
