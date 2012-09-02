@@ -56,6 +56,6 @@ def get_conversion_directory_linux():
     return os.path.expanduser('~')
 
 if sys.platform == 'win32':   
-   get_conversion_directory = get_conversion_directory_windows
+    get_conversion_directory = get_conversion_directory_windows
 else:
-   get_conversion_directory = get_conversion_directory_linux
+    get_conversion_directory = get_conversion_directory_linux
