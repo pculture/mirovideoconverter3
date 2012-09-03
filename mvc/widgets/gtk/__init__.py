@@ -44,7 +44,7 @@ def open_file_linux(filename):
 
 def reveal_file(filename):
     if hasattr(os, 'startfile'): # Windows
-        os.startfile(filename)
+        os.startfile(os.path.dirname(filename))
     else:
         open_file_linux(filename)
 
