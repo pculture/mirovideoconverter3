@@ -37,16 +37,16 @@ SMALL_FONT = widgetutil.font_scale_from_osx_points(10.0)
 
 DEFAULT_FONT="Helvetica"
 
-CONVERT_TO_FONT = "Gill Sans"
+CONVERT_TO_FONT = "Gill Sans Light"
 CONVERT_TO_FONTSIZE = widgetutil.font_scale_from_osx_points(14.0)
 
-SETTINGS_FONT = "Gill Sans"
+SETTINGS_FONT = "Gill Sans Light"
 SETTINGS_FONTSIZE = widgetutil.font_scale_from_osx_points(13.0)
 
-CONVERT_NOW_FONT = "Gill Sans"
+CONVERT_NOW_FONT = "Gill Sans Light"
 CONVERT_NOW_FONTSIZE = widgetutil.font_scale_from_osx_points(18.0)
 
-DND_FONT = "Century Gothic"
+DND_FONT = "Gill Sans Light"
 DND_LARGE_FONTSIZE = widgetutil.font_scale_from_osx_points(13.0)
 DND_SMALL_FONTSIZE = widgetutil.font_scale_from_osx_points(12.0)
 
@@ -184,7 +184,9 @@ class FileDropTarget(widgetset.SolidBackground):
         hbox.pack_start(widgetutil.align_middle(label))
 
         cfb = WebStyleButton()
+        cfb.set_font(DND_FONT, DND_LARGE_FONTSIZE)
         cfb.set_text('Choose Files...')
+     
         cfb.connect('clicked', self.choose_file)
         hbox.pack_start(widgetutil.align_middle(cfb))
         hbox.set_size_request(-1, height)
@@ -212,6 +214,7 @@ class FileDropTarget(widgetset.SolidBackground):
         normal.pack_start(widgetutil.align_middle(drag_label))
         cfb = WebStyleButton()
         cfb.set_text('Choose Files...')
+        cfb.set_font(DND_FONT, DND_SMALL_FONTSIZE)
         cfb.connect('clicked', self.choose_file)
         normal.pack_start(cfb)
         normal.set_size_request(-1, height)
