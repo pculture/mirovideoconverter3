@@ -43,12 +43,15 @@ class SizedControl(Widget):
         if size == widgetconst.SIZE_NORMAL:
             self.view.cell().setControlSize_(NSRegularControlSize)
             font = NSFont.systemFontOfSize_(NSFont.systemFontSize())
+            self.font_size = NSFont.systemFontSize()
         elif size == widgetconst.SIZE_SMALL:
             font = NSFont.systemFontOfSize_(NSFont.smallSystemFontSize())
             self.view.cell().setControlSize_(NSSmallControlSize)
+            self.font_size = NSFont.smallSystemFontSize()
         else:
             self.view.cell().setControlSize_(NSRegularControlSize)
             font = NSFont.systemFontOfSize_(NSFont.systemFontSize() * size)
+            self.font_size = NSFont.systemFontSize() * size
         self.view.setFont_(font)
 
 class BaseTextEntry(SizedControl):
@@ -262,11 +265,27 @@ class Checkbox(SizedControl):
         self.create_signal('toggled')
         self.view = MiroButton.alloc().initWithSignal_('toggled')
         self.view.setButtonType_(NSSwitchButton)
-        self.view.setTitle_(text)
-        if bold:
-            self.view.setFont_(NSFont.boldSystemFontOfSize_(0))
-        if color is not None:
-            pass
+        self.bold = bold
+        self.title = text
+        self.font_size = NSFont.systemFontSize()
+        self.color = self.make_color(color)
+        self._set_title()
+
+    def set_size(self, size):
+        SizedControl.set_size(self, size)
+        self._set_title()
+
+    def _set_title(self):
+        if self.color is None:
+            self.view.setTitle_(self.title)
+        else:
+            attributes = {
+                NSForegroundColorAttributeName: self.color,
+                NSFontAttributeName: NSFont.systemFontOfSize_(self.font_size)
+            }
+            string = NSAttributedString.alloc().initWithString_attributes_(
+                    self.title, attributes)
+            self.view.setAttributedTitle_(string)
 
     def calc_size_request(self):
         if self.manual_size_request:
@@ -452,12 +471,16 @@ class RadioButtonGroup:
                 mem.view.setState_(NSOffState)
 
 class RadioButton(SizedControl):
-    def __init__(self, label, group=None, color=None):
+    def __init__(self, label, group=None, bold=False, color=None):
         SizedControl.__init__(self)
         self.create_signal('clicked')
         self.view = MiroButton.alloc().initWithSignal_('clicked')
         self.view.setButtonType_(NSRadioButton)
-        self.view.setTitle_(label)
+        self.color = self.make_color(color)
+        self.title = label
+        self.bold = bold
+        self.font_size = NSFont.systemFontSize()
+        self._set_title()
 
         if group is not None:
             self.group = group
@@ -465,6 +488,22 @@ class RadioButton(SizedControl):
             self.group = RadioButtonGroup() 
 
         self.group.add_button(self)
+
+    def set_size(self, size):
+        SizedControl.set_size(self, size)
+        self._set_title()
+
+    def _set_title(self):
+        if self.color is None:
+            self.view.setTitle_(self.title)
+        else:
+            attributes = {
+                NSForegroundColorAttributeName: self.color,
+                NSFontAttributeName: NSFont.systemFontOfSize_(self.font_size)
+            }
+            string = NSAttributedString.alloc().initWithString_attributes_(
+                    self.title, attributes)
+            self.view.setAttributedTitle_(string)
 
     def calc_size_request(self):
         size = self.view.cell().cellSize()
