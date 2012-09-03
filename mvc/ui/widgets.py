@@ -955,15 +955,24 @@ class Application(mvc.Application):
 
         for type_ in converter_types:
             options = []
+            more_devices = None
             for c in converters[type_]:
                 if isinstance(c, str):
                     rconverters = self.converter_manager.brand_to_converters(c)
                     values = []
                     for r in rconverters:
                         values.append((r.name, r.identifier))
-                    options.append((c, values))
+                        values.sort()
+                    # yuck
+                    if c == 'More Devices':
+                        more_devices = (c, values)
+                    else:
+                        options.append((c, values))
                 else:
                     options.append((c.name, c.identifier))
+            options.sort()
+            if more_devices:
+                options.append(more_devices)
             menu = SettingsButton(type_)
             menu.connect('clicked', self.show_options_menu, options)
             self.menus.append(menu)
