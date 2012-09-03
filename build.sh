@@ -20,6 +20,6 @@ if [ "$1" = "--sign" ]; then
     source sign.sh
 fi
 
-if [ "$2" = "--installer"] ; then
+if [ "$2" = "--installer" ] ; then
     source build_installer.sh
 fi
