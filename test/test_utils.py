@@ -34,7 +34,8 @@ class UtilsTest(base.Test):
                          (512, 384))
         self.assertEqual(utils.rescale_video((2048, 1536), target), # big
                          target)
-        self.assertEqual(utils.rescale_video((1400, 768), target), # widescreen
+        self.assertEqual(utils.rescale_video((1400, 768), target,
+                                             dont_upsize=False), # widescreen
                          (1024, 560))
 
     def test_line_reader(self):
