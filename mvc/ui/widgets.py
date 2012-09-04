@@ -377,6 +377,16 @@ class CustomOptions(widgetset.Background):
         self.reset()
 
     def reset(self):
+        self.options = {
+            'destination': None,
+            'custom-size': False,
+            'width': None,
+            'height': None,
+            'custom-aspect': False,
+            'aspect-ratio': None,
+            'dont-upsize': True
+        }
+
         self.top = self.create_top()
         self.top.set_size_request(390, 50)
         self.left = self.create_left()
@@ -392,14 +402,6 @@ class CustomOptions(widgetset.Background):
 
         self.box = widgetutil.align_left(vbox)
 
-        self.options = {
-            'destination': None,
-            'custom-size': False,
-            'width': None,
-            'height': None,
-            'custom-aspect': False,
-            'aspect-ratio': None
-            }
         if self.child:
             self.set_child(self.box)
 
@@ -424,6 +426,11 @@ class CustomOptions(widgetset.Background):
         custom_size.set_size(widgetconst.SIZE_SMALL)
         custom_size.connect('toggled', self.on_custom_size_changed)
 
+        dont_upsize = widgetset.Checkbox('Don\'t Upsize', color=TEXT_COLOR)
+        dont_upsize.set_checked(self.options['dont-upsize'])
+        dont_upsize.set_size(widgetconst.SIZE_SMALL)
+        dont_upsize.connect('toggled', self.on_dont_upsize_changed)
+
         bottom = widgetset.HBox(spacing=5)
         self.width_widget = LabeledNumberEntry('Width')
         self.width_widget.connect('focus-out', self.on_width_height_changed)
@@ -434,8 +441,12 @@ class CustomOptions(widgetset.Background):
         bottom.pack_start(self.width_widget)
         bottom.pack_start(self.height_widget)
 
+        hbox = widgetset.HBox(spacing=5)
+        hbox.pack_start(custom_size)
+        hbox.pack_start(dont_upsize)
+
         vbox = widgetset.VBox(spacing=5)
-        vbox.pack_start(widgetutil.align_left(custom_size, left_pad=10))
+        vbox.pack_start(widgetutil.align_left(hbox, left_pad=10))
         vbox.pack_start(widgetutil.align_center(bottom))
         return widgetutil.align_middle(vbox)
 
@@ -523,6 +534,9 @@ class CustomOptions(widgetset.Background):
         save_label = 'Save to %s' % get_conversion_directory()
         self.path_label.set_text(save_label)
         self._change_setting('destination', None)
+
+    def on_dont_upsize_changed(self, widget):
+        self._change_setting('dont-upsize', widget.get_checked())
 
     def on_custom_size_changed(self, widget):
         self._change_setting('custom-size', widget.get_checked())
@@ -1347,6 +1361,8 @@ class Application(mvc.Application):
             self.converter_changed(self.menus[-1]) # formats menu
         if setting in ('width', 'height'):
             setattr(self.current_converter, setting, value)
+        elif setting == 'dont-upsize':
+            setattr(self.current_converter, 'dont_upsize', value)
         elif setting == 'custom-size':
             if not value:
                 self.current_converter.old_size = (

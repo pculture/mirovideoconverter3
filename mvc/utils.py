@@ -21,17 +21,21 @@ def round_even(num):
 
 
 def rescale_video((source_width, source_height),
-                  (target_width, target_height)):
+                  (target_width, target_height),
+                  dont_upsize=True):
     """
     Rescale a video given a (width, height) target.  This returns the largest
     (width, height) which maintains the original aspect ratio while fitting
     within the target size.
+
+    If dont_upsize is set, then don't resize it such that the rescaled size
+    will be larger than the original size.
     """
     if not source_width or not source_height:
         return (round_even(target_width), round_even(target_height))
 
-    if (source_width <= target_width and
-        source_height <= target_height):
+    if ((source_width <= target_width or 
+        source_height <= target_height) and dont_upsize):
         return (round_even(source_width), round_even(source_height))
 
     width_ratio = float(source_width) / float(target_width)

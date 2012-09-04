@@ -135,15 +135,17 @@ class FFmpegConverterInfo(FFmpegConverterInfoBase):
 
     parameters = None
 
-    def __init__(self, name, width=None, height=None):
+    def __init__(self, name, width=None, height=None, dont_upsize=True):
         self.width, self.height = width, height
+        self.dont_upsize = dont_upsize
         ConverterInfo.__init__(self, name)
 
     def get_extra_arguments(self, video, output):
         if self.parameters is None:
             raise NotImplementedError
         width, height = utils.rescale_video((video.width, video.height),
-                                            (self.width, self.height))
+                                            (self.width, self.height),
+                                            dont_upsize=self.dont_upsize)
         ssize = '%ix%i' % (width, height)
         return self.parameters.format(
             ssize=ssize,

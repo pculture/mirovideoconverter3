@@ -9,8 +9,9 @@ class SimpleFFmpegConverterInfo(FFmpegConverterInfoBase):
 
 class SimpleFFmpegConverterInfoWithSize(SimpleFFmpegConverterInfo):
 
-    def __init__(self, name, width=None, height=None):
+    def __init__(self, name, width=None, height=None, dont_upsize=True):
         self.width, self.height = width, height
+        self.dont_upsize = dont_upsize
         super(SimpleFFmpegConverterInfoWithSize, self).__init__(name)
 
     def get_extra_arguments(self, video, output):
@@ -18,8 +19,9 @@ class SimpleFFmpegConverterInfoWithSize(SimpleFFmpegConverterInfo):
                           self).get_extra_arguments(video, output)
         if self.width and self.height:
             width, height = rescale_video((video.width, video.height),
-                                          (self.width, self.height))
-            arguments.extend(('-s', '%ix%i' % (self.width, self.height)))
+                                          (self.width, self.height),
+                                          dont_upsize=self.dont_upsize)
+            arguments.extend(('-s', '%ix%i' % (width, height)))
         return arguments
 
 

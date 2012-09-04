@@ -110,12 +110,12 @@ class FFmpegConverterInfoTest(ConverterInfoTestMixin, base.Test):
             ['640x480'])
 
     def test_get_extra_arguments_rescales_size(self):
-        self.video.width = 1400
-        self.video.height = 768
+        self.video.width = 800
+        self.video.height = 600
         output = str(id(self))
         self.assertEqual(
             self.converter_info.get_extra_arguments(self.video, output),
-            ['1024x560'])
+            ['800x600'])
 
     def test_process_status_line_nothing(self):
         self.assertStatusLineOutput(
