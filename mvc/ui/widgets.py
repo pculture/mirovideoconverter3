@@ -1377,5 +1377,6 @@ class Application(mvc.Application):
 
 
 if __name__ == "__main__":
+    sys.dont_write_bytecode = True
     app.widgetapp = Application()
     initialize(app.widgetapp)
