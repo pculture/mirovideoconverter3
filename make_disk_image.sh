@@ -7,7 +7,7 @@ imgDirName="dist/img"
 imgPath="dist/$imgName"
 rm -rf $imgDirName $imgPath
 mkdir $imgDirName
-cp -r dist/widgets.app $imgDirName/
+cp -r dist/Miro\ Video\ Converter.app $imgDirName/
 ln -s /Applications $imgDirName/Applications
 echo "Creating DMG file... "
 hdiutil create -srcfolder $imgDirName -volname mvc -format UDZO dist/mvc.tmp.dmg
