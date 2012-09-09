@@ -53,7 +53,7 @@ class OggVorbis(SimpleFFmpegConverterInfo):
     extension = 'ogg'
     parameters = '-f ogg -vn -acodec libvorbis -aq 60'.split()
 
-class OggTheora(SimpleFFmpegConverterInfo):
+class OggTheora(SimpleFFmpegConverterInfoWithSize):
     media_type = 'format'
     extension = 'ogv'
     parameters = '-f ogg -vcodec libtheora -acodec libvorbis -aq 60'.split()
