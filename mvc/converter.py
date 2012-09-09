@@ -182,7 +182,16 @@ class ConverterManager(object):
     def load_simple_converters(self):
         from mvc import basicconverters
         for converter in basicconverters.converters:
-            self.add_converter(converter)
+            if isinstance(converter, tuple):
+                brand, realconverters = converter
+                for realconverter in realconverters:
+                    self.brand_rmap[realconverter] = brand
+                    self.brand_map.setdefault(brand, []).append(realconverter)
+                    self.add_converter(realconverter)
+            else:
+                self.brand_rmap[converter] = None
+                self.brand_map.setdefault(None, []).append(converter)
+                self.add_converter(converter)
 
     def load_converters(self, converters):
         for converter_file in converters:

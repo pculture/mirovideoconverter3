@@ -976,7 +976,6 @@ class Application(mvc.Application):
                     values = []
                     for r in rconverters:
                         values.append((r.name, r.identifier))
-                        values.sort()
                     # yuck
                     if c == 'More Devices':
                         more_devices = (c, values)
@@ -984,7 +983,9 @@ class Application(mvc.Application):
                         options.append((c, values))
                 else:
                     options.append((c.name, c.identifier))
-            options.sort()
+            # Don't sort if formats..
+            if type_ != 'format':
+                options.sort()
             if more_devices:
                 options.append(more_devices)
             menu = SettingsButton(type_)
