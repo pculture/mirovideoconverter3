@@ -65,7 +65,7 @@ class py2app_mvc(py2app_cmd):
         copy_binaries('ffmpeg/bin/', helpers_root, ffmpeg_files)
 
 plist = plistlib.readPlist('Info.plist')
-plist['NSHumanReadableCopyright'] = 'Copyright (C) Participapatory Culture Foundation'
+plist['NSHumanReadableCopyright'] = 'Copyright (C) Participatory Culture Foundation'
 plist['CFBundleGetInfoString'] = 'Miro Video Converter'
 plist['CFBundleIdentifier'] = 'org.participatoryculture.mvc3'
 plist['CFBundleShortVersionString'] = '3.0.0'
