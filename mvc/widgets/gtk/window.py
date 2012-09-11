@@ -33,6 +33,7 @@ import gobject
 import gtk
 import os
 
+from mvc import resources
 from mvc.widgets import signals
 
 import keymap
@@ -148,6 +149,7 @@ class Window(WindowBase):
         WindowBase.__init__(self)
         self.set_window(self._make_gtk_window())
         self._window.set_title(title)
+        self.setup_icon()
         if rect:
             self._window.set_default_size(rect.width, rect.height)
             self._window.set_default_size(rect.width, rect.height)
@@ -166,6 +168,12 @@ class Window(WindowBase):
         self._window.connect('delete-event', self.on_delete_window)
         # XXX: Define MVCWindow/MiroWindow style not hard code this
         self._window.set_resizable(False)
+
+    def setup_icon(self):
+        icon_pixbuf = gtk.gdk.pixbuf_new_from_file(
+                resources.image_path("mvc-logo.png"))
+        self._window.set_icon(icon_pixbuf)
+
 
     def accept_file_drag(self, val):
         if not val:
