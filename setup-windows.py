@@ -42,8 +42,8 @@ def ffmpeg_data_files():
     return [
             ('ffmpeg',
                 [os.path.join(ffmpeg_dir, 'ffmpeg.exe')]),
-            ('ffmpeg/presets',
-                glob(os.path.join(ffmpeg_dir, 'presets', '*.ffpreset'))),
+            #('ffmpeg/presets',
+            #glob(os.path.join(ffmpeg_dir, 'presets', '*.ffpreset'))),
             ]
 
 def avconv_data_files():
