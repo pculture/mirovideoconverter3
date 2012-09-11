@@ -58,7 +58,7 @@ def data_files():
         resource_data_files("images"),
         resource_data_files("converters", "*.py"),
         ffmpeg_data_files(),
-        avconv_data_files(),
+        #avconv_data_files(),
     ))
 
 def gtk_includes():

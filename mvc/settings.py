@@ -40,6 +40,7 @@ def memoize(func):
 
 @memoize
 def get_ffmpeg_executable_path():
+    return which("ffmpeg")
     avconv = which('avconv')
     if avconv is not None:
        return avconv
