@@ -17,5 +17,3 @@ settings.add_to_search_path(os.path.join(exe_dir, 'avconv'))
 # run the app
 app.widgetapp = Application()
 initialize(app.widgetapp)
-app.widgetapp.startup()
-app.widgetapp.run()
