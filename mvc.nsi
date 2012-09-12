@@ -1,57 +1,156 @@
+; Passed in from command line:
+!define  CONFIG_VERSION "0.8.0"
 
-!define PUBLISHER "Participatory Culture Foundation"
-!define PUBLISHER_DIR "$PROGRAMFILES\${PUBLISHER}"
-!define APP_NAME "Miro Video Converter"
-!define EXE_NAME "mvc.exe"
+; TODO: Add MIROBAR_EXE
+!define CONFIG_PROJECT_URL "http://www.mirovideoconverter.com/"
+!define CONFIG_SHORT_APP_NAME "MVC"
+!define CONFIG_LONG_APP_NAME  "Miro Video Converter"
+!define CONFIG_PUBLISHER "Participatory Culture Foundation"
+!define CONFIG_ICON "converter3.ico"
+!define CONFIG_EXECUTABLE "mvc.exe"
+!define CONFIG_OUTPUT_FILE "MiroVideoConverter.exe"
+
+!define INST_KEY "Software\${CONFIG_PUBLISHER}\${CONFIG_LONG_APP_NAME}"
 !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${CONFIG_LONG_APP_NAME}"
 
-outFile "MiroVideoConverter.exe"
-InstallDir "${PUBLISHER_DIR}\${APP_NAME}"
- 
-# default section
-section
-    SetOutPath $INSTDIR
-    WriteUninstaller "$INSTDIR\uninstall.exe"
+!define UNINSTALL_SHORTCUT "Uninstall ${CONFIG_LONG_APP_NAME}.lnk"
+!define MUI_ICON "${CONFIG_ICON}"
+!define MUI_UNICON "${CONFIG_ICON}"
 
-    File *.pyd
-    File *.dll
-    File library.zip
-    File ${EXE_NAME}
-    SetOutPath "$INSTDIR\ffmpeg"
-    File /r ffmpeg\*.*
-    SetOutPath "$INSTDIR\avconv"
-    File /r avconv\*.*
-    SetOutPath "$INSTDIR\resources\converters"
-    File resources\converters\*.*
-    SetOutPath "$INSTDIR\resources\images"
-    File resources\images\*.*
+;INCLUDES
+!include "MUI2.nsh"
 
-    CreateDirectory "$SMPROGRAMS\${APP_NAME}"
+!define PRODUCT_NAME "${CONFIG_LONG_APP_NAME}"
 
-    # point the new shortcut at the program uninstaller
-    CreateShortCut "$SMPROGRAMS\${APP_NAME}\Uninstall ${APP_NAME}.lnk" "$INSTDIR\uninstall.exe"
+;GENERAL SETTINGS
+Name "${CONFIG_LONG_APP_NAME}"
+OutFile "${CONFIG_OUTPUT_FILE}"
+InstallDir "$PROGRAMFILES\${CONFIG_PUBLISHER}\${CONFIG_LONG_APP_NAME}"
+InstallDirRegKey HKLM "${INST_KEY}" "Install_Dir"
+SetCompressor lzma
 
-    CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${EXE_NAME}"
-sectionEnd
- 
-# uninstaller section start
-section "uninstall"
- 
-    delete "$INSTDIR\uninstall.exe"
-    delete "$INSTDIR\*.pyd"
-    delete "$INSTDIR\*.dll"
-    delete "$INSTDIR\library.zip"
-    delete "$INSTDIR\${EXE_NAME}"
-    delete "$INSTDIR\resources\converters\*.*"
-    delete "$INSTDIR\resources\images\*.*"
-    rmdir /r "$INSTDIR\avconv"
-    rmdir /r "$INSTDIR\ffmpeg"
-    rmdir "$INSTDIR\resources\converters"
-    rmdir "$INSTDIR\resources\images"
-    rmdir "$INSTDIR\resources"
-    rmdir "$INSTDIR"
-    rmdir "${PUBLISHER_DIR}"
-    rmdir /r "$SMPROGRAMS\${APP_NAME}"
- 
-# uninstaller section end
-sectionEnd
+SetOverwrite on
+CRCCheck on
+
+Icon "${CONFIG_ICON}"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Macros
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Function LaunchLink
+  SetShellVarContext all
+  ExecShell "" "$INSTDIR\${CONFIG_EXECUTABLE}"
+FunctionEnd
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Sections                                                                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Section "-${CONFIG_LONG_APP_NAME}" COM2
+  SectionIn RO
+  ClearErrors
+  SetShellVarContext all
+
+  SetOutPath "$INSTDIR"
+
+  File ${CONFIG_ICON}
+  File *.pyd
+  File *.dll
+  File library.zip
+  File ${CONFIG_EXECUTABLE}
+  SetOutPath "$INSTDIR\ffmpeg"
+  File /r ffmpeg\*.*
+  SetOutPath "$INSTDIR\avconv"
+  File /r avconv\*.*
+  SetOutPath "$INSTDIR\resources\converters"
+  File resources\converters\*.*
+  SetOutPath "$INSTDIR\resources\images"
+  File resources\images\*.*
+
+
+  IfErrors 0 files_ok
+
+  MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed.  An error occured writing to the ${CONFIG_LONG_APP_NAME} Folder."
+  Quit
+files_ok:
+  CreateDirectory "$SMPROGRAMS\${CONFIG_LONG_APP_NAME}"
+  CreateShortCut "$SMPROGRAMS\${CONFIG_LONG_APP_NAME}\${CONFIG_LONG_APP_NAME}.lnk" \
+    "$INSTDIR\${CONFIG_EXECUTABLE}" "" "$INSTDIR\${CONFIG_ICON}"
+  CreateShortCut "$SMPROGRAMS\${CONFIG_LONG_APP_NAME}\${UNINSTALL_SHORTCUT}" \
+    "$INSTDIR\uninstall.exe"
+
+SectionEnd
+
+Section -Post
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+  WriteRegStr HKLM "${INST_KEY}" "InstallDir" $INSTDIR
+  WriteRegStr HKLM "${INST_KEY}" "Version" "${CONFIG_VERSION}"
+  WriteRegStr HKLM "${INST_KEY}" "" "$INSTDIR\${CONFIG_EXECUTABLE}"
+
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayName" "$(^Name)"
+  WriteRegStr HKLM "${UNINST_KEY}" "UninstallString" "$INSTDIR\uninstall.exe"
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\${CONFIG_EXECUTABLE}"
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayVersion" "${CONFIG_VERSION}"
+  WriteRegStr HKLM "${UNINST_KEY}" "URLInfoAbout" "${CONFIG_PROJECT_URL}"
+  WriteRegStr HKLM "${UNINST_KEY}" "Publisher" "${CONFIG_PUBLISHER}"
+
+SectionEnd
+
+Section "Uninstall" SEC91
+
+  SetShellVarContext all
+
+  Delete "$INSTDIR\uninstall.exe"
+  Delete "$INSTDIR\${CONFIG_ICON}"
+  Delete "$INSTDIR\*.pyd"
+  Delete "$INSTDIR\*.dll"
+  Delete "$INSTDIR\library.zip"
+  Delete "$INSTDIR\${CONFIG_EXECUTABLE}"
+  Delete "$INSTDIR\resources\converters\*.*"
+  Delete "$INSTDIR\resources\images\*.*"
+  RMDir /r "$INSTDIR\avconv"
+  RMDir /r "$INSTDIR\ffmpeg"
+  RMDir "$INSTDIR\resources\converters"
+  RMDir "$INSTDIR\resources\images"
+  RMDir "$INSTDIR\resources"
+  RMDir "$INSTDIR"
+  RMDIR "$PROGRAMFILES\${CONFIG_PUBLISHER}"
+
+  RMDir "$PROGRAMFILES\${CONFIG_PUBLISHER}"
+
+  ; Remove Start Menu shortcuts
+  Delete "$SMPROGRAMS\${CONFIG_LONG_APP_NAME}\${UNINSTALL_SHORTCUT}"
+  Delete "$SMPROGRAMS\${CONFIG_LONG_APP_NAME}\${CONFIG_LONG_APP_NAME}.lnk"
+  RMDir "$SMPROGRAMS\${CONFIG_LONG_APP_NAME}"
+
+  SetAutoClose true
+SectionEnd
+
+;PAGE SETUP
+!define MUI_ABORTWARNING ;a confirmation message should be displayed if the user clicks cancel
+
+!define MUI_WELCOMEFINISHPAGE_BITMAP "modern-wizard.bmp"
+!insertmacro MUI_PAGE_WELCOME ;welcome page
+!insertmacro MUI_PAGE_INSTFILES ;install files page
+; Finish page
+!define MUI_FINISHPAGE_RUN
+!define MUI_FINISHPAGE_TITLE "${CONFIG_LONG_APP_NAME} has been installed!"
+!define MUI_FINISHPAGE_TITLE_3LINES
+!define MUI_FINISHPAGE_RUN_TEXT "Run ${CONFIG_LONG_APP_NAME}"
+!define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
+!define MUI_FINISHPAGE_LINK "${CONFIG_PUBLISHER} homepage."
+!define MUI_FINISHPAGE_LINK_LOCATION "${CONFIG_PROJECT_URL}"
+!define MUI_FINISHPAGE_NOREBOOTSUPPORT
+!insertmacro MUI_PAGE_FINISH
+
+; Uninstaller pages
+!insertmacro MUI_UNPAGE_CONFIRM
+
+!insertmacro MUI_UNPAGE_INSTFILES
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "modern-wizard.bmp"
+!insertmacro MUI_UNPAGE_FINISH
+
+;LANGUAGE FILES
+!define MUI_LANGSTRINGS
+!insertmacro MUI_LANGUAGE "English"
