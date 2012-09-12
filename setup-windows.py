@@ -86,12 +86,14 @@ class bdist_nsis(Command):
 
         nsis_source = os.path.join(os.path.dirname(__file__), 'mvc.nsi')
         self.copy_file(nsis_source, self.dist_dir)
+        for nsis_file in glob(os.path.join(resources_dir(), 'nsis', '*.*')):
+            self.copy_file(nsis_file, self.dist_dir)
+
         scrip_path = os.path.join(self.dist_dir, 'mvc.nsi')
 
         if subprocess.call([nsis_path, scrip_path]) != 0:
             print "ERROR creating the 1 stage installer, quitting"
             return
-
 setup(
     name="Miro Video Converter",
     packages=packages,
