@@ -61,8 +61,8 @@ Section "-${CONFIG_LONG_APP_NAME}" COM2
   File ${CONFIG_EXECUTABLE}
   SetOutPath "$INSTDIR\ffmpeg"
   File /r ffmpeg\*.*
-  SetOutPath "$INSTDIR\avconv"
-  File /r avconv\*.*
+  # SetOutPath "$INSTDIR\avconv"
+  # File /r avconv\*.*
   SetOutPath "$INSTDIR\resources\converters"
   File resources\converters\*.*
   SetOutPath "$INSTDIR\resources\images"
@@ -109,7 +109,7 @@ Section "Uninstall" SEC91
   Delete "$INSTDIR\${CONFIG_EXECUTABLE}"
   Delete "$INSTDIR\resources\converters\*.*"
   Delete "$INSTDIR\resources\images\*.*"
-  RMDir /r "$INSTDIR\avconv"
+  # RMDir /r "$INSTDIR\avconv"
   RMDir /r "$INSTDIR\ffmpeg"
   RMDir "$INSTDIR\resources\converters"
   RMDir "$INSTDIR\resources\images"
