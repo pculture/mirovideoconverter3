@@ -18,7 +18,11 @@
 !define MUI_UNICON "${CONFIG_ICON}"
 
 ;INCLUDES
+!addplugindir "${CONFIG_PLUGIN_DIR}"
+!addincludedir "${CONFIG_PLUGIN_DIR}"
+
 !include "MUI2.nsh"
+!include "nsProcess.nsh"
 
 !define PRODUCT_NAME "${CONFIG_LONG_APP_NAME}"
 
@@ -41,6 +45,19 @@ Icon "${CONFIG_ICON}"
 Function LaunchLink
   SetShellVarContext all
   ExecShell "" "$INSTDIR\${CONFIG_EXECUTABLE}"
+FunctionEnd
+
+Function .onInit
+TestRunning:
+  ${nsProcess::FindProcess} ${CONFIG_EXECUTABLE} $R0
+  StrCmp $R0 0 0 NotRunning
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+    "It looks like you're already running ${CONFIG_LONG_APP_NAME}.$\n\
+    Please shut it down before continuing." \
+    IDOK TestRunning
+  Goto TestRunning
+NotRunning:
+
 FunctionEnd
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

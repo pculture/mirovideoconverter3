@@ -89,9 +89,17 @@ class bdist_nsis(Command):
         for nsis_file in glob(os.path.join(resources_dir(), 'nsis', '*.*')):
             self.copy_file(nsis_file, self.dist_dir)
 
-        scrip_path = os.path.join(self.dist_dir, 'mvc.nsi')
+        plugins_dir = os.path.join(resources_dir(), 'nsis', 'plugins')
+        script_path = os.path.join(self.dist_dir, 'mvc.nsi')
+        nsis_defines = {
+            'CONFIG_PLUGIN_DIR': plugins_dir,
+        }
+        cmd_line = [nsis_path]
+        for name, value in nsis_defines.items():
+            cmd_line.append("/D%s=%s" % (name, value))
+        cmd_line.append(script_path)
 
-        if subprocess.call([nsis_path, scrip_path]) != 0:
+        if subprocess.call(cmd_line) != 0:
             print "ERROR creating the 1 stage installer, quitting"
             return
 setup(
