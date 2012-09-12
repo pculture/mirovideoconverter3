@@ -7,5 +7,3 @@ if __name__ == "__main__":
     from mvc.widgets import initialize
     app.widgetapp = Application()
     initialize(app.widgetapp)
-    app.widgetapp.startup()
-    app.widgetapp.run()
