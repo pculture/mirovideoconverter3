@@ -1358,6 +1358,10 @@ class Application(mvc.Application):
                     # update final path
                     c.set_converter(self.current_converter)
             return
+        elif setting == 'dont-upsize':
+            setattr(self.current_converter, 'dont_upsize', value)
+            return
+
         if self.current_converter.identifier != 'custom':
             if hasattr(self.current_converter, 'simple'):
                 self.current_converter = self.current_converter.simple(
@@ -1370,8 +1374,6 @@ class Application(mvc.Application):
             self.converter_changed(self.menus[-1]) # formats menu
         if setting in ('width', 'height'):
             setattr(self.current_converter, setting, value)
-        elif setting == 'dont-upsize':
-            setattr(self.current_converter, 'dont_upsize', value)
         elif setting == 'custom-size':
             if not value:
                 self.current_converter.old_size = (
