@@ -67,11 +67,11 @@ class py2app_mvc(py2app_cmd):
 plist = plistlib.readPlist('Info.plist')
 plist['NSHumanReadableCopyright'] = 'Copyright (C) Participatory Culture Foundation'
 plist['CFBundleGetInfoString'] = 'Miro Video Converter'
-plist['CFBundleIdentifier'] = 'org.participatoryculture.mvc3'
-plist['CFBundleShortVersionString'] = '3.0.0'
+plist['CFBundleIdentifier'] = 'org.participatoryculture.MiroVideoConverter'
+plist['CFBundleShortVersionString'] = '3.0'
 plist['CFBundleExecutable'] = 'Miro Video Converter'
 plist['CFBundleName'] = 'Miro Video Converter'
-plist['CFBundleVersion'] = '3.0.0'
+plist['CFBundleVersion'] = '3.0'
 
 OPTIONS['plist'] = plist
 

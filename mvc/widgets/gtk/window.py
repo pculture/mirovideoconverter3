@@ -614,7 +614,7 @@ class AboutDialog(Dialog):
         #        app.config.get(prefs.APP_REVISION_NUM))
         #else:
         #    version = "%s" % app.config.get(prefs.APP_VERSION)
-        version = '3.0.0'
+        version = '3.0'
         #name_label = gtk.Label(
         #    '<span size="xx-large" weight="bold">%s %s</span>' % (
         #        app.config.get(prefs.SHORT_APP_NAME), version))
