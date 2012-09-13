@@ -297,8 +297,11 @@ class SettingsButton(widgetset.CustomButton):
             hbox.pack(cellpack.Alignment(image, xscale=0, yscale=0,
                                          yalign=0.5))
         if self.name:
+            vbox = cellpack.VBox()
             textbox = self.textbox(layout_manager)
-            hbox.pack(cellpack.Alignment(textbox, yscale=0, yalign=0.5),
+            vbox.pack(textbox)
+            vbox.pack_space(1)
+            hbox.pack(cellpack.Alignment(vbox, yscale=0, yalign=0.5),
                       expand=True)
         a = cellpack.Alignment(arrow, xscale=0, yscale=0, yalign=0.5)
         hbox.pack(cellpack.Padding(a, left=5, right=12))
@@ -779,9 +782,14 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
             box.pack(textbox)
             return box
         elif self.status == 'initialized': # queued
-            return IconWithText(self.queued, layout_manager.textbox("Queued"))
+            vbox = cellpack.VBox()
+            vbox.pack_space(2)
+            vbox.pack(IconWithText(self.queued,
+                                   layout_manager.textbox("Queued")))
+            return vbox
         elif self.status in ('finished', 'failed', 'canceled'):
             vbox = cellpack.VBox(spacing=5)
+            vbox.pack_space(4)
             top = cellpack.HBox(spacing=5)
             if self.status == 'finished':
                 if hotspot == 'show-file':
