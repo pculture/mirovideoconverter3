@@ -12,4 +12,6 @@ from test_utils import *
 
 if __name__ == "__main__":
     import unittest
+    from mvc.widgets import initialize
+    initialize(None)
     unittest.main()

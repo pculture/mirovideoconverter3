@@ -6,6 +6,7 @@ import sys
 
 import mvc
 from mvc.widgets import app
+from mvc.widgets import initialize
 
 parser = optparse.OptionParser(
     usage='%prog [-l] [--list-converters] [-c <converter> <filenames..>]',
@@ -113,6 +114,7 @@ class Application(mvc.Application):
         sys.exit(0 if not any_failed else 1)
 
 if __name__ == "__main__":
+    initialize(None)
     app.widgetapp = Application()
     app.widgetapp.startup()
     app.widgetapp.run()
