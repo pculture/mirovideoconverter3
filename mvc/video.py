@@ -42,20 +42,15 @@ class VideoFile(object):
         key = (width, height, type_)
 
         if key not in self.thumbnails:
-            temp = tempfile.NamedTemporaryFile(
-                suffix=type_)
-            name = get_thumbnail(self.filename, width, height, temp.name,
+            temp_path = tempfile.mktemp(suffix=type_)
+            name = get_thumbnail(self.filename, width, height, temp_path,
                                  skip=skip)
             if name is None:
-                temp = None # no result
+                temp_path = None # no result
 
-            self.thumbnails[key] = temp
+            self.thumbnails[key] = temp_path
 
-        temp = self.thumbnails[key]
-        if temp is None:
-            return None
-        else:
-            return temp.name
+        return self.thumbnails.get(key)
 
 
 class Node(object):
