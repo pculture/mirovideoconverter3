@@ -66,7 +66,7 @@ class Conversion(object):
     def run(self):
         logger.info('starting %r', self)
         try:
-            self.temp_fd, self.temp_output = tempfile.mkstemp(
+            self.temp_output = tempfile.mktemp(
                 dir=os.path.dirname(self.output))
         except EnvironmentError,e :
             logger.exception('while creating temp file for %r',
@@ -108,8 +108,6 @@ class Conversion(object):
         self.manager.conversion_finished(self)
 
     def _thread(self):
-        os.close(self.temp_fd)
-        os.unlink(self.temp_output) # unlink temp file before FFmpeg gets it
         try:
             commandline = self.get_subprocess_arguments(self.temp_output)
             self.popen = execute.Popen(commandline, bufsize=1)
