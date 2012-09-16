@@ -146,7 +146,7 @@ class Label(Widget):
         if size == widgetconst.SIZE_NORMAL:
             self.scale_factor = 1
         elif size == widgetconst.SIZE_SMALL:
-            self.scale_factor = 0.85
+            self.scale_factor = 0.75
         else:
             self.scale_factor = size
         baseline = self._widget.style.font_desc.get_size()

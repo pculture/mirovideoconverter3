@@ -318,7 +318,7 @@ class OptionMenu(Widget):
         if size == widgetconst.SIZE_NORMAL:
             self.cell.props.scale = 1
         else:
-            self.cell.props.scale = 0.85
+            self.cell.props.scale = 0.75
 
     def set_color(self, color):
         self.cell.props.foreground_gdk = self.make_color(color)
