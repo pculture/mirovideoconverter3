@@ -1166,6 +1166,11 @@ class Application(mvc.Application):
         elif (self.current_converter is EMPTY_CONVERTER or not
             (can_cancel or can_start)):
             self.convert_button.set_off()
+        elif (self.current_converter is not EMPTY_CONVERTER and
+          self.options.options['custom-size'] and
+          (not self.options.options['width'] or
+           not self.options.options['height'])):
+            self.convert_button.set_off()
         else:
             self.convert_button.set_on()
         if can_cancel:
@@ -1262,9 +1267,15 @@ class Application(mvc.Application):
         self.convert_button.disable()
         if not self.conversion_manager.running:
             if self.current_converter is not EMPTY_CONVERTER:
-                for conversion in self.model.conversions():
-                    if conversion.status == 'initialized':
-                        self.conversion_manager.run_conversion(conversion)
+                valid_resolution = True
+                if (self.options.options['custom-size'] and
+                  not (self.options.options['width'] and
+                       self.options.options['height'])):
+                    valid_resolution = False
+                if valid_resolution:
+                    for conversion in self.model.conversions():
+                        if conversion.status == 'initialized':
+                            self.conversion_manager.run_conversion(conversion)
                 self.button_bar.disable()
                 # all done: no conversion job should be running at this point
                 all_done = self.model.all_conversions_done()
