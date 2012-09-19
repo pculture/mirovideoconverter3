@@ -457,6 +457,7 @@ class CustomOptions(widgetset.Background):
         aspect = widgetset.Checkbox('Custom Aspect Ratio', color=TEXT_COLOR)
         aspect.set_size(widgetconst.SIZE_SMALL)
         aspect.connect('toggled', self.on_aspect_changed)
+        self.aspect_widget = aspect
         self.button_group = widgetset.RadioButtonGroup()
         b1 = widgetset.RadioButton('4:3', self.button_group, color=TEXT_COLOR)
         b2 = widgetset.RadioButton('3:2', self.button_group, color=TEXT_COLOR)
@@ -469,6 +470,9 @@ class CustomOptions(widgetset.Background):
         self.aspect_map[b2] = (3, 2)
         self.aspect_map[b3] = (16, 9)
         hbox = widgetset.HBox(spacing=5)
+        # Because the custom size starts off as disabled, so should aspect
+        # ratio as aspect ratio is dependent on a custom size set.
+        self.aspect_widget.disable()
         for button in self.button_group.get_buttons():
             button.disable()
             button.set_size(widgetconst.SIZE_SMALL)
@@ -546,9 +550,15 @@ class CustomOptions(widgetset.Background):
         if widget.get_checked():
             self.width_widget.enable()
             self.height_widget.enable()
+            self.aspect_widget.enable()
+            self.on_aspect_changed(self.aspect_widget)
         else:
             self.width_widget.disable()
             self.height_widget.disable()
+            self.aspect_widget.disable()
+            self.on_aspect_changed(self.aspect_widget)
+            for button in self.button_group.get_buttons():
+                button.disable()
 
     def on_width_height_changed(self, widget):
         if widget.get_text():
@@ -1378,7 +1388,10 @@ class Application(mvc.Application):
                 self.current_converter = self.current_converter.simple(
                     self.current_converter.name)
             else:
-                self.current_converter = copy.copy(self.current_converter)
+                if self.current_converter is EMPTY_CONVERTER:
+                    self.current_converter = self.converter_manager.get_null_converter()
+                else:
+                    self.current_converter = copy.copy(self.current_converter)
             self.current_converter.name = 'Custom'
             self.current_converter.width = self.options.options['width']
             self.current_converter.height = self.options.options['height']

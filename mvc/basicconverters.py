@@ -94,6 +94,20 @@ class AVC_INTRA_720(SimpleFFmpegConverterInfoWithSize):
     parameters = ('-s hd720 -f mov  -vcodec libx264 -pix_fmt yuv422p '
                   '-crf 0 -intra -b:v 100M -acodec pcm_s16be -ar 48000').split()
 
+class NullConverter(SimpleFFmpegConverterInfoWithSize):
+    media_type = 'format'
+    extension = None
+    parameters = ('-vcodec copy -acodec copy').split()
+
+    def get_extra_arguments(self, video, output):
+        args = SimpleFFmpegConverterInfoWithSize.get_extra_arguments(self,
+                                                                     video,
+                                                                     output)
+        # Never None
+        container = video.container if video.container else ''        
+        args.extend(('-f', container))
+        return args
+
 mp3 = MP3('MP3')
 ogg_vorbis = OggVorbis('Ogg Vorbis')
 
@@ -116,4 +130,6 @@ avc_intra_720 = PRORES_720('AVC Intra 720p')
 ingest_formats = ('Ingest Formats', [dnxhd_1080, dnxhd_720, prores_1080,
                                      prores_720, avc_intra_1080, avc_intra_720])
 
-converters = [video_formats, audio_formats, ingest_formats]
+null_converter = NullConverter('Null')
+
+converters = [video_formats, audio_formats, ingest_formats, null_converter]
