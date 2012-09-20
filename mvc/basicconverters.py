@@ -130,6 +130,6 @@ avc_intra_720 = PRORES_720('AVC Intra 720p')
 ingest_formats = ('Ingest Formats', [dnxhd_1080, dnxhd_720, prores_1080,
                                      prores_720, avc_intra_1080, avc_intra_720])
 
-null_converter = NullConverter('Null')
+null_converter = NullConverter('Copy')
 
 converters = [video_formats, audio_formats, ingest_formats, null_converter]

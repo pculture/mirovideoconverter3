@@ -1389,10 +1389,13 @@ class Application(mvc.Application):
                     self.current_converter.name)
             else:
                 if self.current_converter is EMPTY_CONVERTER:
-                    self.current_converter = self.converter_manager.get_null_converter()
+                    self.current_converter = copy.copy(self.converter_manager.get_by_id('copy'))
                 else:
                     self.current_converter = copy.copy(self.current_converter)
-            self.current_converter.name = 'Custom'
+            # If the current converter name is resize only, then we don't
+            # want to call it a custom conversion.
+            if self.current_converter.identifier != 'copy':
+                self.current_converter.name = 'Custom'
             self.current_converter.width = self.options.options['width']
             self.current_converter.height = self.options.options['height']
             self.converter_changed(self.menus[-1]) # formats menu

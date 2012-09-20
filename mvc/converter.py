@@ -32,6 +32,8 @@ class ConverterInfo(object):
     def get_output_filename(self, video):
         basename = os.path.basename(video.filename)
         name, ext = os.path.splitext(basename)
+        if ext and ext[0] == '.':
+            ext = ext[1:]
         extension = self.extension if self.extension else ext
         return '%s.%s.%s' % (name, self.identifier, extension)
 
@@ -160,7 +162,6 @@ class ConverterManager(object):
         # and not very scalable.
         self.brand_rmap = {}
         self.brand_map = {}
-        self.null_converter = None
 
     def add_converter(self, converter):
         self.converters[converter.identifier] = converter
@@ -191,12 +192,9 @@ class ConverterManager(object):
                     self.brand_map.setdefault(brand, []).append(realconverter)
                     self.add_converter(realconverter)
             else:
-                if converter.identifier == 'null':
-                    self.null_converter = converter
-                else:
-                    self.brand_rmap[converter] = None
-                    self.brand_map.setdefault(None, []).append(converter)
-                    self.add_converter(converter)
+                self.brand_rmap[converter] = None
+                self.brand_map.setdefault(None, []).append(converter)
+                self.add_converter(converter)
 
     def load_converters(self, converters):
         for converter_file in converters:
@@ -223,6 +221,3 @@ class ConverterManager(object):
 
     def get_by_id(self, id_):
         return self.converters[id_]
-
-    def get_null_converter(self):
-        return self.null_converter
