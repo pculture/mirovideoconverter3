@@ -46,9 +46,10 @@ class ConverterInfo(object):
     def finalize(self, temp_output, output):
         err = None
         needs_remove = False
-        if self.extension == 'mp4':
+        if self.media_type == 'format' and self.extension == 'mp4':
             needs_remove = True
-            logging.debug('mp4 extension detected.  Running qtfaststart...')
+            logging.debug('generic mp4 format detected.  '
+                          'Running qtfaststart...')
             try:
                 processor.process(temp_output, output)
             except FastStartException:
