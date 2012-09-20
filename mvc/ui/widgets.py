@@ -630,6 +630,12 @@ class ConversionModel(widgetset.TableModel):
             output_size = os.stat(conversion.output).st_size
         except OSError:
             output_size = 0
+
+        def complete():
+            # needs to do it on the update_conversion() from app object
+            # which calls model_changed() and redraws for us
+            app.widgetapp.update_conversion(conversion)
+
         values = (conversion.video.filename,
                   output_size,
                   conversion.converter.name,
@@ -637,7 +643,7 @@ class ConversionModel(widgetset.TableModel):
                   conversion.duration or 0,
                   conversion.progress or 0,
                   conversion.eta or 0,
-                  self.get_image(conversion.video.get_thumbnail(90, 70)),
+                  self.get_image(conversion.video.get_thumbnail(complete, 90, 70)),
                   conversion
                   )
         iter_ = self.conversion_to_iter.get(conversion)

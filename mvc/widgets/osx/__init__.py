@@ -50,7 +50,10 @@ def idle_add(callback, periodic=None):
             AppHelper.callLater(periodic, wrapper)
     if periodic is not None and periodic < 0:
         raise ValueError('periodic cannot be negative')
-    AppHelper.callLater(periodic, wrapper)
+    # XXX: we have a lousy thread API that doesn't allocate pools for us...
+    pool = NSAutoreleasePool.alloc().init()
+    AppHelper.callLater(0, wrapper)
+    del pool
 
 def idle_remove(id_):
     pass

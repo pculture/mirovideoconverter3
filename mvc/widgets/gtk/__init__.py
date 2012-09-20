@@ -26,7 +26,7 @@ def idle_add(callback, periodic=None):
         callback()
         return periodic is not None
     periodic *= 1000    # milliseconds
-    return gobject.timeout_add(periodic, wrapper)
+    return gobject.timeout_add(0, wrapper)
 
 def idle_remove(id_):
     gobject.source_remove(id_)

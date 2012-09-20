@@ -2,8 +2,10 @@ import logging
 import os
 import re
 import tempfile
+import threading
 
 from mvc import execute
+from mvc.widgets import idle_add
 from mvc.settings import get_ffmpeg_executable_path
 from mvc.utils import hms_to_seconds
 
@@ -25,7 +27,7 @@ class VideoFile(object):
         self.__dict__.update(
             get_media_info(self.filename))
 
-    def get_thumbnail(self, width=None, height=None, type_='.png'):
+    def get_thumbnail(self, completion, width=None, height=None, type_='.png'):
         if not self.video_codec:
             # don't bother with thumbnails for audio files
             return None
@@ -41,14 +43,15 @@ class VideoFile(object):
 
         key = (width, height, type_)
 
+        def complete(name):
+            self.thumbnails[key] = name
+            completion()
+
         if key not in self.thumbnails:
             temp_path = tempfile.mktemp(suffix=type_)
-            name = get_thumbnail(self.filename, width, height, temp_path,
-                                 skip=skip)
-            if name is None:
-                temp_path = None # no result
-
-            self.thumbnails[key] = temp_path
+            get_thumbnail(self.filename, width, height, temp_path, complete,
+                          skip=skip)
+            return None
 
         return self.thumbnails.get(key)
 
@@ -244,7 +247,7 @@ def get_media_info(filepath):
     logger.info('get_media_info: %r', info)
     return info
 
-def get_thumbnail(filename, width, height, output, skip=0):
+def get_thumbnail(filename, width, height, output, completion, skip=0):
     executable = get_ffmpeg_executable_path()
     filter_ = 'scale=%i:%i' % (width, height)
     if 'ffmpeg' in executable:
@@ -254,11 +257,19 @@ def get_thumbnail(filename, width, height, output, skip=0):
                    '-ss', str(skip), '-i', filename, '-vf', filter_,
                    '-vframes', '1', output]
 
-    try:
-        execute.check_output(commandline)
-    except execute.CalledProcessError, e:
-        logger.exception('error calling %r\ncode:%s\noutput:%s',
-                          commandline, e.returncode, e.output)
-        return None
+    name = 'Thumbnail - %r @ %sx%s' % (filename, width, height)
+    def run():
+        from Foundation import NSAutoreleasePool
+        pool = NSAutoreleasePool.alloc().init()
+        try:
+            execute.check_output(commandline)
+        except execute.CalledProcessError, e:
+            logger.exception('error calling %r\ncode:%s\noutput:%s',
+                              commandline, e.returncode, e.output)
+            idle_add(None, completion(None))
+        else:
+            idle_add(None, completion(output))
+        del pool
 
-    return output
+    t = threading.Thread(target=run, name=name)
+    t.start()
