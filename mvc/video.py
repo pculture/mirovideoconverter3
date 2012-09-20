@@ -250,9 +250,10 @@ def get_media_info(filepath):
 def get_thumbnail(filename, width, height, output, completion, skip=0):
     executable = get_ffmpeg_executable_path()
     filter_ = 'scale=%i:%i' % (width, height)
-    if 'ffmpeg' in executable:
-        # supports the thumbnail filter, we hope
-        filter_ = 'thumbnail,' + filter_
+    # bz19571: temporary disable: libav ffmpeg does not support this filter
+    #if 'ffmpeg' in executable:
+    #    # supports the thumbnail filter, we hope
+    #    filter_ = 'thumbnail,' + filter_
     commandline = [executable,
                    '-ss', str(skip), '-i', filename, '-vf', filter_,
                    '-vframes', '1', output]
