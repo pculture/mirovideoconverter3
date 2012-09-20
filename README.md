@@ -10,7 +10,6 @@ This is an in-progress rewrite of the existing application.  If you're looking f
 
 * Python 2.7
 * FFmpeg
-* FFmpeg2Theora (for conversions to Theora/Ogg)
 * GTK2 and its Python bindings (for the GTK UI)
 
 A copy of qtfaststart is bundled within this application, it is licensed
