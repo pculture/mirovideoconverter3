@@ -259,8 +259,6 @@ def get_thumbnail(filename, width, height, output, completion, skip=0):
 
     name = 'Thumbnail - %r @ %sx%s' % (filename, width, height)
     def run():
-        from Foundation import NSAutoreleasePool
-        pool = NSAutoreleasePool.alloc().init()
         try:
             execute.check_output(commandline)
         except execute.CalledProcessError, e:
@@ -269,7 +267,6 @@ def get_thumbnail(filename, width, height, output, completion, skip=0):
             idle_add(None, completion(None))
         else:
             idle_add(None, completion(output))
-        del pool
 
     t = threading.Thread(target=run, name=name)
     t.start()
