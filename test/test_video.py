@@ -1,5 +1,6 @@
 import os, os.path
 import tempfile
+import threading
 import unittest
 
 from mvc import video
@@ -145,11 +146,20 @@ class GetThumbnailTest(base.Test):
             suffix='.png')
 
     def generate_thumbnail(self, width, height):
-        path = video.get_thumbnail(self.video_path, width, height,
-                                   self.temp_path.name,
-                                   skip=0)
-        self.assertEqual(path, self.temp_path.name)
-        thumbnail = video.VideoFile(path)
+        ev = threading.Event()
+
+        def completion(path):
+            ev.set()
+            self.assertEqual(path, self.temp_path.name)
+
+        video.get_thumbnail(self.video_path, width, height,
+                            self.temp_path.name, completion,
+                            skip=0)
+        ev.wait(10)
+        if not ev.is_set():
+            self.assertTrue(None, 'timed out generating thumbnail image')
+
+        thumbnail = video.VideoFile(self.temp_path.name)
         return thumbnail
 
     def test_original_size(self):
@@ -182,7 +192,17 @@ class VideoFileTest(base.Test):
         self.video.thumbnails = {}
 
     def get_thumbnail_from_video(self, **kwargs):
-        path = self.video.get_thumbnail(**kwargs)
+        ev = threading.Event()
+
+        def completion():
+            ev.set()
+
+        path = self.video.get_thumbnail(completion, **kwargs)
+        if not path:
+            ev.wait(10)
+            if not ev.is_set():
+                self.assertTrue(None, 'timed out generating thumbnail')
+            path = self.video.get_thumbnail(completion, **kwargs)
         self.assertNotEqual(path, None, 'thumbnail not created')
         return video.VideoFile(path)
 
@@ -215,5 +235,7 @@ class VideoFileTest(base.Test):
     def test_get_thumbnail_audio(self):
         audio_path = os.path.join(self.testdata_dir, 'mp3-0.mp3')
         audio = video.VideoFile(audio_path)
-        self.assertEqual(audio.get_thumbnail(), None)
-        self.assertEqual(audio.get_thumbnail(90, 70), None)
+        def complete():
+            pass
+        self.assertEqual(audio.get_thumbnail(complete), None)
+        self.assertEqual(audio.get_thumbnail(complete, 90, 70), None)
