@@ -655,7 +655,15 @@ class ConversionModel(widgetset.TableModel):
     def remove(self, iter_):
         conversion = self[iter_][-1]
         del self.conversion_to_iter[conversion]
-        thumbnail_path = conversion.video.get_thumbnail(90, 70)
+
+        # XXX If we add/remove too quickly, we could still be processing
+        # thumbnails and this may return null, and the self.thumbnail_to_image
+        # dictionary may get out of sync
+        def complete(path):
+            logging.info('calling completion handler for get_thumbnail on '
+                         'removal')
+
+        thumbnail_path = conversion.video.get_thumbnail(complete, 90, 70)
         if thumbnail_path:
             del self.thumbnail_to_image[thumbnail_path]
         return super(ConversionModel, self).remove(iter_)
