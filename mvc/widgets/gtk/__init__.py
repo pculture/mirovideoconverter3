@@ -25,7 +25,8 @@ def idle_add(callback, periodic=None):
     def wrapper():
         callback()
         return periodic is not None
-    if periodic is not None:
+    delay = periodic
+    if delay is not None:
         delay *= 1000    # milliseconds
     else:
         delay = 0

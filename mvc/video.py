@@ -265,9 +265,9 @@ def get_thumbnail(filename, width, height, output, completion, skip=0):
         except execute.CalledProcessError, e:
             logger.exception('error calling %r\ncode:%s\noutput:%s',
                               commandline, e.returncode, e.output)
-            idle_add(None, completion(None))
+            idle_add(lambda: completion(None))
         else:
-            idle_add(None, completion(output))
+            idle_add(lambda: completion(output))
 
     t = threading.Thread(target=run, name=name)
     t.start()
