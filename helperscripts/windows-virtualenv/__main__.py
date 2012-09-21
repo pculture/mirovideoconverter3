@@ -162,7 +162,7 @@ def rmtree_if_exists(directory):
         shutil.rmtree(directory)
 
 def check_call(*command_line):
-    subprocess.check_call(command_line, shell=True)
+    subprocess.check_call(command_line)
 
 @contextlib.contextmanager
 def build_dir_context():
