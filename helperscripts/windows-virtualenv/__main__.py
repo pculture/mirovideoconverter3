@@ -11,6 +11,7 @@ import zipfile
 from optparse import OptionParser
 
 env_dir = build_dir = site_packages_dir = scripts_dir = python_dir = None
+seven_zip_path = None
 working_dir = downloads_dir = None
 options = args = None
 
@@ -32,6 +33,8 @@ download_info = [
     ('d7e43beabc017a7d892a3d6663e988d4',
         'http://sourceforge.net/projects/nsis/files/'
         'NSIS%202/2.46/nsis-2.46.zip/download'),
+    ('9bd44a22bffe0e4e0b71b8b4cf3a80e2',
+        'http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/7z920.msi'),
     ('9aa6c2d7229a37a3996270bff411ab22',
         'http://win32.libav.org/win32/libav-win32-20120821.7z'),
 ]
@@ -127,10 +130,6 @@ def parse_args():
             action="store_true",
             help="overwrite env directory if it exists")
 
-    parser.add_option("--7-zip-exe", dest="seven_zip_path",
-            default="C:\\Program Files\\7-Zip\\7z.exe",
-            help="path to 7z.exe")
-
     (options, args) = parser.parse_args()
     if len(args) < 1:
         parser.error("must specify env-directory")
@@ -219,6 +218,15 @@ def run_lessmsi(msi_path, output_dir):
     lessmsi_path = os.path.join(build_dir, 'lessmsi', 'lessmsi.exe')
     check_call(lessmsi_path, "/x", msi_path, output_dir)
 
+def install_7zip():
+    global seven_zip_path
+    url = 'http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/7z920.msi'
+    msi_path = get_download_path(url)
+    build_path = os.path.join(build_dir, 'z7ip')
+    run_lessmsi(msi_path, build_path)
+
+    seven_zip_path = os.path.join(build_path, "SourceDir", "Files", "7-Zip", "7z.exe")
+
 def make_env_dir():
     rmtree_if_exists(env_dir)
     os.makedirs(env_dir)
@@ -262,7 +270,7 @@ def install_ffmpeg():
     url = ("http://ffmpeg.zeranoe.com/builds/win32/static/"
             "ffmpeg-20120426-git-a4b58fd-win32-static.7z")
     download_path = get_download_path(url)
-    check_call(options.seven_zip_path, "x", download_path, '-o' + build_dir)
+    check_call(seven_zip_path, "x", download_path, '-o' + build_dir)
 
     archive_dir = os.path.join(build_dir,
             os.path.splitext(os.path.basename(url))[0])
@@ -281,7 +289,7 @@ def install_avconv():
     # official builds after version 7.7, released in June 2011
     url = 'http://win32.libav.org/win32/libav-win32-20120821.7z'
     download_path = get_download_path(url)
-    check_call(options.seven_zip_path, "x", download_path, '-o' + build_dir)
+    check_call(seven_zip_path, "x", download_path, '-o' + build_dir)
 
     archive_dir = os.path.join(build_dir,
             os.path.splitext(os.path.basename(url))[0])
@@ -303,6 +311,7 @@ def main():
     download_files()
     with build_dir_context():
         install_lessmsi()
+        install_7zip()
         install_python()
         install_virtualenv()
         install_py2exe()
