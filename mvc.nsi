@@ -6,7 +6,7 @@
 !define CONFIG_SHORT_APP_NAME "MVC"
 !define CONFIG_LONG_APP_NAME  "Miro Video Converter"
 !define CONFIG_PUBLISHER "Participatory Culture Foundation"
-!define CONFIG_ICON "converter3.ico"
+!define CONFIG_ICON "mvc-logo.ico"
 !define CONFIG_EXECUTABLE "mvc.exe"
 !define CONFIG_OUTPUT_FILE "MiroVideoConverter.exe"
 
