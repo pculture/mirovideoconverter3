@@ -14,6 +14,7 @@ def attach_menubar():
     app.widgetapp.vbox.pack_start(app.widgetapp.menubar)
 
 def mainloop_start():
+    gobject.threads_init()
     gtk.main()
 
 def mainloop_stop():
