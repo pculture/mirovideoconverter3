@@ -104,7 +104,10 @@ class NullConverter(SimpleFFmpegConverterInfoWithSize):
                                                                      video,
                                                                      output)
         # Never None
-        container = video.container if video.container else ''        
+        container = video.container if video.container else ''
+        # XXX: mov,mp4,m4a,3gp,3g2,mj2
+        if isinstance(container, list):
+            container = 'mp4'
         args.extend(('-f', container))
         return args
 
