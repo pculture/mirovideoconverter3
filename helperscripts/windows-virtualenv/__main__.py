@@ -34,9 +34,13 @@ download_info = [
         'http://sourceforge.net/projects/nsis/files/'
         'NSIS%202/2.46/nsis-2.46.zip/download'),
     ('9bd44a22bffe0e4e0b71b8b4cf3a80e2',
-        'http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/7z920.msi'),
+        'http://downloads.sourceforge.net/'
+	'project/sevenzip/7-Zip/9.20/7z920.msi'),
     ('9aa6c2d7229a37a3996270bff411ab22',
         'http://win32.libav.org/win32/libav-win32-20120821.7z'),
+    ('8f0347331b7023e343dc460378e23c4e',
+	'http://downloads.sourceforge.net/'
+	'project/winsparkle/0.3/WinSparkle-0.3.zip')
 ]
 
 def get_download_hash(url):
@@ -304,6 +308,11 @@ def install_avconv():
             shutil.move(os.path.join(src_dir, filename), 
                     os.path.join(dest_dir, filename))
 
+def install_winsparkle():
+    url = ('http://downloads.sourceforge.net/'
+	    'project/winsparkle/0.3/WinSparkle-0.3.zip')
+    download_path = get_download_path(url)
+    extract_zip(download_path, env_dir)
 
 def main():
     parse_args()
@@ -318,6 +327,7 @@ def main():
         install_pygtk()
         install_ffmpeg()
         install_avconv()
+        install_winsparkle()
         install_nsis()
 
 if __name__ == '__main__':
