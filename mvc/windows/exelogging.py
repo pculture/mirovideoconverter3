@@ -66,8 +66,14 @@ FORMAT = "%(asctime)s %(levelname)-8s %(name)s: %(message)s"
 def setup_logging():
     """Setup logging for when we're running inside a windows exe.
 
-    The object here is to avoid logging anything to stderr/stdout since
+    The object here is to avoid logging anything to stderr since
     windows will consider that an error.
+
+    We also catch things written to sys.stdout and forward that to the logging
+    system.
+
+    Finally we also copy the log output to stdout so that when MVC is run in
+    console mode we see the logs
     """
 
     log_path = os.path.join(tempfile.gettempdir(), "MVC.log")
@@ -78,6 +84,7 @@ def setup_logging():
     rotater.setFormatter(formatter)
     logger = logging.getLogger('')
     logger.addHandler(rotater)
+    logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.INFO)
     rotater.doRollover()
     sys.stdout = AutoLoggingStream(logging.warn, '(from stdout) ')

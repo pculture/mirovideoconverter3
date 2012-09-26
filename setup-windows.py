@@ -111,6 +111,11 @@ setup(
         'dest_base': 'mvc',
         },
     ],
+    console=[
+        {'script': 'mvc/windows/exe_main.py',
+        'dest_base': 'mvcdebug',
+        },
+    ],
     data_files=data_files(),
     cmdclass={
         'bdist_nsis': bdist_nsis,
