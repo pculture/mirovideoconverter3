@@ -84,7 +84,10 @@ Section "-${CONFIG_LONG_APP_NAME}" COM2
   File resources\converters\*.*
   SetOutPath "$INSTDIR\resources\images"
   File resources\images\*.*
-
+  SetOutPath "$INSTDIR\etc\gtk-2.0"
+  File etc\gtk-2.0\gtkrc
+  SetOutPath "$INSTDIR\lib\gtk-2.0\2.10.0\engines"
+  File lib\gtk-2.0\2.10.0\engines\libclearlooks.dll
 
   IfErrors 0 files_ok
 
@@ -126,8 +129,16 @@ Section "Uninstall" SEC91
   Delete "$INSTDIR\${CONFIG_EXECUTABLE}"
   Delete "$INSTDIR\resources\converters\*.*"
   Delete "$INSTDIR\resources\images\*.*"
+  Delete "$INSTDIR\etc\gtk-2.0\gtkrc"
+  Delete "$INSTDIR\lib\gtk-2.0\2.10.0\engines\libclearlooks.dll"
   # RMDir /r "$INSTDIR\avconv"
   RMDir /r "$INSTDIR\ffmpeg"
+  RMDir "$INSTDIR\lib\gtk-2.0\2.10.0\engines\"
+  RMDir "$INSTDIR\lib\gtk-2.0\2.10.0\"
+  RMDir "$INSTDIR\lib\gtk-2.0\"
+  RMDir "$INSTDIR\lib\"
+  RMDir "$INSTDIR\etc\gtk-2.0"
+  RMDir "$INSTDIR\etc"
   RMDir "$INSTDIR\resources\converters"
   RMDir "$INSTDIR\resources\images"
   RMDir "$INSTDIR\resources"

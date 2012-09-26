@@ -9,4 +9,4 @@ if [ ! -e mvc-env ] ; then
         exit 1
 fi
 
-PATH="mvc-env/ffmpeg:mvc-env/avconv:$PATH" PYTHONPATH="." mvc-env/Scripts/python.exe mvc
+mvc-env/Scripts/python.exe setup-windows.py py2exe && ./dist/mvcdebug.exe
