@@ -946,6 +946,10 @@ class TextDialog(widgetset.Dialog):
         self.textbox.set_text(text)
 
 class Application(mvc.Application):
+    def __init__(self, simultaneous=None):
+	mvc.Application.__init__(self, simultaneous)
+	self.create_signal('window-shown')
+	self.sent_window_shown = False
 
     def startup(self):
         if self.started:
@@ -959,6 +963,7 @@ class Application(mvc.Application):
         self.menu_manager.setup_menubar(self.menubar)
 
         self.window = widgetset.Window("Miro Video Converter")
+        self.window.connect('on-shown', self.on_window_shown)
         self.window.connect('will-close', self.destroy)
 
         # # table on top
@@ -1099,6 +1104,13 @@ class Application(mvc.Application):
             if parsed.scheme == 'file':
                 pathname = urllib.url2pathname(parsed.path)
                 self.file_activated(widget, pathname)
+
+    def on_window_shown(self, window):
+	# only emit window-shown once, even if our window gets shown, hidden,
+	# and shown again
+	if not self.sent_window_shown:
+	    self.emit("window-shown")
+	    self.sent_window_shown = True
 
     def destroy(self, widget):
         for conversion in self.conversion_manager.in_progress.copy():

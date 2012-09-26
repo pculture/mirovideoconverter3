@@ -33,7 +33,7 @@ import gobject
 import gtk
 import pango
 
-from mvc.widgets import signals
+from mvc import signals
 from mvc.widgets import widgetconst
 import drawing
 import wrappermap

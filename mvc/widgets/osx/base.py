@@ -33,7 +33,7 @@ from AppKit import *
 from Foundation import *
 from objc import YES, NO, nil
 
-from mvc.widgets import signals
+from mvc import signals
 import wrappermap
 from .viewport import Viewport, BorrowedViewport
 

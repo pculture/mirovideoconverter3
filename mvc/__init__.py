@@ -1,13 +1,17 @@
 import os
 
 import multiprocessing
-from mvc import converter, conversion, video
+from mvc import converter
+from mvc import conversion
+from mvc import signals
+from mvc import video
 
 VERSION = '3.0a'
 
-class Application(object):
+class Application(signals.SignalEmitter):
 
     def __init__(self, simultaneous=None):
+	signals.SignalEmitter.__init__(self)
         if simultaneous is None:
             try:
                 simultaneous = multiprocessing.cpu_count()

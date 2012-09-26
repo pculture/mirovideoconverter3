@@ -37,7 +37,7 @@ import AppKit
 from AppKit import *
 from Foundation import *
 
-from mvc.widgets import signals
+from mvc import signals
 from mvc.widgets import keyboard
 # import these names directly into our namespace for easy access
 from mvc.widgets.keyboard import Shortcut, MOD

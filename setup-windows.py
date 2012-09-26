@@ -46,6 +46,13 @@ def ffmpeg_data_files():
             #glob(os.path.join(ffmpeg_dir, 'presets', '*.ffpreset'))),
             ]
 
+def winsparkle_data_files():
+    winsparkle_dll = os.path.join(env_path, 'WinSparkle-0.3',
+	    "WinSparkle.dll")
+    return [
+            ('', [winsparkle_dll]),
+    ]
+
 def avconv_data_files():
     avconv_dir = os.path.join(env_path, 'avconv')
     return [
@@ -58,6 +65,7 @@ def data_files():
         resource_data_files("images"),
         resource_data_files("converters", "*.py"),
         ffmpeg_data_files(),
+        winsparkle_data_files(),
         #avconv_data_files(),
     ))
 
@@ -109,11 +117,13 @@ setup(
     windows=[
         {'script': 'mvc/windows/exe_main.py',
         'dest_base': 'mvc',
+	'company_name': 'Participatory Culture Foundation',
         },
     ],
     console=[
         {'script': 'mvc/windows/exe_main.py',
         'dest_base': 'mvcdebug',
+	'company_name': 'Participatory Culture Foundation',
         },
     ],
     data_files=data_files(),

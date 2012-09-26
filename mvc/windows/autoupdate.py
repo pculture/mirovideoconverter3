@@ -1,5 +1,5 @@
 # Miro - an RSS based video player application
-# Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011
+# Copyright (C) 2012
 # Participatory Culture Foundation
 #
 # This program is free software; you can redistribute it and/or modify
@@ -27,30 +27,16 @@
 # this exception statement from your version. If you delete this exception
 # statement from all source files in the program, then also delete it here.
 
-"""weakconnect.py -- Connect to a signal of a GObject using a weak method
-reference.  This means that this connection will not keep the object alive.
-This is a good thing because it prevents circular references between wrapper
-widgets and the wrapped GTK widget.
-"""
+"""Autoupdate functionality """
 
-from mvc import signals
+import ctypes
+winsparkle = ctypes.cdll.WinSparkle
 
-class WeakSignalHandler(object):
-    def __init__(self, method):
-        self.method = signals.WeakMethodReference(method)
+APPCAST_URL = 'http://miro-updates.participatoryculture.org/mvc-appcast.xml'
 
-    def connect(self, obj, signal, *user_args):
-        self.user_args = user_args
-        self.signal_handle = obj.connect(signal, self.handle_callback)
-        return self.signal_handle
+def startup():
+    winsparkle.win_sparkle_set_appcast_url(APPCAST_URL)
+    winsparkle.win_sparkle_init()
 
-    def handle_callback(self, obj, *args):
-        real_method = self.method()
-        if real_method is not None:
-            return real_method(obj, *(args + self.user_args))
-        else:
-            obj.disconnect(self.signal_handle)
-
-def weak_connect(gobject, signal, method, *user_args):
-    handler = WeakSignalHandler(method)
-    return handler.connect(gobject, signal, *user_args)
+def shutdown():
+    winsparkle.win_sparkle_cleanup()

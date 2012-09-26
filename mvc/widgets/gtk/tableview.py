@@ -43,7 +43,7 @@ from collections import namedtuple
 CUSTOM_HEADER_HEIGHT = 25
 HEADER_HEIGHT = 25
 
-from mvc.widgets import signals
+from mvc import signals
 from mvc.errors import (WidgetActionError, WidgetDomainError,
                                 WidgetRangeError, WidgetNotReadyError)
 from mvc.widgets.tableselection import SelectionOwnerMixin

@@ -31,7 +31,7 @@
 
 import gtk
 
-from mvc.widgets import signals
+from mvc import signals
 import wrappermap
 from .weakconnect import weak_connect
 import keymap

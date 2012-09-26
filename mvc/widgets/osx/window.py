@@ -36,7 +36,7 @@ from Foundation import *
 from objc import YES, NO, nil
 from PyObjCTools import AppHelper
 
-from mvc.widgets import signals
+from mvc import signals
 from mvc.widgets import widgetconst
 import wrappermap
 import osxmenus

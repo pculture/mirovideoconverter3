@@ -7,7 +7,7 @@
 
 import collections
 
-from mvc.widgets import signals
+from mvc import signals
 from mvc.widgets import widgetutil
 from mvc.widgets import widgetset
 from mvc.widgets import app

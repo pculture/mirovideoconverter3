@@ -36,7 +36,7 @@ from AppKit import (NSDragOperationNone, NSDragOperationAll, NSTableViewDropOn,
 from Foundation import NSObject, NSNotFound, NSMutableIndexSet
 from objc import YES, NO, nil
 
-from mvc.widgets import signals
+from mvc import signals
 from mvc.errors import WidgetActionError
 import fasttypes
 import wrappermap

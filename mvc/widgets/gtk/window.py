@@ -34,7 +34,7 @@ import gtk
 import os
 
 from mvc import resources
-from mvc.widgets import signals
+from mvc import signals
 
 import keymap
 import layout
@@ -162,10 +162,12 @@ class Window(WindowBase):
         self.create_signal('file-drag-motion')
         self.create_signal('file-drag-received')
         self.create_signal('file-drag-leave')
+        self.create_signal('on-shown')
         self.drag_signals = []
         alive_windows.add(self)
 
         self._window.connect('delete-event', self.on_delete_window)
+        self._window.connect('map-event', lambda w, a: self.emit('on-shown'))
         # XXX: Define MVCWindow/MiroWindow style not hard code this
         self._window.set_resizable(False)
 
@@ -342,11 +344,9 @@ class MainWindow(Window):
         self._add_app_menubar()
         self.create_signal('save-dimensions')
         self.create_signal('save-maximized')
-        self.create_signal('on-shown')
         self._window.connect('key-release-event', self.on_key_release)
         self._window.connect('window-state-event', self.on_window_state_event)
         self._window.connect('configure-event', self.on_configure_event)
-        self._window.connect('map-event', lambda w, a: self.emit('on-shown'))
 
     def _make_gtk_window(self):
         return WrappedWindow()
