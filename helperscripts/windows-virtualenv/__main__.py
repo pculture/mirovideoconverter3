@@ -6,6 +6,7 @@ import urllib
 import urlparse
 import shutil
 import subprocess
+import tarfile
 import time
 import zipfile
 from optparse import OptionParser
@@ -40,7 +41,15 @@ download_info = [
         'http://win32.libav.org/win32/libav-win32-20120821.7z'),
     ('8f0347331b7023e343dc460378e23c4e',
 	'http://downloads.sourceforge.net/'
-	'project/winsparkle/0.3/WinSparkle-0.3.zip')
+	'project/winsparkle/0.3/WinSparkle-0.3.zip'),
+    ('0f53e6c67f57f61469a90293f288e209',
+	'http://art.gnome.org/'
+	'download/themes/gtk2/1203/GTK2-ClearlooksVisto.tar.bz2'),
+    ('05b59fdc6b6e6c4530154c0ac52f8a94',
+	'http://downloads.sourceforge.net/'
+	'project/gtk-win/GTK%2B%20Themes%20Package/2009-09-07/'
+	'gtk2-themes-2009-09-07-win32_bin.zip'),
+
 ]
 
 def get_download_hash(url):
@@ -196,9 +205,23 @@ def extract_zip(zip_path, dest_dir):
         archive.extract(name, dest_dir)
     archive.close()
 
+def extract_tarball(tarball_path, dest_dir):
+    writeout("* Extracting %s", tarball_path)
+    with tarfile.open(tarball_path, 'r') as archive:
+	archive.extractall(dest_dir)
+
 def run_pip_install(package_name, version):
     pip_path = os.path.join(scripts_dir, 'pip.exe')
     check_call(pip_path, 'install', "%s==%s" % (package_name, version))
+
+def install_gtk_theme_files():
+    clearlooks_visto_url = ('http://art.gnome.org/'
+	    'download/themes/gtk2/1203/GTK2-ClearlooksVisto.tar.bz2')
+    gtk_themes_url = ('http://downloads.sourceforge.net/'
+	'project/gtk-win/GTK%2B%20Themes%20Package/2009-09-07/'
+	'gtk2-themes-2009-09-07-win32_bin.zip')
+    extract_tarball(get_download_path(clearlooks_visto_url), env_dir)
+    extract_zip(get_download_path(gtk_themes_url), env_dir)
 
 def install_nsis():
     url = ('http://sourceforge.net/projects/nsis/files/'
@@ -328,6 +351,7 @@ def main():
         install_ffmpeg()
         install_avconv()
         install_winsparkle()
+        install_gtk_theme_files()
         install_nsis()
 
 if __name__ == '__main__':
