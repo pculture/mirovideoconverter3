@@ -410,11 +410,10 @@ class CustomOptions(widgetset.Background):
 
     def create_top(self):
         hbox = widgetset.HBox(spacing=5)
-        save_label = 'Save to %s' % get_conversion_directory()
-        self.path_label = widgetset.Label(save_label, color=TEXT_COLOR)
+        self.path_label = widgetset.Label('', color=TEXT_COLOR)
         self.path_label.set_size(widgetconst.SIZE_SMALL)
-        self.path_label.set_size_request(200, -1)
         hbox.pack_start(self.path_label)
+        self.set_path_label(get_conversion_directory())
         # XXX: disabled until we can figure out how to do this properly.
         #button = widgetset.Button('...')
         #button.connect('clicked', self.on_destination_clicked)
@@ -423,6 +422,10 @@ class CustomOptions(widgetset.Background):
         #hbox.pack_start(button)
         #hbox.pack_start(reset)
         return widgetutil.align(hbox, xalign=0.5, yalign=0.5)
+
+    def set_path_label(self, directory):
+        save_label = 'Save to %s' % directory
+        self.path_label.set_text(save_label)
 
     def create_left(self):
         custom_size = widgetset.Checkbox('Custom Size', color=TEXT_COLOR)
@@ -532,14 +535,11 @@ class CustomOptions(widgetset.Background):
         dialog = widgetset.DirectorySelectDialog('Destination Directory')
         r = dialog.run()
         if r == 0: # picked a directory
-            directory = dialog.get_directory()
-            save_label = 'Save to %s' % directory
-            self.path_label.set_text(save_label)
+            self.set_path_label(dialog.get_directory())
             self._change_setting('destination', directory)
 
     def on_destination_reset(self, widget):
-        save_label = 'Save to %s' % get_conversion_directory()
-        self.path_label.set_text(save_label)
+        self.set_path_label(get_conversion_directory())
         self._change_setting('destination', None)
 
     def on_dont_upsize_changed(self, widget):
