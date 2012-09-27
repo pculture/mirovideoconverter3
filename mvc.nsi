@@ -47,6 +47,11 @@ Function LaunchLink
   ExecShell "" "$INSTDIR\${CONFIG_EXECUTABLE}"
 FunctionEnd
 
+Function CreateDesktopShortcut
+  CreateShortCut "$DESKTOP\${CONFIG_LONG_APP_NAME}.lnk" \
+    "$INSTDIR\${CONFIG_EXECUTABLE}" "" "$INSTDIR\${CONFIG_ICON}"
+FunctionEnd
+
 Function .onInit
 TestRunning:
   ${nsProcess::FindProcess} ${CONFIG_EXECUTABLE} $R0
@@ -122,6 +127,7 @@ Section "Uninstall" SEC91
   SetShellVarContext all
 
   Delete "$INSTDIR\uninstall.exe"
+  Delete "$DESKTOP\Miro Video Converter.lnk"
   Delete "$INSTDIR\${CONFIG_ICON}"
   Delete "$INSTDIR\*.pyd"
   Delete "$INSTDIR\*.dll"
@@ -170,6 +176,11 @@ SectionEnd
 !define MUI_FINISHPAGE_LINK "${CONFIG_PUBLISHER} homepage."
 !define MUI_FINISHPAGE_LINK_LOCATION "${CONFIG_PROJECT_URL}"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
+; hijack the showreadme checkbox and use it for the desktop shortcut
+!define MUI_FINISHPAGE_SHOWREADME ""
+!define MUI_FINISHPAGE_SHOWREADME_CHECKED
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION CreateDesktopShortcut
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
