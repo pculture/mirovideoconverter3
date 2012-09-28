@@ -207,8 +207,9 @@ def extract_zip(zip_path, dest_dir):
 
 def extract_tarball(tarball_path, dest_dir):
     writeout("* Extracting %s", tarball_path)
-    with tarfile.open(tarball_path, 'r') as archive:
-	archive.extractall(dest_dir)
+    archive = tarfile.open(tarball_path, 'r')
+    archive.extractall(dest_dir)
+    archive.close()
 
 def run_pip_install(package_name, version):
     pip_path = os.path.join(scripts_dir, 'pip.exe')
