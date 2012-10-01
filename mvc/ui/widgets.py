@@ -738,18 +738,17 @@ class ConversionCellRenderer(widgetset.CustomCellRenderer):
 
     @staticmethod
     def draw_background(context, x, y, width, height):
-        gradient = widgetset.Gradient(x, y + 1, x, height)
+	# draw main background
+        gradient = widgetset.Gradient(x, y, x, height)
         gradient.set_start_color(GRADIENT_TOP)
         gradient.set_end_color(GRADIENT_BOTTOM)
-        context.rectangle(x, y + 1, width, height)
+        context.rectangle(x, y, width, height)
         context.gradient_fill(gradient)
+	# draw bottom line
         context.set_line_width(1)
         context.set_color((0, 0, 0))
-        context.move_to(0, 0.5)
-        context.line_to(context.width, 0.5)
-        context.stroke()
-        context.move_to(0, context.height)
-        context.line_to(context.width, context.height)
+        context.move_to(0, height-0.5)
+        context.line_to(context.width, height-0.5)
         context.stroke()
 
     def draw_progressbar(self, context, x, y, _, height, width):
