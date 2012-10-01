@@ -1064,7 +1064,9 @@ class Application(mvc.Application):
         vbox = widgetset.VBox()
         self.vbox = vbox
 
-        attach_menubar()
+	# add menubars, if we're not on windows
+	if sys.platform != 'win32':
+	    attach_menubar()
 
         self.scroller = widgetset.Scroller(False, True)
         self.scroller.set_size_request(0, 0)
