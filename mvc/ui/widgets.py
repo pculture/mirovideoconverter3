@@ -270,8 +270,25 @@ class SettingsButton(widgetset.CustomButton):
                     image_path('%s-icon-off.png' % name)))
             if self.surface_on.height != self.surface_off.height:
                 raise ValueError('invalid surface: height mismatch')
+	    self.image_padding = self.calc_image_padding(name)
         else:
             self.surface_on = self.surface_off = None
+
+    def calc_image_padding(self, name):
+	"""Add some padding to the bottom of our image icon.  This can be used
+	to fine tune where it gets placed.
+
+	:returns: padding in as a (top, right, bottom, left) tuple
+	"""
+
+	# NOTE: we vertically center the images, so in order to move it X
+	# pickels up, we need X*2 pixels of bottom padding
+	if name == 'android':
+	    return (0, 0, 2, 0)
+	elif name in ('apple', 'other'):
+	    return (0, 0, 4, 0)
+	else:
+	    return (0, 0, 0, 0)
 
     def textbox(self, layout_manager):
         layout_manager.set_font(SETTINGS_FONTSIZE, family=SETTINGS_FONT)
@@ -294,7 +311,8 @@ class SettingsButton(widgetset.CustomButton):
             arrow = self.arrow_off
             layout_manager.set_text_color(TEXT_DISABLED)
         if image:
-            hbox.pack(cellpack.Alignment(image, xscale=0, yscale=0,
+	    padding = cellpack.Padding(image, *self.image_padding)
+            hbox.pack(cellpack.Alignment(padding, xscale=0, yscale=0,
                                          yalign=0.5))
         if self.name:
             vbox = cellpack.VBox()
