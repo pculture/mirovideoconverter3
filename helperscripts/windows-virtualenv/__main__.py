@@ -42,9 +42,6 @@ download_info = [
     ('8f0347331b7023e343dc460378e23c4e',
 	'http://downloads.sourceforge.net/'
 	'project/winsparkle/0.3/WinSparkle-0.3.zip'),
-    ('0f53e6c67f57f61469a90293f288e209',
-	'http://art.gnome.org/'
-	'download/themes/gtk2/1203/GTK2-ClearlooksVisto.tar.bz2'),
     ('05b59fdc6b6e6c4530154c0ac52f8a94',
 	'http://downloads.sourceforge.net/'
 	'project/gtk-win/GTK%2B%20Themes%20Package/2009-09-07/'
@@ -216,12 +213,9 @@ def run_pip_install(package_name, version):
     check_call(pip_path, 'install', "%s==%s" % (package_name, version))
 
 def install_gtk_theme_files():
-    clearlooks_visto_url = ('http://art.gnome.org/'
-	    'download/themes/gtk2/1203/GTK2-ClearlooksVisto.tar.bz2')
     gtk_themes_url = ('http://downloads.sourceforge.net/'
 	'project/gtk-win/GTK%2B%20Themes%20Package/2009-09-07/'
 	'gtk2-themes-2009-09-07-win32_bin.zip')
-    extract_tarball(get_download_path(clearlooks_visto_url), env_dir)
     extract_zip(get_download_path(gtk_themes_url), env_dir)
 
 def install_nsis():

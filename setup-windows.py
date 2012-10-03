@@ -56,8 +56,7 @@ def winsparkle_data_files():
 def gtk_theme_data_files():
     engine_path = os.path.join(env_path, 'gtk2-themes-2009-09-07-win32_bin',
 	    'lib', 'gtk-2.0', '2.10.0', 'engines', 'libclearlooks.dll')
-    gtkrc_path = os.path.join(env_path, 'Clearlooks-Visto', 'gtk-2.0',
-	    'gtkrc')
+    gtkrc_path = os.path.join(resources_dir(), 'windows', 'gtkrc')
     return [
 	    ('etc/gtk-2.0', [gtkrc_path]),
 	    ('lib/gtk-2.0/2.10.0/engines', [engine_path])
