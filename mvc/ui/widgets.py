@@ -30,6 +30,7 @@ from mvc.converter import ConverterInfo
 from mvc.video import VideoFile
 from mvc.resources import image_path
 from mvc.utils import size_string, round_even
+from mvc import openfiles
 
 BUTTON_FONT = widgetutil.font_scale_from_osx_points(15.0)
 LARGE_FONT = widgetutil.font_scale_from_osx_points(13.0)
@@ -428,10 +429,11 @@ class CustomOptions(widgetset.Background):
 
     def create_top(self):
         hbox = widgetset.HBox(spacing=5)
-        self.path_label = widgetset.Label('', color=TEXT_COLOR)
-        self.path_label.set_size(widgetconst.SIZE_SMALL)
+	self.path_label = WebStyleButton()
+	self.path_label.set_text('Show output folder')
+        self.path_label.set_font(DEFAULT_FONT, widgetconst.SIZE_SMALL)
+        self.path_label.connect('clicked', self.on_path_label_clicked)
         hbox.pack_start(self.path_label)
-        self.set_path_label(get_conversion_directory())
         # XXX: disabled until we can figure out how to do this properly.
         #button = widgetset.Button('...')
         #button.connect('clicked', self.on_destination_clicked)
@@ -441,9 +443,14 @@ class CustomOptions(widgetset.Background):
         #hbox.pack_start(reset)
         return widgetutil.align(hbox, xalign=0.5, yalign=0.5)
 
-    def set_path_label(self, directory):
-        save_label = 'Save to %s' % directory
-        self.path_label.set_text(save_label)
+    def _get_save_to_path(self):
+	if self.options['destination'] is None:
+	    return get_conversion_directory()
+	else:
+	    return self.options['destination']
+
+    def on_path_label_clicked(self, label):
+	openfiles.reveal_folder(self._get_save_to_path())
 
     def create_left(self):
         custom_size = widgetset.Checkbox('Custom Size', color=TEXT_COLOR)
@@ -553,11 +560,9 @@ class CustomOptions(widgetset.Background):
         dialog = widgetset.DirectorySelectDialog('Destination Directory')
         r = dialog.run()
         if r == 0: # picked a directory
-            self.set_path_label(dialog.get_directory())
             self._change_setting('destination', directory)
 
     def on_destination_reset(self, widget):
-        self.set_path_label(get_conversion_directory())
         self._change_setting('destination', None)
 
     def on_dont_upsize_changed(self, widget):
