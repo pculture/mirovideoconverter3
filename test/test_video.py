@@ -3,8 +3,9 @@ import tempfile
 import threading
 import unittest
 
-from mvc import video
+import mock
 
+from mvc import video
 import base
 
 class GetMediaInfoTest(base.Test):
@@ -146,21 +147,24 @@ class GetThumbnailTest(base.Test):
             suffix='.png')
 
     def generate_thumbnail(self, width, height):
-        ev = threading.Event()
-
-        def completion(path):
-            ev.set()
-            self.assertEqual(path, self.temp_path.name)
-
-        video.get_thumbnail(self.video_path, width, height,
-                            self.temp_path.name, completion,
-                            skip=0)
-        ev.wait(10)
-        if not ev.is_set():
-            self.assertTrue(None, 'timed out generating thumbnail image')
-
-        thumbnail = video.VideoFile(self.temp_path.name)
-        return thumbnail
+        completion = mock.Mock()
+        with mock.patch('mvc.video.idle_add') as mock_idle_add:
+            with mock.patch('threading.Thread') as mock_thread:
+                video.get_thumbnail(self.video_path, width, height,
+                                    self.temp_path.name, completion,
+                                    skip=0)
+                # get_thumbnail() creates a thread to create the thumbnail.
+                # Run the function for that thread now.
+                mock_thread.call_args[1]['target']()
+                self.assertEquals(mock_idle_add.call_count, 1)
+                # At the end of the thread it uses add_idle() to call the
+                # completion function.  Run that now.
+                mock_idle_add.call_args[0][0]()
+                # Now when we call get_thumbnail() it should return
+                # immediately with the thumbnail
+                path = completion.call_args[0][0]
+                self.assertNotEquals(path, None)
+                return video.VideoFile(path)
 
     def test_original_size(self):
         thumbnail = self.generate_thumbnail(-1, -1)
@@ -192,19 +196,32 @@ class VideoFileTest(base.Test):
         self.video.thumbnails = {}
 
     def get_thumbnail_from_video(self, **kwargs):
-        ev = threading.Event()
+        """Run Video.get_thumbnail()
 
-        def completion():
-            ev.set()
-
-        path = self.video.get_thumbnail(completion, **kwargs)
-        if not path:
-            ev.wait(10)
-            if not ev.is_set():
-                self.assertTrue(None, 'timed out generating thumbnail')
-            path = self.video.get_thumbnail(completion, **kwargs)
-        self.assertNotEqual(path, None, 'thumbnail not created')
-        return video.VideoFile(path)
+        This method uses mock to intercept the threading and idle_add calls and
+        just runs the code in the current thread
+        """
+        completion = mock.Mock()
+        with mock.patch('mvc.video.idle_add') as mock_idle_add:
+            with mock.patch('threading.Thread') as mock_thread:
+                initial_rv = self.video.get_thumbnail(completion, **kwargs)
+                if initial_rv is not None:
+                    # we already had a thumbnail and didn't have to do
+                    # anything synchrously
+                    return video.VideoFile(initial_rv)
+                # We don't already have a thumbnail, so get_thumbnail()
+                # created a thread to create it.  Run the function for that
+                # thread.
+                mock_thread.call_args[1]['target']()
+                self.assertEquals(mock_idle_add.call_count, 1)
+                # At the end of the thread it uses add_idle() to call the
+                # completion function.  Run that now.
+                mock_idle_add.call_args[0][0]()
+                # Now when we call get_thumbnail() it should return
+                # immediately with the thumbnail
+                path = self.video.get_thumbnail(completion, **kwargs)
+                self.assertNotEquals(path, None)
+                return video.VideoFile(path)
 
     def test_get_thumbnail_original_size(self):
         thumbnail = self.get_thumbnail_from_video()
