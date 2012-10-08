@@ -1,3 +1,6 @@
+import logging
+import re
+
 from mvc.converter import FFmpegConverterInfoBase
 from mvc.utils import rescale_video
 
@@ -7,9 +10,33 @@ class SimpleFFmpegConverterInfo(FFmpegConverterInfoBase):
 
 class SimpleFFmpegConverterInfoWithSize(SimpleFFmpegConverterInfo):
     def __init__(self, name, width=None, height=None, dont_upsize=True):
-        self.width, self.height = width, height
+        try:
+            self.width, self.height = self.parse_size_parameter()
+        except StandardError, e:
+            logging.warn("%s: %s parsing size parameter (%s)",
+                         self, e, self.parameters)
         self.dont_upsize = dont_upsize
         super(SimpleFFmpegConverterInfoWithSize, self).__init__(name)
+
+    def parse_size_parameter(self):
+        size_index = self.parameters.index('-s')
+        size_param = self.parameters[size_index+1]
+        # try matching against predefined size strings
+        known_sizes = {
+            'hd1080': (1920, 1080),
+            'hd720': (1080, 720),
+            'hd480': (720, 480),
+        }
+        if size_param in known_sizes:
+            return known_sizes[size_param]
+        # use a regex to match <width>x<height>
+        generic_match = re.match(r'(\d+)x(\d+)$', size_param)
+        if generic_match is not None:
+            return int(generic_match.group(1)), int(generic_match.group(2))
+        # no match
+        logging.warn("%s: Unknown size parameter: %s", self,
+                     size_param)
+        return None, None
 
     def get_extra_arguments(self, video, output):
         arguments = super(SimpleFFmpegConverterInfoWithSize,

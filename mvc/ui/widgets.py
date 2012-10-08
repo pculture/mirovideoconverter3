@@ -453,9 +453,9 @@ class CustomOptions(widgetset.Background):
 	openfiles.reveal_folder(self._get_save_to_path())
 
     def create_left(self):
-        custom_size = widgetset.Checkbox('Custom Size', color=TEXT_COLOR)
-        custom_size.set_size(widgetconst.SIZE_SMALL)
-        custom_size.connect('toggled', self.on_custom_size_changed)
+        self.custom_size = widgetset.Checkbox('Custom Size', color=TEXT_COLOR)
+        self.custom_size.set_size(widgetconst.SIZE_SMALL)
+        self.custom_size.connect('toggled', self.on_custom_size_changed)
 
         dont_upsize = widgetset.Checkbox('Don\'t Upsize', color=TEXT_COLOR)
         dont_upsize.set_checked(self.options['dont-upsize'])
@@ -473,7 +473,7 @@ class CustomOptions(widgetset.Background):
         bottom.pack_start(self.height_widget)
 
         hbox = widgetset.HBox(spacing=5)
-        hbox.pack_start(custom_size)
+        hbox.pack_start(self.custom_size)
         hbox.pack_start(dont_upsize)
 
         vbox = widgetset.VBox(spacing=5)
@@ -516,12 +516,24 @@ class CustomOptions(widgetset.Background):
         self.background.draw(context, 0, 0, self.background.width,
                              self.background.height)
 
+    def enable_custom_size(self):
+        self.custom_size.enable()
+
+    def disable_custom_size(self):
+        self.custom_size.disable()
+        self.custom_size.set_checked(False)
+
     def update_setting(self, setting, value):
         self.options[setting] = value
-        if setting == 'width':
-            self.width_widget.set_text(str(value))
-        elif setting == 'height':
-            self.height_widget.set_text(str(value))
+        if setting in ('width', 'height'):
+            if value is not None:
+                widget_text = str(value)
+            else:
+                widget_text = ''
+            if setting == 'width':
+                self.width_widget.set_text(widget_text)
+            elif setting == 'height':
+                self.height_widget.set_text(widget_text)
 
     def _change_setting(self, setting, value):
         self.options[setting] = value
@@ -1300,10 +1312,13 @@ class Application(mvc.Application):
             self.convert_label.set_text('Convert to')
 
         if hasattr(self.current_converter, 'width'):
+            self.options.enable_custom_size()
             self.options.update_setting('width',
                                         self.current_converter.width)
             self.options.update_setting('height',
                                         self.current_converter.height)
+        else:
+            self.options.disable_custom_size()
 
         for c in self.model.conversions():
             if c.status == 'initialized':
