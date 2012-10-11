@@ -75,6 +75,21 @@ class ConverterInfo(object):
                                   'error: %s', str(err))
                     raise err
 
+    def get_target_size(self, video):
+        """Get the size that we will convert to for a given video.
+
+        :returns: (width, height) tuple
+        """
+        # FIXME: this function assumes that self.width and self.height are
+        # set, but that's not part of the ConverterInfo API.  See # for plans
+        # to refactor the ConverterInfo class hierarchy.
+        if self.width is None or self.height is None:
+            return (video.width, video.height)
+        else:
+            return utils.rescale_video((video.width, video.height),
+                    (self.width, self.height),
+                    dont_upsize=self.dont_upsize)
+
     def process_status_line(self, line):
         raise NotImplementedError
 
@@ -143,15 +158,6 @@ class FFmpegConverterInfo(FFmpegConverterInfoBase):
         self.width, self.height = width, height
         self.dont_upsize = dont_upsize
         ConverterInfo.__init__(self, name)
-
-    def get_target_size(self, video):
-	"""Get the size that we will convert to for a given video.
-
-	:returns: (width, height) tuple
-	"""
-	return utils.rescale_video((video.width, video.height),
-		(self.width, self.height),
-		dont_upsize=self.dont_upsize)
 
     def get_extra_arguments(self, video, output):
         if self.parameters is None:
