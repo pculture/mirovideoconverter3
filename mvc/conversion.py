@@ -9,12 +9,12 @@ import logging
 
 from mvc import execute
 from mvc.utils import line_reader
+from mvc.video import get_thumbnail_synchronous
 from mvc.widgets import get_conversion_directory
 
 logger = logging.getLogger(__name__)
 
 class Conversion(object):
-
     def __init__(self, video, converter, manager, output_dir=None):
         self.video = video
         self.manager = manager
@@ -31,6 +31,7 @@ class Conversion(object):
         self.duration = None
         self.progress = None
         self.progress_percent = None
+        self.create_thumbnail = False
         self.eta = None
         self.listeners = set()
         self.set_converter(converter)
@@ -127,7 +128,47 @@ class Conversion(object):
             logger.exception('in %s' % (self.thread.name,))
             self.error = str(e)
 
+        if self.create_thumbnail:
+            self.write_thumbnail_file()
         self.finalize()
+
+    def write_thumbnail_file(self):
+        output_basename = os.path.splitext(os.path.basename(self.output))[0]
+        logging.info("td: %s ob: %s", self._get_thumbnail_dir(),
+                output_basename)
+        thumbnail_path = os.path.join(self._get_thumbnail_dir(),
+                output_basename + '.png')
+        logging.info("creating thumbnail: %s", thumbnail_path)
+        width, height = self.converter.get_target_size(self.video)
+        get_thumbnail_synchronous(self.video.filename, width, height,
+                thumbnail_path)
+        if os.path.exists(thumbnail_path):
+            logging.info("thumbnail successful: %s", thumbnail_path)
+        else:
+            logging.warning("get_thumbnail_synchronous() succeeded, but the "
+                    "thumbnail file is missing!")
+
+    def _get_thumbnail_dir(self):
+        """Get the directory to store thumbnails in it.
+
+        This method will create the directory if it doesn't exist
+        """
+        thumbnail_dir = os.path.join(self.output_dir, 'thumbnails')
+        if not os.path.exists(thumbnail_dir):
+            os.mkdir(thumbnail_dir)
+        return thumbnail_dir
+
+    def calc_progress_percent(self):
+        if not self.duration:
+            return 0.0
+
+        if self.create_thumbnail:
+            # assume that thumbnail creation takes as long as 2 seconds of
+            # video processing
+            effective_duration = self.duration + 2.0
+        else:
+            effective_duration = self.duration
+        return self.progress / effective_duration
 
     def process_output(self):
         self.started_at = time.time()
@@ -158,10 +199,7 @@ class Conversion(object):
                 self.eta = float(status['eta'])
 
             if updated:
-                if self.duration:
-                    self.progress_percent = self.progress / self.duration
-                else:
-                    self.progress_percent = 0.0
+                self.progress_percent = self.calc_progress_percent()
                 if 'eta' not in updated:
                     if self.duration and 0 < self.progress_percent < 1.0:
                         progress = self.progress_percent * 100
@@ -215,6 +253,7 @@ class ConversionManager(object):
         self.waiting = collections.deque()
         self.simultaneous = simultaneous
         self.running = False
+        self.create_thumbnails = False
 
     def get_conversion(self, video, converter, **kwargs):
         return Conversion(video, converter, self, **kwargs)
@@ -230,10 +269,14 @@ class ConversionManager(object):
             len(self.in_progress) >= self.simultaneous):
             self.waiting.append(conversion)
         else:
-            self.in_progress.add(conversion)
-            conversion.run()
+            self._start_conversion(conversion)
             self.running = True
         return conversion
+
+    def _start_conversion(self, conversion):
+        self.in_progress.add(conversion)
+        conversion.create_thumbnail = self.create_thumbnails
+        conversion.run()
 
     def check_notifications(self):
         if not self.running:
@@ -253,7 +296,6 @@ class ConversionManager(object):
         while (self.waiting and self.simultaneous is not None and
                len(self.in_progress) < self.simultaneous):
             c = self.waiting.popleft()
-            self.in_progress.add(c)
-            c.run()
+            self._start_conversion(c)
         if not self.in_progress:
             self.running = False

@@ -55,7 +55,6 @@ class VideoFile(object):
 
         return self.thumbnails.get(key)
 
-
 class Node(object):
     def __init__(self, line="", children=None):
         self.line = line
@@ -248,6 +247,14 @@ def get_media_info(filepath):
     return info
 
 def get_thumbnail(filename, width, height, output, completion, skip=0):
+    name = 'Thumbnail - %r @ %sx%s' % (filename, width, height)
+    def run():
+	rv = get_thumbnail_synchronous(filename, width, height, output, skip)
+	idle_add(lambda: completion(rv))
+    t = threading.Thread(target=run, name=name)
+    t.start()
+
+def get_thumbnail_synchronous(filename, width, height, output, skip=0):
     executable = get_ffmpeg_executable_path()
     filter_ = 'scale=%i:%i' % (width, height)
     # bz19571: temporary disable: libav ffmpeg does not support this filter
@@ -257,17 +264,11 @@ def get_thumbnail(filename, width, height, output, completion, skip=0):
     commandline = [executable,
                    '-ss', str(skip), '-i', filename, '-vf', filter_,
                    '-vframes', '1', output]
-
-    name = 'Thumbnail - %r @ %sx%s' % (filename, width, height)
-    def run():
-        try:
-            execute.check_output(commandline)
-        except execute.CalledProcessError, e:
-            logger.exception('error calling %r\ncode:%s\noutput:%s',
-                              commandline, e.returncode, e.output)
-            idle_add(lambda: completion(None))
-        else:
-            idle_add(lambda: completion(output))
-
-    t = threading.Thread(target=run, name=name)
-    t.start()
+    try:
+	execute.check_output(commandline)
+    except execute.CalledProcessError, e:
+	logger.exception('error calling %r\ncode:%s\noutput:%s',
+			  commandline, e.returncode, e.output)
+	return None
+    else:
+	return output

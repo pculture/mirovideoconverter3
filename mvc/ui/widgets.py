@@ -428,12 +428,20 @@ class CustomOptions(widgetset.Background):
             self.set_child(self.box)
 
     def create_top(self):
-        hbox = widgetset.HBox(spacing=5)
-	self.path_label = WebStyleButton()
-	self.path_label.set_text('Show output folder')
-        self.path_label.set_font(DEFAULT_FONT, widgetconst.SIZE_SMALL)
-        self.path_label.connect('clicked', self.on_path_label_clicked)
-        hbox.pack_start(self.path_label)
+        hbox = widgetset.HBox(spacing=0)
+	path_label = WebStyleButton()
+	path_label.set_text('Show output folder')
+        path_label.set_font(DEFAULT_FONT, widgetconst.SIZE_SMALL)
+        path_label.connect('clicked', self.on_path_label_clicked)
+        create_thumbnails = widgetset.Checkbox('Create Thumbnails',
+		color=TEXT_COLOR)
+        create_thumbnails.set_size(widgetconst.SIZE_SMALL)
+        create_thumbnails.connect('toggled',
+		self.on_create_thumbnails_changed)
+
+        hbox.pack_start(widgetutil.align(path_label, xalign=0.5), expand=True)
+        hbox.pack_start(widgetutil.align(create_thumbnails, xalign=0.5),
+		expand=True)
         # XXX: disabled until we can figure out how to do this properly.
         #button = widgetset.Button('...')
         #button.connect('clicked', self.on_destination_clicked)
@@ -441,7 +449,7 @@ class CustomOptions(widgetset.Background):
         #reset.connect('clicked', self.on_destination_reset)
         #hbox.pack_start(button)
         #hbox.pack_start(reset)
-        return widgetutil.align(hbox, xalign=0.5, yalign=0.5)
+        return widgetutil.align(hbox, xscale=1.0, yalign=0.5)
 
     def _get_save_to_path(self):
 	if self.options['destination'] is None:
@@ -594,6 +602,9 @@ class CustomOptions(widgetset.Background):
             self.on_aspect_changed(self.aspect_widget)
             for button in self.button_group.get_buttons():
                 button.disable()
+
+    def on_create_thumbnails_changed(self, widget):
+        self._change_setting('create-thumbnails', widget.get_checked())
 
     def on_width_height_changed(self, widget):
         if widget.get_text():
@@ -1448,7 +1459,8 @@ class Application(mvc.Application):
             setattr(self.current_converter, 'dont_upsize', value)
             return
 
-        if self.current_converter.identifier != 'custom':
+        if (self.current_converter.identifier != 'custom' and
+		setting != 'create-thumbnails'):
             if hasattr(self.current_converter, 'simple'):
                 self.current_converter = self.current_converter.simple(
                     self.current_converter.name)
@@ -1477,7 +1489,8 @@ class Application(mvc.Application):
                 old_size = self.current_converter.old_size
                 (self.current_converter.width,
                  self.current_converter.height) = old_size
-
+	elif setting == 'create-thumbnails':
+	    self.conversion_manager.create_thumbnails = bool(value)
 
 if __name__ == "__main__":
     sys.dont_write_bytecode = True

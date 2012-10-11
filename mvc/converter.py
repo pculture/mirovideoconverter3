@@ -144,6 +144,15 @@ class FFmpegConverterInfo(FFmpegConverterInfoBase):
         self.dont_upsize = dont_upsize
         ConverterInfo.__init__(self, name)
 
+    def get_target_size(self, video):
+	"""Get the size that we will convert to for a given video.
+
+	:returns: (width, height) tuple
+	"""
+	return utils.rescale_video((video.width, video.height),
+		(self.width, self.height),
+		dont_upsize=self.dont_upsize)
+
     def get_extra_arguments(self, video, output):
         if self.parameters is None:
             raise NotImplementedError
