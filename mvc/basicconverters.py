@@ -15,6 +15,7 @@ class SimpleFFmpegConverterInfoWithSize(SimpleFFmpegConverterInfo):
         except StandardError, e:
             logging.warn("%s: %s parsing size parameter (%s)",
                          self, e, self.parameters)
+	    self.width = self.height = None
         self.dont_upsize = dont_upsize
         super(SimpleFFmpegConverterInfoWithSize, self).__init__(name)
 
