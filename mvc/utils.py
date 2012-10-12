@@ -1,4 +1,6 @@
+import ctypes
 import itertools
+import sys
 
 def hms_to_seconds(hours, minutes, seconds):
     return (hours * 3600 +
@@ -199,3 +201,22 @@ def size_string(nbytes):
         return "%(size)s KB" % {"size": value}
     else:
         return "%(size)s B" % {"size": nbytes}
+
+def convert_path_for_subprocess(path):
+    """Convert a path to a form suitable for passing to a subprocess.
+
+    This method converts unicode paths to bytestrings according to the system
+    fileencoding.  On windows, it converts the path to a short filename for
+    maximum compatibility
+    """
+    if not isinstance(path, unicode):
+	# path already is a bytestring, just return it
+	return path
+    if sys.platform != 'win32':
+	return path.encode(sys.getfilesystemencoding())
+    else:
+	buf_size = 1024
+	short_path_buf = ctypes.create_unicode_buffer(buf_size)
+	ctypes.windll.kernel32.GetShortPathNameW(path,
+		short_path_buf, buf_size)
+	return short_path_buf.value.decode('ascii')

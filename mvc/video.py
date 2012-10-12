@@ -7,7 +7,7 @@ import threading
 from mvc import execute
 from mvc.widgets import idle_add
 from mvc.settings import get_ffmpeg_executable_path
-from mvc.utils import hms_to_seconds
+from mvc.utils import hms_to_seconds, convert_path_for_subprocess
 
 logger = logging.getLogger(__name__)
 
@@ -217,7 +217,8 @@ def extract_info(ast):
 def get_ffmpeg_output(filepath):
 
     commandline = [get_ffmpeg_executable_path(),
-                   "-i", filepath]
+                   "-i", convert_path_for_subprocess(filepath)]
+    logging.info("get_ffmpeg_output(): running %s", commandline)
     try:
         output = execute.check_output(commandline)
     except execute.CalledProcessError, e:
@@ -262,8 +263,9 @@ def get_thumbnail_synchronous(filename, width, height, output, skip=0):
     #    # supports the thumbnail filter, we hope
     #    filter_ = 'thumbnail,' + filter_
     commandline = [executable,
-                   '-ss', str(skip), '-i', filename, '-vf', filter_,
-                   '-vframes', '1', output]
+                   '-ss', str(skip),
+		   '-i', convert_path_for_subprocess(filename),
+		   '-vf', filter_, '-vframes', '1', output]
     try:
 	execute.check_output(commandline)
     except execute.CalledProcessError, e:

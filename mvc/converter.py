@@ -109,8 +109,8 @@ class FFmpegConverterInfoBase(ConverterInfo):
     def get_arguments(self, video, output):
         extra_args = settings.customize_ffmpeg_parameters(
           self.get_extra_arguments(video, output))
-        return (['-i', video.filename, '-strict', 'experimental'] +
-                extra_args + [output])
+        return (['-i', utils.convert_path_for_subprocess(video.filename),
+	    '-strict', 'experimental'] + extra_args + [output])
 
     def get_extra_arguments(self, video, output):
         raise NotImplementedError
