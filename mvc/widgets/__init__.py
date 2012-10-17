@@ -18,7 +18,7 @@ reveal_file = plat.reveal_file
 get_conversion_directory = plat.get_conversion_directory
 
 def get_conversion_directory():
-    return os.path.join(plat.get_conversion_directory(), 'MVC Conversions')
+    return os.path.join(plat.get_conversion_directory(), 'Miro Video Converter')
 
 def initialize(app):
     try:
