@@ -1,13 +1,13 @@
-from mvc.basicconverters import SimpleFFmpegConverterInfo
+from mvc.converter import FFmpegConverterInfo
 
-class PlaystationPortable(SimpleFFmpegConverterInfo):
+class PlaystationPortable(FFmpegConverterInfo):
     media_type = 'other'
     extension = 'mp4'
     parameters = ('-s 320x240 -b 512000 -ar 24000 -ab 64000 '
                   '-f psp -r 29.97').split()
 
 
-class KindleFire(SimpleFFmpegConverterInfo):
+class KindleFire(FFmpegConverterInfo):
     media_type = 'other'
     extension = 'mp4'
     parameters = ('-acodec aac -ab 96k -vcodec libx264 '

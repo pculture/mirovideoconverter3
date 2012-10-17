@@ -15,13 +15,31 @@ logger = logging.getLogger(__name__)
 NON_WORD_CHARS = re.compile(r"[^a-zA-Z0-9]+")
 
 class ConverterInfo(object):
+    """Describes a particular output converter
+
+    ConverterInfo is the base class for all converters.  Subclasses must
+    implement get_executable() and get_arguments()
+
+    :attribue name: user-friendly name for this converter
+    :attribute identifier: unique id for this converter
+    :attribute width: output width for this converter, or None to copy the
+    input width.  This attribute is set to a default on construction, but can
+    be changed to reflect the user overriding the default.
+    :attribute height: output height for this converter.  Works just like
+    width
+    :attribute dont_upsize: should we allow upsizing for conversions? 
+    """
     media_type = None
     bitrate = None
     extension = None
+    audio_only = False
 
-    def __init__(self, name):
+    def __init__(self, name, width=None, height=None, dont_upsize=True):
         self.name = name
         self.identifier = NON_WORD_CHARS.sub("", name).lower()
+        self.width = width
+        self.height = height
+        self.dont_upsize = dont_upsize
 
     def get_executable(self):
         raise NotImplementedError
@@ -90,7 +108,14 @@ class ConverterInfo(object):
     def process_status_line(self, line):
         raise NotImplementedError
 
-class FFmpegConverterInfoBase(ConverterInfo):
+class FFmpegConverterInfo(ConverterInfo):
+    """Base class for all ffmpeg-based conversions.
+
+    Subclasses must override the parameters attribute and supply it with the
+    ffmpeg command line for the conversion.  parameters can either be a list
+    of arguments, or a string in which case split() will be called to create
+    the list.
+    """
     DURATION_RE = re.compile(r'\W*Duration: (\d\d):(\d\d):(\d\d)\.(\d\d)'
                              '(, start:.*)?(, bitrate:.*)?')
     PROGRESS_RE = re.compile(r'(?:frame=.* fps=.* q=.* )?size=.* time=(.*) '
@@ -99,18 +124,33 @@ class FFmpegConverterInfoBase(ConverterInfo):
                                   'bitrate=(.*)')
 
     extension = None
+    parameters = None
 
     def get_executable(self):
         return settings.get_ffmpeg_executable_path()
 
     def get_arguments(self, video, output):
-        extra_args = settings.customize_ffmpeg_parameters(
-          self.get_extra_arguments(video, output))
-        return (['-i', utils.convert_path_for_subprocess(video.filename),
-	    '-strict', 'experimental'] + extra_args + [output])
+        args = ['-i', utils.convert_path_for_subprocess(video.filename),
+                 '-strict', 'experimental']
+        args.extend(settings.customize_ffmpeg_parameters(
+            self.get_parameters()))
+        if not self.audio_only:
+            width, height = utils.rescale_video((video.width, video.height),
+                                                (self.width, self.height),
+                                                dont_upsize=self.dont_upsize)
+            args.append("-s")
+            args.append('%ix%i' % (width, height))
+        args.append(output)
+        return args
 
-    def get_extra_arguments(self, video, output):
-        raise NotImplementedError
+
+    def get_parameters(self):
+        if self.parameters is None:
+            raise ValueError("%s: parameters is None" % self)
+        elif isinstance(self.parameters, basestring):
+            return self.parameters.split()
+        else:
+            return list(self.parameters)
 
     @staticmethod
     def _check_for_errors(line):
@@ -146,27 +186,6 @@ class FFmpegConverterInfoBase(ConverterInfo):
         if match is not None:
             return {'finished': True}
 
-
-class FFmpegConverterInfo(FFmpegConverterInfoBase):
-
-    parameters = None
-
-    def __init__(self, name, width=None, height=None, dont_upsize=True):
-        self.width, self.height = width, height
-        self.dont_upsize = dont_upsize
-        ConverterInfo.__init__(self, name)
-
-    def get_extra_arguments(self, video, output):
-        if self.parameters is None:
-            raise NotImplementedError
-        width, height = utils.rescale_video((video.width, video.height),
-                                            (self.width, self.height),
-                                            dont_upsize=self.dont_upsize)
-        ssize = '%ix%i' % (width, height)
-        return self.parameters.format(
-            ssize=ssize,
-            input=video.filename,
-            output=output).split()
 
 class ConverterManager(object):
     def __init__(self):

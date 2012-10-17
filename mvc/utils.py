@@ -36,6 +36,9 @@ def rescale_video((source_width, source_height),
     if source_width is None or source_height is None:
         return (round_even(target_width), round_even(target_height))
 
+    if target_width is None or target_height is None:
+        return (round_even(source_width), round_even(source_height))
+
     if (dont_upsize and
         (source_width <= target_width or source_height <= target_height)):
         return (round_even(source_width), round_even(source_height))
