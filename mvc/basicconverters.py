@@ -20,7 +20,12 @@ class SimpleFFmpegConverterInfoWithSize(SimpleFFmpegConverterInfo):
         super(SimpleFFmpegConverterInfoWithSize, self).__init__(name)
 
     def parse_size_parameter(self):
-        size_index = self.parameters.index('-s')
+        try:
+            size_index = self.parameters.index('-s')
+        except ValueError:
+            # This converter doesn't have a preset size.  It will use the
+            # input size
+            return (None, None)
         size_param = self.parameters[size_index+1]
         # try matching against predefined size strings
         known_sizes = {
