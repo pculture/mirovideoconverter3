@@ -81,14 +81,11 @@ class ConverterInfo(object):
         :returns: (width, height) tuple
         """
         # FIXME: this function assumes that self.width and self.height are
-        # set, but that's not part of the ConverterInfo API.  See # for plans
-        # to refactor the ConverterInfo class hierarchy.
-        if self.width is None or self.height is None:
-            return (video.width, video.height)
-        else:
-            return utils.rescale_video((video.width, video.height),
-                    (self.width, self.height),
-                    dont_upsize=self.dont_upsize)
+        # valid attributes, but that's not part of the ConverterInfo API.  See
+	# for plans to refactor the ConverterInfo class hierarchy.
+	return utils.rescale_video((video.width, video.height),
+		(self.width, self.height),
+		dont_upsize=self.dont_upsize)
 
     def process_status_line(self, line):
         raise NotImplementedError
