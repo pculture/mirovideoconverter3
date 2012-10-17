@@ -14,7 +14,7 @@ class KindleFire(SimpleFFmpegConverterInfo):
                   '-preset slow -f mp4 -crf 22').split()
 
 
-psp = PlaystationPortable('Playstation Portable (PSP)')
+psp = PlaystationPortable('Playstation Portable')
 kindle_fire = KindleFire('Kindle Fire')
 
 converters = [psp, kindle_fire]

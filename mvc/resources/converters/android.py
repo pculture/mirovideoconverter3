@@ -50,10 +50,10 @@ zio = AndroidConversion('Zio', 800, 480)
 
 sanyo_devices = ('Sanyo', [zio])
 
-small = AndroidConversion('Small screen (320x480)', 480, 320)
-normal = AndroidConversion('Normal screen (480x800)', 800, 480)
-large720 = AndroidConversion('Large screen (720p)', 1280, 720)
-large1080 = AndroidConversion('Large screen (1080p)', 1920, 1080)
+small = AndroidConversion('Small (480x320)', 480, 320)
+normal = AndroidConversion('Normal (800x480)', 800, 480)
+large720 = AndroidConversion('Large (720p)', 1280, 720)
+large1080 = AndroidConversion('Large (1080p)', 1920, 1080)
 
 more_devices = ('More Devices', [small, normal, large720, large1080])
 

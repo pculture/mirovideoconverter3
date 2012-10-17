@@ -33,14 +33,11 @@ def rescale_video((source_width, source_height),
     If dont_upsize is set, then don't resize it such that the rescaled size
     will be larger than the original size.
     """
-    if not source_width or not source_height:
+    if source_width is None or source_height is None:
         return (round_even(target_width), round_even(target_height))
 
     if (dont_upsize and
         (source_width <= target_width or source_height <= target_height)):
-        return (round_even(source_width), round_even(source_height))
-
-    if source_width <= target_width and source_height <= target_height:
         return (round_even(source_width), round_even(source_height))
 
     width_ratio = float(source_width) / float(target_width)
