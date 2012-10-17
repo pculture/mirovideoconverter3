@@ -40,9 +40,6 @@ def rescale_video((source_width, source_height),
         (source_width <= target_width or source_height <= target_height)):
         return (round_even(source_width), round_even(source_height))
 
-    if source_width <= target_width and source_height <= target_height:
-        return (round_even(source_width), round_even(source_height))
-
     width_ratio = float(source_width) / float(target_width)
     height_ratio = float(source_height) / float(target_height)
     ratio = max(width_ratio, height_ratio)
