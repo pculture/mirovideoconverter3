@@ -28,7 +28,7 @@ On Debian/Ubuntu, that looks like:
     $ git clone http://github.com/pculture/mirovideoconverter3
     $ cd mirovideoconverter3
     $ python2.7 test/runtests.py # Unit tests
-    $ python2.7 -m mvc.ui.gtk_ # GTK interface
+    $ python2.7 -m mvc.ui.widgets # GTK interface
     $ python2.7 -m mvc.ui.console [filename to convert] [conversion type] # console interface
 
 ## Contact ##
