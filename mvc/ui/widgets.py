@@ -29,7 +29,7 @@ from mvc.widgets import app
 from mvc.converter import ConverterInfo
 from mvc.video import VideoFile
 from mvc.resources import image_path
-from mvc.utils import size_string, round_even
+from mvc.utils import size_string, round_even, convert_path_for_subprocess
 from mvc import openfiles
 
 BUTTON_FONT = widgetutil.font_scale_from_osx_points(15.0)
@@ -458,7 +458,9 @@ class CustomOptions(widgetset.Background):
 	    return self.options['destination']
 
     def on_path_label_clicked(self, label):
-	openfiles.reveal_folder(self._get_save_to_path())
+        save_path = self._get_save_to_path()
+        save_path = convert_path_for_subprocess(save_path)
+	openfiles.reveal_folder(save_path)
 
     def create_left(self):
         self.custom_size = widgetset.Checkbox('Custom Size', color=TEXT_COLOR)

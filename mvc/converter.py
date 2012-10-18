@@ -140,7 +140,7 @@ class FFmpegConverterInfo(ConverterInfo):
                                                 dont_upsize=self.dont_upsize)
             args.append("-s")
             args.append('%ix%i' % (width, height))
-        args.append(output)
+        args.append(utils.convert_path_for_subprocess(output))
         return args
 
 
