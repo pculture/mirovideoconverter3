@@ -98,9 +98,6 @@ class ConverterInfo(object):
 
         :returns: (width, height) tuple
         """
-        # FIXME: this function assumes that self.width and self.height are
-        # valid attributes, but that's not part of the ConverterInfo API.  See
-	# for plans to refactor the ConverterInfo class hierarchy.
 	return utils.rescale_video((video.width, video.height),
 		(self.width, self.height),
 		dont_upsize=self.dont_upsize)
@@ -135,9 +132,7 @@ class FFmpegConverterInfo(ConverterInfo):
         args.extend(settings.customize_ffmpeg_parameters(
             self.get_parameters()))
         if not self.audio_only:
-            width, height = utils.rescale_video((video.width, video.height),
-                                                (self.width, self.height),
-                                                dont_upsize=self.dont_upsize)
+            width, height = self.get_target_size(video)
             args.append("-s")
             args.append('%ix%i' % (width, height))
         args.append(utils.convert_path_for_subprocess(output))

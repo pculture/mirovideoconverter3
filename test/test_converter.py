@@ -154,19 +154,35 @@ class FFmpegConverterInfoTest(ConverterInfoTestMixin, base.Test):
                                                             1024, 768)
         self.converter_info.parameters = '{ssize}'
 
-    def test_get_extra_arguments(self):
-        output = str(id(self))
-        self.assertEqual(
-            self.converter_info.get_extra_arguments(self.video, output),
-            ['640x480'])
+    def run_get_target_size(self, (src_width, src_height),
+                            (dest_width, dest_height),
+                            dont_upsize=True):
+        """Create a converter run get_target_size() on a video.
+        """
+        mock_video = mock.Mock(width=src_width, height=src_height)
+        converter_info = converter.FFmpegConverterInfo(
+            'FFmpeg Test', dest_width, dest_height)
+        converter_info.dont_upsize = dont_upsize
+        return converter_info.get_target_size(mock_video)
 
-    def test_get_extra_arguments_rescales_size(self):
-        self.video.width = 800
-        self.video.height = 600
-        output = str(id(self))
-        self.assertEqual(
-            self.converter_info.get_extra_arguments(self.video, output),
-            ['800x600'])
+    def test_get_target_size(self):
+        self.assertEqual(self.run_get_target_size((1024, 768), (640, 480)),
+                         (640, 480))
+
+    def test_get_target_size_rescale(self):
+        # Test get_target_size() rescaling an image.  It should ensure that
+        # both dimensions fit inside the target image, and that the aspect
+        # ratio is unchanged.
+        self.assertEqual(self.run_get_target_size((1024, 768), (800, 500)),
+                         (666, 500))
+
+    def test_get_target_size_dont_upsize(self):
+        # Test that get_target_size only upsizes when dont_upsize is True
+        self.assertEqual(self.run_get_target_size((640, 480), (800, 600)),
+                         (640, 480))
+        self.assertEqual(self.run_get_target_size((640, 480), (800, 600),
+                                                  dont_upsize=False),
+                         (800, 600))
 
     def test_process_status_line_nothing(self):
         self.assertStatusLineOutput(
