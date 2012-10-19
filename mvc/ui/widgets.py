@@ -386,6 +386,12 @@ class LabeledNumberEntry(widgetset.HBox):
 
     def set_text(self, text):
         self.entry.set_text(text)
+        
+    def get_value(self):
+        try:
+            return int(self.entry.get_text())
+        except ValueError:
+            return None
 
 
 class CustomOptions(widgetset.Background):
@@ -405,7 +411,7 @@ class CustomOptions(widgetset.Background):
             'width': None,
             'height': None,
             'custom-aspect': False,
-            'aspect-ratio': None,
+            'aspect-ratio': 4.0/3.0,
             'dont-upsize': True
         }
 
@@ -474,10 +480,14 @@ class CustomOptions(widgetset.Background):
 
         bottom = widgetset.HBox(spacing=5)
         self.width_widget = LabeledNumberEntry('Width')
-        self.width_widget.connect('focus-out', self.on_width_height_changed)
+        self.width_widget.connect('focus-out', self.on_width_changed)
+        self.width_widget.entry.connect('activate',
+                self.on_width_changed)
         self.width_widget.disable()
         self.height_widget = LabeledNumberEntry('Height')
-        self.height_widget.connect('focus-out', self.on_width_height_changed)
+        self.height_widget.connect('focus-out', self.on_height_changed)
+        self.height_widget.entry.connect('activate',
+                self.on_height_changed)
         self.height_widget.disable()
         bottom.pack_start(self.width_widget)
         bottom.pack_start(self.height_widget)
@@ -500,6 +510,7 @@ class CustomOptions(widgetset.Background):
         b1 = widgetset.RadioButton('4:3', self.button_group, color=TEXT_COLOR)
         b2 = widgetset.RadioButton('3:2', self.button_group, color=TEXT_COLOR)
         b3 = widgetset.RadioButton('16:9', self.button_group, color=TEXT_COLOR)
+	b1.set_selected()
         b1.set_size(widgetconst.SIZE_SMALL)
         b2.set_size(widgetconst.SIZE_SMALL)
         b3.set_size(widgetconst.SIZE_SMALL)
@@ -545,20 +556,36 @@ class CustomOptions(widgetset.Background):
             elif setting == 'height':
                 self.height_widget.set_text(widget_text)
 
+    def do_setting_changed(self, setting, value):
+        logging.info('setting-changed: %s -> %s', setting, value)
+
     def _change_setting(self, setting, value):
+        """Handles setting changes in response to widget changes."""
+
         self.options[setting] = value
         self.emit('setting-changed', setting, value)
-        if setting == 'aspect-ratio' and self.options['custom-aspect']:
-            width = self.width_widget.get_text()
-            height = self.height_widget.get_text()
-            if not (width and height):
-                return
-            if float(width) / float(height) != value:
-                new_height = round_even(float(width) / value)
-                if new_height != height:
-                    self.update_setting('width', int(width))
-                    self.update_setting('height', new_height)
-                    self.emit('setting-changed', 'height', new_height)
+
+    def force_width_to_aspect_ratio(self):
+        aspect_ratio = self.options['aspect-ratio']
+        width = self.width_widget.get_text()
+        height = self.height_widget.get_text()
+        if not (width and height):
+            return
+        new_width = round_even(float(height) * aspect_ratio)
+        if new_width != width:
+            self.update_setting('width', new_width)
+            self.emit('setting-changed', 'width', new_width)
+
+    def force_height_to_aspect_ratio(self):
+        aspect_ratio = self.options['aspect-ratio']
+        width = self.width_widget.get_text()
+        height = self.height_widget.get_text()
+        if not (width and height):
+            return
+        new_height = round_even(float(width) / aspect_ratio)
+        if new_height != height:
+            self.update_setting('height', new_height)
+            self.emit('setting-changed', 'height', new_height)
 
     def show(self):
         self.set_child(self.box)
@@ -608,19 +635,17 @@ class CustomOptions(widgetset.Background):
     def on_create_thumbnails_changed(self, widget):
         self._change_setting('create-thumbnails', widget.get_checked())
 
-    def on_width_height_changed(self, widget):
-        if widget.get_text():
-            value = int(widget.get_text())
-        else:
-            value = None
-        if widget.label.get_text() == 'Width':
-            setting = 'width'
-        else:
-            setting = 'height'
-        self._change_setting(setting, value)
+    def on_width_changed(self, widget):
+        self._change_setting('width', self.width_widget.get_value())
+        self.force_height_to_aspect_ratio()
+
+    def on_height_changed(self, widget):
+        self._change_setting('height', self.height_widget.get_value())
+        self.force_width_to_aspect_ratio()
 
     def on_aspect_changed(self, widget):
         self._change_setting('custom-aspect', widget.get_checked())
+        self.force_height_to_aspect_ratio()
         if widget.get_checked():
             for button in self.button_group.get_buttons():
                 button.enable()
@@ -634,6 +659,7 @@ class CustomOptions(widgetset.Background):
                                          self.aspect_map[widget]]
             ratio = width_ratio / height_ratio
             self._change_setting('aspect-ratio', ratio)
+            self.force_height_to_aspect_ratio()
 
 EMPTY_CONVERTER = ConverterInfo("")
 
