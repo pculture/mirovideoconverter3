@@ -136,8 +136,19 @@ class FFmpegConverterInfo(ConverterInfo):
             args.append("-s")
             args.append('%ix%i' % (width, height))
         args.extend(self.get_extra_arguments(video, output))
-        args.append(utils.convert_path_for_subprocess(output))
+	args.append(self.convert_output_path(output))
         return args
+
+    def convert_output_path(self, output_path):
+	"""Convert our output path so that it can be passed to ffmpeg."""
+	# this is a bit tricky, because output_path doesn't exist on windows
+	# yet, so we can't just call convert_path_for_subprocess().  Instead,
+	# call convert_path_for_subprocess() on the output directory, and
+	# assume that the filename only contains safe characters
+	output_dir = os.path.dirname(output_path)
+	output_filename = os.path.basename(output_path)
+	return os.path.join(utils.convert_path_for_subprocess(output_dir),
+		output_filename)
 
     def get_extra_arguments(self, video, output):
         """Subclasses can override this to add argumenst to the ffmpeg command

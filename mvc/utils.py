@@ -208,7 +208,11 @@ def convert_path_for_subprocess(path):
     This method converts unicode paths to bytestrings according to the system
     fileencoding.  On windows, it converts the path to a short filename for
     maximum compatibility
+
+    This method should only be called on a path that exists on the filesystem.
     """
+    if not os.path.exists(path):
+	raise ValueError("path %r doesn't exist" % path)
     if not isinstance(path, unicode):
 	# path already is a bytestring, just return it
 	return path
