@@ -135,9 +135,15 @@ class FFmpegConverterInfo(ConverterInfo):
             width, height = self.get_target_size(video)
             args.append("-s")
             args.append('%ix%i' % (width, height))
+        args.extend(self.get_extra_arguments(video, output))
         args.append(utils.convert_path_for_subprocess(output))
         return args
 
+    def get_extra_arguments(self, video, output):
+        """Subclasses can override this to add argumenst to the ffmpeg command
+        line.
+        """
+        return []
 
     def get_parameters(self):
         if self.parameters is None:

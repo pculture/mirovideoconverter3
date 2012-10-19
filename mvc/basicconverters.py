@@ -112,16 +112,15 @@ class NullConverter(SimpleFFmpegConverterInfoWithSize):
     parameters = ('-vcodec copy -acodec copy')
 
     def get_extra_arguments(self, video, output):
-        args = SimpleFFmpegConverterInfoWithSize.get_extra_arguments(self,
-                                                                     video,
-                                                                     output)
-        # Never None
-        container = video.container if video.container else ''
-        # XXX: mov,mp4,m4a,3gp,3g2,mj2
-        if isinstance(container, list):
+        if not video.container:
+            logging.warn("sameformat: video.container is None.  Using mp4")
             container = 'mp4'
-        args.extend(('-f', container))
-        return args
+        elif isinstance(video.container, list):
+            # XXX: special case mov,mp4,m4a,3gp,3g2,mj2
+            container = 'mp4'
+        else:
+            container = video.container
+        return ['-f', container]
 
 mp3 = MP3('MP3')
 ogg_vorbis = OggVorbis('Ogg Vorbis')

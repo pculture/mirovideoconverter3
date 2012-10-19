@@ -585,6 +585,7 @@ class TestConverterDefinitions(base.Test):
             's': '542x320',
             'strict': 'experimental',
             'vcodec': 'copy',
+            'f': '#container_name#',
         })
         self.check_uses_input_size('sameformat')
 
