@@ -187,6 +187,17 @@ class FFmpegConverterInfo(ConverterInfo):
         if match is not None:
             return {'finished': True}
 
+class FFmpegConverterInfo1080p(FFmpegConverterInfo):
+    def __init__(self, name):
+        FFmpegConverterInfo.__init__(self, name, 1920, 1080)
+
+class FFmpegConverterInfo720p(FFmpegConverterInfo):
+    def __init__(self, name):
+        FFmpegConverterInfo.__init__(self, name, 1080, 720)
+
+class FFmpegConverterInfo480p(FFmpegConverterInfo):
+    def __init__(self, name):
+        FFmpegConverterInfo.__init__(self, name, 720, 480)
 
 class ConverterManager(object):
     def __init__(self):

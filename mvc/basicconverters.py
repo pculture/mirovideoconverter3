@@ -1,112 +1,84 @@
 import logging
 import re
 
-from mvc.converter import FFmpegConverterInfo
-from mvc.utils import rescale_video
+from mvc import converter
 
-class SimpleFFmpegConverterInfoWithSize(FFmpegConverterInfo):
-    def parse_size_parameter(self):
-        try:
-            size_index = self.parameters.index('-s')
-        except ValueError:
-            # This converter doesn't have a preset size.  It will use the
-            # input size
-            return (None, None)
-        size_param = self.parameters[size_index+1]
-        # try matching against predefined size strings
-        known_sizes = {
-            'hd1080': (1920, 1080),
-            'hd720': (1080, 720),
-            'hd480': (720, 480),
-        }
-        if size_param in known_sizes:
-            return known_sizes[size_param]
-        # use a regex to match <width>x<height>
-        generic_match = re.match(r'(\d+)x(\d+)$', size_param)
-        if generic_match is not None:
-            return int(generic_match.group(1)), int(generic_match.group(2))
-        # no match
-        logging.warn("%s: Unknown size parameter: %s", self,
-                     size_param)
-        return None, None
-
-
-class WebM_HD(SimpleFFmpegConverterInfoWithSize):
+class WebM_HD(converter.FFmpegConverterInfo720p):
     media_type = 'format'
     extension = 'webm'
-    parameters = ('-f webm -s hd720 -vcodec libvpx -g 120 -lag-in-frames 16 '
+    parameters = ('-f webm -vcodec libvpx -g 120 -lag-in-frames 16 '
                   '-deadline good -cpu-used 0 -vprofile 0 -qmax 51 -qmin 11 '
                   '-slices 4 -b:v 2M -acodec libvorbis -ab 112k '
                   '-ar 44100')
 
-class WebM_SD(SimpleFFmpegConverterInfoWithSize):
+class WebM_SD(converter.FFmpegConverterInfo480p):
     media_type = 'format'
     extension = 'webm'
-    parameters = ('-f webm -s hd480 -vcodec libvpx -g 120 -lag-in-frames 16 '
+    parameters = ('-f webm -vcodec libvpx -g 120 -lag-in-frames 16 '
                   '-deadline good -cpu-used 0 -vprofile 0 -qmax 53 -qmin 0 '
                   '-b:v 768k -acodec libvorbis -ab 112k '
                   '-ar 44100')
 
-class MP4(SimpleFFmpegConverterInfoWithSize):
+class MP4(converter.FFmpegConverterInfo):
     media_type = 'format'
     extension = 'mp4'
     parameters = ('-acodec aac -ab 96k -vcodec libx264 -preset slow '
                   '-f mp4 -crf 22')
 
-class MP3(FFmpegConverterInfo):
+class MP3(converter.FFmpegConverterInfo):
     media_type = 'format'
     extension = 'mp3'
     parameters = '-f mp3 -ac 2'
     audio_only = True
 
-class OggVorbis(FFmpegConverterInfo):
+class OggVorbis(converter.FFmpegConverterInfo):
     media_type = 'format'
     extension = 'ogg'
     parameters = '-f ogg -vn -acodec libvorbis -aq 60'
     audio_only = True
 
-class OggTheora(SimpleFFmpegConverterInfoWithSize):
+class OggTheora(converter.FFmpegConverterInfo):
     media_type = 'format'
     extension = 'ogv'
     parameters = '-f ogg -vcodec libtheora -acodec libvorbis -aq 60'
 
-class DNxHD_1080(SimpleFFmpegConverterInfoWithSize):
+class DNxHD_1080(converter.FFmpegConverterInfo1080p):
     media_type = 'format'
     extension = 'mov'
-    parameters = ('-r 23.976 -f mov -s hd1080 -vcodec dnxhd -b:v '
+    parameters = ('-r 23.976 -f mov -vcodec dnxhd -b:v '
                   '175M -acodec pcm_s16be -ar 48000')
 
-class DNxHD_720(SimpleFFmpegConverterInfoWithSize):
+class DNxHD_720(converter.FFmpegConverterInfo720p):
     media_type = 'format'
     extension = 'mov'
-    parameters = ('-r 23.976 -f mov -s hd720 -vcodec dnxhd -b:v '
+    parameters = ('-r 23.976 -f mov -vcodec dnxhd -b:v '
                   '175M -acodec pcm_s16be -ar 48000')
 
-class PRORES_720(SimpleFFmpegConverterInfoWithSize):
+class PRORES_720(converter.FFmpegConverterInfo720p):
     media_type = 'format'
     extension = 'mov'
-    parameters = ('-s hd720 -f mov -vcodec prores -profile 2 '
+    parameters = ('-f mov -vcodec prores -profile 2 '
                   '-acodec pcm_s16be -ar 48000')
 
-class PRORES_1080(SimpleFFmpegConverterInfoWithSize):
+class PRORES_1080(converter.FFmpegConverterInfo1080p):
     media_type = 'format'
     extension = 'mov'
-    parameters = ('-s hd1080 -f mov -vcodec prores -profile 2 '
+    parameters = ('-f mov -vcodec prores -profile 2 '
                   '-acodec pcm_s16be -ar 48000')
 
-class AVC_INTRA_1080(SimpleFFmpegConverterInfoWithSize):
+class AVC_INTRA_1080(converter.FFmpegConverterInfo1080p):
     media_type = 'format'
     extension = 'mov'
-    parameters = ('-s hd1080 -f mov  -vcodec libx264 -pix_fmt yuv422p '
+    parameters = ('-f mov  -vcodec libx264 -pix_fmt yuv422p '
                   '-crf 0 -intra -b:v 100M -acodec pcm_s16be -ar 48000')
 
-class AVC_INTRA_720(SimpleFFmpegConverterInfoWithSize):
+class AVC_INTRA_720(converter.FFmpegConverterInfo720p):
     media_type = 'format'
     extension = 'mov'
-    parameters = ('-s hd720 -f mov  -vcodec libx264 -pix_fmt yuv422p '
+    parameters = ('-f mov  -vcodec libx264 -pix_fmt yuv422p '
                   '-crf 0 -intra -b:v 100M -acodec pcm_s16be -ar 48000')
 
-class NullConverter(SimpleFFmpegConverterInfoWithSize):
+class NullConverter(converter.FFmpegConverterInfo):
     media_type = 'format'
     extension = None
     parameters = ('-vcodec copy -acodec copy')

@@ -327,7 +327,7 @@ class TestConverterDefinitions(base.Test):
             'strict': 'experimental',
             'vcodec': 'prores',
         })
-        self.check_uses_input_size('proresingest720p')
+        self.check_size('proresingest720p', 1080, 720)
 
     def test_droidx2(self):
         self.check_ffmpeg_arguments('droidx2', {
@@ -381,7 +381,7 @@ class TestConverterDefinitions(base.Test):
             'strict': 'experimental',
             'vcodec': 'prores',
         })
-        self.check_uses_input_size('avcintra1080p')
+        self.check_size('avcintra1080p', 1920, 1080)
 
     def test_mp4(self):
         self.check_ffmpeg_arguments('mp4', {
@@ -441,7 +441,7 @@ class TestConverterDefinitions(base.Test):
             'strict': 'experimental',
             'vcodec': 'prores',
         })
-        self.check_uses_input_size('proresingest1080p')
+        self.check_size('proresingest1080p', 1920, 1080)
 
     def test_galaxyinfuse(self):
         self.check_ffmpeg_arguments('galaxyinfuse', {
@@ -786,7 +786,7 @@ class TestConverterDefinitions(base.Test):
             'vcodec': 'libvpx',
             'vprofile': '0',
         })
-        self.check_uses_input_size('webmhd')
+        self.check_size('webmhd', 1080, 720)
 
     def test_galaxytab101(self):
         self.check_ffmpeg_arguments('galaxytab101', {
@@ -980,7 +980,7 @@ class TestConverterDefinitions(base.Test):
             'strict': 'experimental',
             'vcodec': 'prores',
         })
-        self.check_uses_input_size('avcintra720p')
+        self.check_size('avcintra720p', 1080, 720)
 
     def test_dnxhd720p(self):
         self.check_ffmpeg_arguments('dnxhd720p', {
@@ -995,7 +995,7 @@ class TestConverterDefinitions(base.Test):
             'strict': 'experimental',
             'vcodec': 'dnxhd',
         })
-        self.check_uses_input_size('dnxhd720p')
+        self.check_size('dnxhd720p', 1080, 720)
 
     def test_iphone5(self):
         self.check_ffmpeg_arguments('iphone5', {
@@ -1038,7 +1038,7 @@ class TestConverterDefinitions(base.Test):
             'vcodec': 'libvpx',
             'vprofile': '0',
         })
-        self.check_uses_input_size('webmsd')
+        self.check_size('webmsd', 720, 480)
 
     def test_galaxymini(self):
         self.check_ffmpeg_arguments('galaxymini', {
@@ -1182,7 +1182,7 @@ class TestConverterDefinitions(base.Test):
             'strict': 'experimental',
             'vcodec': 'dnxhd',
         })
-        self.check_uses_input_size('dnxhd1080p')
+        self.check_size('dnxhd1080p', 1920, 1080)
 
     def test_small480x320(self):
         self.check_ffmpeg_arguments('small480x320', {
