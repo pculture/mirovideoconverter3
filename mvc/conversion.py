@@ -178,7 +178,11 @@ class Conversion(object):
         # the process ends, and we're looking for real-time updates.
         for line in line_reader(self.popen.stdout):
             self.lines.append(line) # for debugging, if needed
-            status = self.converter.process_status_line(self.video, line)
+            try:
+                status = self.converter.process_status_line(self.video, line)
+            except StandardError:
+                logging.warn("error in process_status_line()", exc_info=True)
+                continue
             if status is None:
                 continue
             updated = set()
