@@ -645,8 +645,8 @@ class CustomOptions(widgetset.Background):
 
     def on_aspect_changed(self, widget):
         self._change_setting('custom-aspect', widget.get_checked())
-        self.force_height_to_aspect_ratio()
         if widget.get_checked():
+            self.force_height_to_aspect_ratio()
             for button in self.button_group.get_buttons():
                 button.enable()
         else:
