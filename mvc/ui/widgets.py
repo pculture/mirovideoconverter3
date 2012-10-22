@@ -569,7 +569,7 @@ class CustomOptions(widgetset.Background):
         aspect_ratio = self.options['aspect-ratio']
         width = self.width_widget.get_text()
         height = self.height_widget.get_text()
-        if not (width and height):
+        if not height:
             return
         new_width = round_even(float(height) * aspect_ratio)
         if new_width != width:
@@ -580,7 +580,7 @@ class CustomOptions(widgetset.Background):
         aspect_ratio = self.options['aspect-ratio']
         width = self.width_widget.get_text()
         height = self.height_widget.get_text()
-        if not (width and height):
+        if not width:
             return
         new_height = round_even(float(width) / aspect_ratio)
         if new_height != height:
