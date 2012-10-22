@@ -224,4 +224,6 @@ def convert_path_for_subprocess(path):
 	short_path_buf = ctypes.create_unicode_buffer(buf_size)
 	ctypes.windll.kernel32.GetShortPathNameW(path,
 		short_path_buf, buf_size)
-	return short_path_buf.value.decode('ascii')
+        logging.info("convert_path_for_subprocess: got short path %r",
+                short_path_buf.value)
+	return short_path_buf.value.encode('ascii')
