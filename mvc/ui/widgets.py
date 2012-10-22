@@ -1350,7 +1350,7 @@ class Application(mvc.Application):
         else:
             self.convert_label.set_text('Convert to')
 
-        if hasattr(self.current_converter, 'width'):
+        if not self.current_converter.audio_only:
             self.options.enable_custom_size()
             self.options.update_setting('width',
                                         self.current_converter.width)
