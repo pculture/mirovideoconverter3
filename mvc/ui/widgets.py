@@ -1094,8 +1094,7 @@ class Application(mvc.Application):
                 else:
                     options.append((c.name, c.identifier))
             # Don't sort if formats..
-            if type_ != 'format':
-                options.sort()
+            self.sort_converter_menu(type_, options)
             if more_devices:
                 options.append(more_devices)
             menu = SettingsButton(type_)
@@ -1166,6 +1165,19 @@ class Application(mvc.Application):
         self.window.center()
         self.window.show()
         self.update_table_size()
+
+    def sort_converter_menu(self, menu_type, options):
+        """Sort a list of converter options for the menus
+
+        :param menu_type: type of the menu
+        :param options: list of (name, menu) tuples, where menu is either a
+        ConverterInfo or list of ConverterInfos.
+        """
+        if menu_type == 'format':
+            order = ['Audio', 'Video', 'Ingest Formats', 'Same Format']
+            options.sort(key=lambda (name, menu): order.index(name))
+        else:
+            options.sort()
 
     def drag_finished(self, widget):
         self.drop_target.set_in_drag(False)
