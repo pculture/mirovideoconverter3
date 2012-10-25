@@ -187,9 +187,16 @@ def extract_info(ast):
     if duration:
         _, rest = duration.line.split(':', 1)
         duration_string, _ = rest.split(', ', 1)
-        hours, minutes, seconds = [
-            float(i) for i in duration_string.split(':')]
-        info['duration'] = hms_to_seconds(hours, minutes, seconds)
+        logging.info("duration: %r", duration_string)
+        try:
+            hours, minutes, seconds = [
+                float(i) for i in duration_string.split(':')]
+        except ValueError:
+            if duration_string.strip() != "N/A":
+                logging.warn("Error parsing duration string: %r",
+                        duration_string)
+        else:
+            info['duration'] = hms_to_seconds(hours, minutes, seconds)
         for stream_node in duration.children:
             stream = stream_node.line
             if "Video:" in stream:

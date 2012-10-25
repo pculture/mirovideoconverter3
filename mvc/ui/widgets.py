@@ -1322,7 +1322,8 @@ class Application(mvc.Application):
         try:
             vf = VideoFile(filename)
         except ValueError:
-            logging.info('invalid file %r, cannot parse', filename)
+            logging.info('invalid file %r, cannot parse', filename,
+                    exc_info=True)
             return
         c = self.conversion_manager.get_conversion(
             vf,
