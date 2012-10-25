@@ -133,6 +133,10 @@ class Conversion(object):
         self.finalize()
 
     def write_thumbnail_file(self):
+        if self.video.audio_only:
+            logging.warning("write_thumbnail_file: audio_only=True "
+                    "not writing thumbnail %s", self.video.filename)
+            return
         output_basename = os.path.splitext(os.path.basename(self.output))[0]
         logging.info("td: %s ob: %s", self._get_thumbnail_dir(),
                 output_basename)

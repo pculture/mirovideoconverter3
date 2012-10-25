@@ -131,7 +131,7 @@ class FFmpegConverterInfo(ConverterInfo):
                  '-strict', 'experimental']
         args.extend(settings.customize_ffmpeg_parameters(
             self.get_parameters()))
-        if not self.audio_only:
+        if not (self.audio_only or video.audio_only):
             width, height = self.get_target_size(video)
             args.append("-s")
             args.append('%ix%i' % (width, height))

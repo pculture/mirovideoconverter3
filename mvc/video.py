@@ -27,8 +27,12 @@ class VideoFile(object):
         self.__dict__.update(
             get_media_info(self.filename))
 
+    @property
+    def audio_only(self):
+        return self.video_codec is None
+
     def get_thumbnail(self, completion, width=None, height=None, type_='.png'):
-        if not self.video_codec:
+        if self.audio_only:
             # don't bother with thumbnails for audio files
             return None
         if width is None:
