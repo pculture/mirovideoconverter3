@@ -4,7 +4,7 @@ from mvc.basicconverters import MP4
 class AndroidConversion(FFmpegConverterInfo):
     media_type = 'android'
     extension = 'mp4'
-    parameters = ('-acodec aac -ac 2 -ab 160k -s {ssize} '
+    parameters = ('-acodec aac -ac 2 -ab 160k '
                   '-vcodec libx264 -preset slow -profile:v baseline -level 30 '
                   '-maxrate 10000000 -bufsize 10000000 -f mp4 -threads 0 ')
     simple = MP4
