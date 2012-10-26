@@ -81,7 +81,20 @@ class AVC_INTRA_720(converter.FFmpegConverterInfo720p):
 class NullConverter(converter.FFmpegConverterInfo):
     media_type = 'format'
     extension = None
-    parameters = ('-vcodec copy -acodec copy')
+
+    def get_parameters(self, video):
+        params = []
+        if not video.audio_only and self.should_copy_video_size(video):
+            # -vcodec copy copies the video data exactly.  Only use it if the
+            # output video is the same size as the input video (#19664)
+            params.extend(['-vcodec', 'copy'])
+        params.extend(['-acodec', 'copy'])
+        return params
+
+    def should_copy_video_size(self, video):
+        if self.width is None or self.height is None:
+            return True
+        return (video.width == self.width and video.height == self.height)
 
     def get_extra_arguments(self, video, output):
         if not video.container:

@@ -130,7 +130,7 @@ class FFmpegConverterInfo(ConverterInfo):
         args = ['-i', utils.convert_path_for_subprocess(video.filename),
                  '-strict', 'experimental']
         args.extend(settings.customize_ffmpeg_parameters(
-            self.get_parameters()))
+            self.get_parameters(video)))
         if not (self.audio_only or video.audio_only):
             width, height = self.get_target_size(video)
             args.append("-s")
@@ -156,7 +156,7 @@ class FFmpegConverterInfo(ConverterInfo):
         """
         return []
 
-    def get_parameters(self):
+    def get_parameters(self, video):
         if self.parameters is None:
             raise ValueError("%s: parameters is None" % self)
         elif isinstance(self.parameters, basestring):
