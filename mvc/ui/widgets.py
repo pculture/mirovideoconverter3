@@ -637,11 +637,13 @@ class CustomOptions(widgetset.Background):
 
     def on_width_changed(self, widget):
         self._change_setting('width', self.width_widget.get_value())
-        self.force_height_to_aspect_ratio()
+        if self.options['custom-aspect']:
+            self.force_height_to_aspect_ratio()
 
     def on_height_changed(self, widget):
         self._change_setting('height', self.height_widget.get_value())
-        self.force_width_to_aspect_ratio()
+        if self.options['custom-aspect']:
+            self.force_width_to_aspect_ratio()
 
     def on_aspect_changed(self, widget):
         self._change_setting('custom-aspect', widget.get_checked())
@@ -654,7 +656,7 @@ class CustomOptions(widgetset.Background):
                 button.disable()
 
     def on_aspect_size_changed(self, widget):
-        if widget.get_selected():
+        if self.options['custom-aspect']:
             width_ratio, height_ratio = [float(v) for v in
                                          self.aspect_map[widget]]
             ratio = width_ratio / height_ratio
