@@ -133,6 +133,12 @@ class Conversion(object):
         self.finalize()
 
     def write_thumbnail_file(self):
+        try:
+            self._write_thumbnail_file()
+        except StandardError:
+            logging.warn("Error writing thumbnail", exc_info=True)
+
+    def _write_thumbnail_file(self):
         if self.video.audio_only:
             logging.warning("write_thumbnail_file: audio_only=True "
                     "not writing thumbnail %s", self.video.filename)
