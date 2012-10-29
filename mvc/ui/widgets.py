@@ -981,14 +981,12 @@ class ConvertButton(widgetset.CustomButton):
     def size_request(self, layout_manager):
         if self.hidden:
             return 0, 0
-        return self.off.width, self.off.height + 100 # padding
+        return self.off.width, self.off.height
 
     def draw(self, context, layout_manager):
         if self.hidden:
             return
-        x = (context.width - self.image.width) // 2
-        y = (context.height - self.image.height - 100) // 2 + 50
-        self.image.draw(context, x, y, self.image.width, self.image.height)
+        self.image.draw(context, 0, 0, self.image.width, self.image.height)
         layout_manager.set_font(CONVERT_NOW_FONTSIZE, family=CONVERT_NOW_FONT)
         if self.image == self.off:
             layout_manager.set_text_shadow(widgetutil.Shadow(TEXT_SHADOW,
@@ -1152,7 +1150,8 @@ class Application(mvc.Application):
         self.convert_button.connect('clicked', self.convert)
 
         bottom_box.pack_start(widgetutil.align(self.convert_button,
-                                         xalign=0.5, yalign=0.5))
+                                         xalign=0.5, yalign=0.5,
+                                         top_pad=50, bottom_pad=50))
         bottom.set_child(widgetutil.pad(bottom_box, left=20, right=20))
         vbox.pack_start(bottom)
         self.window.set_content_widget(vbox)
