@@ -11,6 +11,7 @@ import glob
 import os
 import plistlib
 import shutil
+import subprocess
 
 from setuptools import setup
 from setuptools.extension import Extension
@@ -22,7 +23,7 @@ from py2app.build_app import py2app as py2app_cmd
 
 ROOT = os.path.dirname(__file__)
 
-APP = ['mvc/ui/widgets.py']
+APP = ['mvc/osx/app_main.py']
 DATA_FILES = ['mvc/widgets/osx/Resources-Widgets/MainMenu.nib']
 OPTIONS = {
     'iconfile': 'mvc3.icns',
@@ -48,21 +49,35 @@ def copy_binaries(source, target, binaries):
         else:
             copy_file(src, target, update=True)
 
-class py2app_mvc(py2app_cmd):
+def extract_tarball(tar_file, target_directory):
+    subprocess.check_call(["tar", "-C", target_directory, "-zxf", tar_file])
 
+class py2app_mvc(py2app_cmd):
     def run(self):
         py2app_cmd.run(self)
-        bundle_root = os.path.join(self.dist_dir,
+        self.setup_directories()
+        self.copy_ffmpeg()
+        self.copy_sparkle()
+
+    def setup_directories(self):
+        self.bundle_root = os.path.join(self.dist_dir,
                                    'Miro Video Converter.app/Contents')
-        helpers_root = os.path.join(bundle_root, 'Helpers')
-        if os.path.exists(helpers_root):
-            shutil.rmtree(helpers_root)
-        print 'Copying FFmpeg to', helpers_root
-        os.mkdir(helpers_root)
+        self.helpers_root = os.path.join(self.bundle_root, 'Helpers')
+        self.frameworks_root = os.path.join(self.bundle_root, 'Frameworks')
+
+        if os.path.exists(self.helpers_root):
+            shutil.rmtree(self.helpers_root)
+        os.mkdir(self.helpers_root)
+
+    def copy_ffmpeg(self):
         ffmpeg_files = ["ffmpeg"]
         lib_paths = glob.glob(os.path.join(BKIT_DIR, "ffmpeg", "bin", "*.dylib")) 
         ffmpeg_files.extend(os.path.basename(p) for p in lib_paths)
-        copy_binaries('ffmpeg/bin/', helpers_root, ffmpeg_files)
+        copy_binaries('ffmpeg/bin/', self.helpers_root, ffmpeg_files)
+
+    def copy_sparkle(self):
+        tarball = os.path.join(BKIT_DIR, "frameworks", "sparkle.1.5b6.tar.gz")
+        extract_tarball(tarball, self.frameworks_root)
 
 plist = plistlib.readPlist('Info.plist')
 plist['NSHumanReadableCopyright'] = 'Copyright (C) Participatory Culture Foundation'
@@ -71,7 +86,9 @@ plist['CFBundleIdentifier'] = 'org.participatoryculture.MiroVideoConverter'
 plist['CFBundleShortVersionString'] = '3.0'
 plist['CFBundleExecutable'] = 'Miro Video Converter'
 plist['CFBundleName'] = 'Miro Video Converter'
-plist['CFBundleVersion'] = '3.0'
+plist['CFBundleVersion'] = '1.0'
+plist['SUFeedURL'] = ('http://miro-updates.participatoryculture.org/'
+                      'mvc-appcast-osx.xml')
 
 OPTIONS['plist'] = plist
 
