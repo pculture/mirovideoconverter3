@@ -21,6 +21,10 @@ codesign -fs \
 
 codesign -fs \
   '3rd Party Mac Developer Application: Participatory Culture Foundation' \
+  "dist/Miro Video Converter.app/Contents/Frameworks/Sparkle.framework/Versions/A"
+
+codesign -fs \
+  '3rd Party Mac Developer Application: Participatory Culture Foundation' \
   "dist/Miro Video Converter.app"
 
 
