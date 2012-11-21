@@ -58,6 +58,7 @@ class py2app_mvc(py2app_cmd):
         self.setup_directories()
         self.copy_ffmpeg()
         self.copy_sparkle()
+        self.copy_update_public_key()
         self.delete_site_py()
 
     def setup_directories(self):
@@ -65,8 +66,9 @@ class py2app_mvc(py2app_cmd):
                                    'Miro Video Converter.app/Contents')
         self.helpers_root = os.path.join(self.bundle_root, 'Helpers')
         self.frameworks_root = os.path.join(self.bundle_root, 'Frameworks')
-        self.python_lib_root = os.path.join(self.bundle_root, 'Resources',
-                                            'lib', 'python2.7')
+        self.resources_root = os.path.join(self.bundle_root, 'Resources')
+        self.python_lib_root = os.path.join(self.resources_root, 'lib',
+                                            'python2.7')
 
         if os.path.exists(self.helpers_root):
             shutil.rmtree(self.helpers_root)
@@ -81,6 +83,11 @@ class py2app_mvc(py2app_cmd):
     def copy_sparkle(self):
         tarball = os.path.join(BKIT_DIR, "frameworks", "sparkle.1.5b6.tar.gz")
         extract_tarball(tarball, self.frameworks_root)
+
+    def copy_update_public_key(self):
+        src = os.path.join(ROOT, "sparkle-keys", "dsa_pub.pem")
+        target = os.path.join(self.resources_root, 'dsa_pub.pem')
+        copy_file(src, target, update=True)
 
     def delete_site_py(self):
         """Delete the site.py symlink.
@@ -101,6 +108,7 @@ plist['CFBundleName'] = 'Miro Video Converter'
 plist['CFBundleVersion'] = '1.0'
 plist['SUFeedURL'] = ('http://miro-updates.participatoryculture.org/'
                       'mvc-appcast-osx.xml')
+plist['SUPublicDSAKeyFile'] = 'dsa_pub.pem'
 
 OPTIONS['plist'] = plist
 
