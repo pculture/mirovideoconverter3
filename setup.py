@@ -58,12 +58,15 @@ class py2app_mvc(py2app_cmd):
         self.setup_directories()
         self.copy_ffmpeg()
         self.copy_sparkle()
+        self.delete_site_py()
 
     def setup_directories(self):
         self.bundle_root = os.path.join(self.dist_dir,
                                    'Miro Video Converter.app/Contents')
         self.helpers_root = os.path.join(self.bundle_root, 'Helpers')
         self.frameworks_root = os.path.join(self.bundle_root, 'Frameworks')
+        self.python_lib_root = os.path.join(self.bundle_root, 'Resources',
+                                            'lib', 'python2.7')
 
         if os.path.exists(self.helpers_root):
             shutil.rmtree(self.helpers_root)
@@ -78,6 +81,15 @@ class py2app_mvc(py2app_cmd):
     def copy_sparkle(self):
         tarball = os.path.join(BKIT_DIR, "frameworks", "sparkle.1.5b6.tar.gz")
         extract_tarball(tarball, self.frameworks_root)
+
+    def delete_site_py(self):
+        """Delete the site.py symlink.
+
+        This causes issues with codesigning on 10.8 -- possibly because it's a
+        symlink that links to a location outside the resources dir.  In any
+        case, it's not needed, so let's just nuke it.
+        """
+        os.unlink(os.path.join(self.python_lib_root, 'site.py'))
 
 plist = plistlib.readPlist('Info.plist')
 plist['NSHumanReadableCopyright'] = 'Copyright (C) Participatory Culture Foundation'
