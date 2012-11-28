@@ -105,7 +105,7 @@ plist['CFBundleIdentifier'] = 'org.participatoryculture.MiroVideoConverter'
 plist['CFBundleShortVersionString'] = '3.0'
 plist['CFBundleExecutable'] = 'Miro Video Converter'
 plist['CFBundleName'] = 'Miro Video Converter'
-plist['CFBundleVersion'] = '1.0'
+plist['CFBundleVersion'] = '3.0'
 plist['SUFeedURL'] = ('http://miro-updates.participatoryculture.org/'
                       'mvc-appcast-osx.xml')
 plist['SUPublicDSAKeyFile'] = 'dsa_pub.pem'
