@@ -1,2 +1,5 @@
 recursive-include mvc/resources/images *.*
 recursive-include mvc/resources/converters *.py
+include setup-linux.py
+include setup-osx.py
+include setup-windows.py

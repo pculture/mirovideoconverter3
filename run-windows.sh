@@ -9,4 +9,4 @@ if [ ! -e mvc-env ] ; then
         exit 1
 fi
 
-mvc-env/Scripts/python.exe setup-windows.py py2exe && ./dist/mvcdebug.exe
+mvc-env/Scripts/python.exe setup.py py2exe && ./dist/mvcdebug.exe

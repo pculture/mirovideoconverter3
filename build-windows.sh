@@ -9,4 +9,4 @@ if [ ! -e mvc-env ] ; then
         exit 1
 fi
 
-PYTHONPATH="." mvc-env/Scripts/python.exe setup-windows.py bdist_nsis
+PYTHONPATH="." mvc-env/Scripts/python.exe setup.py bdist_nsis
