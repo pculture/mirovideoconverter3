@@ -1,0 +1,2 @@
+recursive-include mvc/resources/images *.*
+recursive-include mvc/resources/converters *.py
