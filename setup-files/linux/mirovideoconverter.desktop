@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Miro Video Converter
+GenericName=Media player
+Comment=Miro Video Converter is super simple way to convert almost any video to MP4, WebM (vp8), Ogg Theora, or for Android, iPhone, and more.
+Icon=mirovideoconverter
+TryExec=miro-video-converter.py
+Exec=miro-video-converter.py %F
+Terminal=false
+Categories=GTK;AudioVideo;
