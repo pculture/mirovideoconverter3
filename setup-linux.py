@@ -5,7 +5,7 @@ if sys.version < '2.7':
     raise RuntimeError('MVC requires Python 2.7')
 
 setup(
-    name='Miro Video Converter',
+    name='mirovideoconverter',
     description='Simple Video Converter',
     author='Participatory Culture Foundation',
     author_email='ben@pculture.org',
