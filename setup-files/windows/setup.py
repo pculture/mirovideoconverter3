@@ -102,7 +102,7 @@ class bdist_nsis(Command):
 
         log.info("building installer")
 
-        nsis_source = os.path.join(os.path.dirname(__file__), 'mvc.nsi')
+        nsis_source = os.path.join(SETUP_DIR, 'mvc.nsi')
         self.copy_file(nsis_source, self.dist_dir)
         for nsis_file in glob(os.path.join(resources_dir(), 'nsis', '*.*')):
             self.copy_file(nsis_file, self.dist_dir)
@@ -121,9 +121,6 @@ class bdist_nsis(Command):
             print "ERROR creating the 1 stage installer, quitting"
             return
 setup(
-    name="Miro Video Converter",
-    packages=packages,
-    version='3.0',
     windows=[
         {'script': 'mvc/windows/exe_main.py',
         'dest_base': 'mvc',
@@ -145,4 +142,5 @@ setup(
             'includes': py2exe_includes(),
         },
     },
+    **SETUP_ARGS
 )
