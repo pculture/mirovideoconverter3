@@ -21,12 +21,10 @@ from distutils.dir_util import mkpath
 
 from py2app.build_app import py2app as py2app_cmd
 
-ROOT = os.path.dirname(__file__)
-
 APP = ['mvc/osx/app_main.py']
 DATA_FILES = ['mvc/widgets/osx/Resources-Widgets/MainMenu.nib']
 OPTIONS = {
-    'iconfile': 'mvc3.icns',
+    'iconfile': os.path.join(SETUP_DIR, 'mvc3.icns'),
     'excludes': ['mvc.widgets.gtk'],
     'includes': ['mvc.widgets.osx.fasttypes'],
     'packages': ['mvc', 'mvc.widgets', 'mvc.widgets.osx', 'mvc.ui',
@@ -85,7 +83,7 @@ class py2app_mvc(py2app_cmd):
         extract_tarball(tarball, self.frameworks_root)
 
     def copy_update_public_key(self):
-        src = os.path.join(ROOT, "sparkle-keys", "dsa_pub.pem")
+        src = os.path.join(SETUP_DIR, "sparkle-keys", "dsa_pub.pem")
         target = os.path.join(self.resources_root, 'dsa_pub.pem')
         copy_file(src, target, update=True)
 
@@ -98,7 +96,7 @@ class py2app_mvc(py2app_cmd):
         """
         os.unlink(os.path.join(self.python_lib_root, 'site.py'))
 
-plist = plistlib.readPlist('Info.plist')
+plist = plistlib.readPlist(os.path.join(SETUP_DIR, 'Info.plist'))
 plist['NSHumanReadableCopyright'] = 'Copyright (C) Participatory Culture Foundation'
 plist['CFBundleGetInfoString'] = 'Miro Video Converter'
 plist['CFBundleIdentifier'] = 'org.participatoryculture.MiroVideoConverter'
@@ -113,7 +111,6 @@ plist['SUPublicDSAKeyFile'] = 'dsa_pub.pem'
 OPTIONS['plist'] = plist
 
 setup(
-    name="Miro Video Converter",
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
@@ -121,5 +118,6 @@ setup(
     cmdclass={'py2app': py2app_mvc},
     ext_modules=[
         Extension("mvc.widgets.osx.fasttypes",
-                  [os.path.join(ROOT, 'mvc', 'widgets', 'osx', 'fasttypes.c')])],
+                  [os.path.join(ROOT_DIR, 'mvc', 'widgets', 'osx', 'fasttypes.c')])],
+    **SETUP_ARGS
     )

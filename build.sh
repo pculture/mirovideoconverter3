@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ -z ${SANDBOX_PATH} ]; then
     echo "you must set SANDBOX_PATH to point to the built miro sandbox"
     exit 1

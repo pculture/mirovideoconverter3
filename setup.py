@@ -40,11 +40,12 @@ elif sys.platform.startswith("darwin"):
 else:
     sys.stderr.write("Unknown platform: %s" % sys.platform)
 
-setup_dir = os.path.abspath(os.path.join(
-        os.path.dirname(__file__), 'setup-files', platform))
+root_dir = os.path.abspath(os.path.dirname(__file__))
+setup_dir = os.path.join(root_dir, 'setup-files', platform)
 
 script_vars = {
     'VERSION': version,
+    'ROOT_DIR': root_dir,
     'SETUP_DIR': setup_dir,
     'SETUP_ARGS': setup_args,
 }
