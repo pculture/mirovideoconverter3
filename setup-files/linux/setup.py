@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 import subprocess
@@ -47,17 +48,23 @@ class sdist_deb(Command):
     def run(self):
         self.run_command("sdist")
         self.setup_dirs()
-        os.chdir(self.work_dir)
-        try:
-            self.extract_tarball()
-            self.copy_debian_directory()
-            os.chdir('mirovideoconverter-%s' % VERSION)
-            subprocess.check_call(['dpkg-buildpackage', '-S'])
-        finally:
-            os.chdir(self.orig_dir)
+        for debian_dir in glob.glob(os.path.join(SETUP_DIR, 'debian-*')):
+            self.build_for_release(debian_dir)
+        os.chdir(self.orig_dir)
         print
         print "debian source build complete"
         print "files are in %s" % self.work_dir
+
+    def build_for_release(self, debian_dir):
+        os.chdir(self.work_dir)
+        source_tree = os.path.join(self.work_dir,
+                                   'mirovideoconverter-%s' % VERSION)
+        if os.path.exists(source_tree):
+            shutil.rmtree(source_tree)
+        self.extract_tarball()
+        self.copy_debian_directory(debian_dir)
+        os.chdir('mirovideoconverter-%s' % VERSION)
+        subprocess.check_call(['dpkg-buildpackage', '-S'])
 
     def setup_dirs(self):
         self.orig_dir = os.getcwd()
@@ -73,11 +80,10 @@ class sdist_deb(Command):
         shutil.copyfile(tarball,
                         "mirovideoconverter_%s.orig.tar.gz" % VERSION)
 
-    def copy_debian_directory(self):
-        source = os.path.join(SETUP_DIR, 'debian')
+    def copy_debian_directory(self, debian_dir):
         dest = os.path.join(self.work_dir,
                             'mirovideoconverter-%s/debian' % VERSION)
-        shutil.copytree(source, dest)
+        shutil.copytree(debian_dir, dest)
 
 setup(
     cmdclass={
