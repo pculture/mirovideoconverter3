@@ -9,7 +9,7 @@ if sys.version < '2.7':
     raise RuntimeError('MVC requires Python 2.7')
 
 def icon_data_files():
-    sizes = ["24", "48"]
+    sizes = [16, 22, 32, 48]
     data_files = []
     for size in sizes:
         d = os.path.join("icons", "hicolor", "%sx%s" % (size, size), "apps")
