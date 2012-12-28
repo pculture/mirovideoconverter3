@@ -1,7 +1,7 @@
 import os
 import sys
 
-version = '3.0'
+version = '3.0.2'
 
 # platform-independent arguments for setup()
 setup_args = {
