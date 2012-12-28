@@ -80,30 +80,10 @@ class sdist_deb(Command):
         shutil.copytree(source, dest)
 
 setup(
-    name='mirovideoconverter',
-    description='Simple Video Converter',
-    author='Participatory Culture Foundation',
-    author_email='ben@pculture.org',
-    url='http://www.mirovideoconverter.com/',
-    license='GPL',
-    version=VERSION,
     cmdclass={
         'sdist_deb': sdist_deb,
     },
-    packages=[
-        'mvc',
-        'mvc.resources',
-        'mvc.widgets',
-        'mvc.widgets.gtk',
-        'mvc.ui',
-        'mvc.qtfaststart',
-    ],
-    package_data={
-        'mvc.resources': [
-            'converters/*.py',
-            'images/*.*',
-        ],
-    },
     data_files=data_files(),
     scripts=['scripts/miro-video-converter.py'],
+    **SETUP_ARGS
 )
