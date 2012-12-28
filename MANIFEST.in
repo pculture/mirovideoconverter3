@@ -1,3 +1,11 @@
-recursive-include mvc/resources/images *.*
-recursive-include mvc/resources/converters *.py
+include mvc/resources/converters/*.py
+include *.sh
+include LICENSE
+include README.md
+include README.widgets
+include mvc/widgets/osx/fasttypes.c
+include mvc/widgets/osx/Resources-Widgets/MainMenu.nib/*.nib
+recursive-include helperscripts *
 recursive-include setup-files *
+recursive-include mvc/resources *
+recursive-include test *
