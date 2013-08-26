@@ -40,7 +40,7 @@ class OggVorbis(converter.FFmpegConverterInfo):
 class OggTheora(converter.FFmpegConverterInfo):
     media_type = 'format'
     extension = 'ogv'
-    parameters = '-f ogg -vcodec libtheora -acodec libvorbis -aq 60'
+    parameters = '-f ogg -codec:v libtheora -qscale:v 7 -codec:a libvorbis -qscale:a 5'
 
 class DNxHD_1080(converter.FFmpegConverterInfo1080p):
     media_type = 'format'
